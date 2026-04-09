@@ -106,7 +106,7 @@ export default function FirstApproachPage() {
     <div className="flex min-h-screen justify-center bg-page px-4 py-8">
       <div className="w-full max-w-[400px]">
         {/* ステップ1 */}
-        <div className="frame mb-4">
+        {step === 1 && <div className="frame mb-4">
           <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
             <button
               onClick={() => navigate('/home')}
@@ -233,16 +233,16 @@ export default function FirstApproachPage() {
             </div>
 
             <button
-              onClick={() => setStep(2)}
+              onClick={() => { setStep(2); window.scrollTo(0, 0) }}
               className="w-full cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light"
             >
               次へ　→
             </button>
           </div>
-        </div>
+        </div>}
 
         {/* ステップ2 */}
-        <div className="frame">
+        {step === 2 && <div className="frame">
           <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
             <button
               onClick={() => setStep(1)}
@@ -364,7 +364,7 @@ export default function FirstApproachPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   )
