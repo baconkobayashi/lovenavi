@@ -1,0 +1,180 @@
+
+<style>
+  .lp-wrap { max-width: 480px; margin: 0 auto; font-size: 14px; color: var(--color-text-primary); }
+  .lp-section { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); background: var(--color-background-primary); margin-bottom: 12px; overflow: hidden; }
+  .lp-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--color-text-tertiary); text-transform: uppercase; margin-bottom: 6px; }
+  .lp-nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); }
+  .lp-logo { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .lp-navbtn { font-size: 12px; padding: 5px 14px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; cursor: pointer; color: var(--color-text-primary); }
+  .lp-hero { padding: 40px 24px 32px; text-align: center; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .lp-hero-tag { display: inline-block; font-size: 11px; padding: 4px 12px; border-radius: 99px; background: #EEEDFE; color: #3C3489; margin-bottom: 16px; font-weight: 500; }
+  .lp-hero h1 { font-size: 22px; font-weight: 500; line-height: 1.4; margin: 0 0 12px; color: var(--color-text-primary); }
+  .lp-hero p { font-size: 13px; color: var(--color-text-secondary); line-height: 1.7; margin: 0 0 24px; }
+  .lp-cta-main { display: block; width: 100%; padding: 12px; border-radius: var(--border-radius-md); background: #534AB7; color: #EEEDFE; font-size: 14px; font-weight: 500; border: none; cursor: pointer; margin-bottom: 8px; }
+  .lp-cta-sub { display: block; width: 100%; padding: 10px; border-radius: var(--border-radius-md); background: transparent; color: var(--color-text-secondary); font-size: 13px; border: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
+  .lp-features { padding: 20px 20px 8px; }
+  .lp-feature-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px; }
+  .lp-feature-icon { width: 36px; height: 36px; border-radius: var(--border-radius-md); background: #EEEDFE; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .lp-feature-icon svg { width: 16px; height: 16px; }
+  .lp-feature-title { font-size: 13px; font-weight: 500; margin: 0 0 2px; color: var(--color-text-primary); }
+  .lp-feature-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
+  .lp-social { padding: 16px 20px; border-top: 0.5px solid var(--color-border-tertiary); }
+  .lp-social-row { display: flex; gap: 8px; align-items: center; }
+  .lp-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--color-background-secondary); border: 1.5px solid var(--color-background-primary); margin-left: -6px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: var(--color-text-secondary); }
+  .lp-avatar:first-child { margin-left: 0; }
+  .lp-social-text { font-size: 12px; color: var(--color-text-secondary); margin-left: 4px; }
+  .lp-how { padding: 20px; }
+  .lp-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px; }
+  .lp-step-num { width: 24px; height: 24px; border-radius: 50%; background: #EEEDFE; color: #534AB7; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .lp-step-text { font-size: 13px; color: var(--color-text-primary); line-height: 1.5; padding-top: 3px; }
+  .lp-step-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .lp-voice { padding: 20px; }
+  .lp-voice-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; margin-bottom: 10px; }
+  .lp-voice-text { font-size: 12px; color: var(--color-text-primary); line-height: 1.6; margin: 0 0 8px; }
+  .lp-voice-user { font-size: 11px; color: var(--color-text-tertiary); }
+  .lp-footer { padding: 16px 20px; border-top: 0.5px solid var(--color-border-tertiary); display: flex; justify-content: space-between; align-items: center; }
+  .lp-footer-links { display: flex; gap: 12px; }
+  .lp-footer-link { font-size: 11px; color: var(--color-text-tertiary); text-decoration: none; cursor: pointer; }
+  .section-title { font-size: 16px; font-weight: 500; margin: 0 0 16px; color: var(--color-text-primary); text-align: center; }
+</style>
+
+<div class="lp-wrap">
+
+  <div style="margin-bottom:8px;">
+    <div class="lp-label">ナビゲーションバー</div>
+  </div>
+  <div class="lp-section">
+    <div class="lp-nav">
+      <span class="lp-logo">lovenavigation</span>
+      <div style="display:flex;gap:8px;">
+        <button class="lp-navbtn">ログイン</button>
+        <button class="lp-navbtn" style="background:#534AB7;color:#EEEDFE;border-color:#534AB7;">無料で始める</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:8px;margin-top:16px;">
+    <div class="lp-label">ヒーローセクション</div>
+  </div>
+  <div class="lp-section">
+    <div class="lp-hero">
+      <span class="lp-hero-tag">実際の女性の声をAIに学習</span>
+      <h1>マッチングアプリで<br>もう返信に悩まない</h1>
+      <p>相手の情報を入れるだけで、好印象を与える<br>メッセージを自動生成します。</p>
+      <button class="lp-cta-main">無料で始める</button>
+      <button class="lp-cta-sub">使い方を見る</button>
+    </div>
+    <div class="lp-social">
+      <div class="lp-social-row">
+        <span class="lp-avatar">A</span>
+        <span class="lp-avatar">B</span>
+        <span class="lp-avatar">C</span>
+        <span class="lp-avatar">D</span>
+        <span class="lp-social-text">すでに <strong>〇〇人</strong> が利用中</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:8px;margin-top:16px;">
+    <div class="lp-label">機能紹介セクション</div>
+  </div>
+  <div class="lp-section">
+    <div class="lp-features">
+      <p class="section-title">2つの機能でサポート</p>
+      <div class="lp-feature-item">
+        <div class="lp-feature-icon">
+          <svg viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+            <path d="M2 8C2 4.7 4.7 2 8 2s6 2.7 6 6-2.7 6-6 6H2.5L2 14V8z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="lp-feature-title">初回アプローチ生成</p>
+          <p class="lp-feature-desc">相手のプロフィールを入力するだけで、自然で好印象を与える最初のメッセージを自動生成。</p>
+        </div>
+      </div>
+      <div class="lp-feature-item">
+        <div class="lp-feature-icon">
+          <svg viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+            <path d="M14 3H2v8h4l2 2 2-2h4V3z"/>
+            <path d="M5 7h6M5 5h4"/>
+          </svg>
+        </div>
+        <div>
+          <p class="lp-feature-title">返信メッセージ生成</p>
+          <p class="lp-feature-desc">相手の返信と目的（デート誘いたい etc.）を入れると、状況に合った返信を3パターン提案。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:8px;margin-top:16px;">
+    <div class="lp-label">使い方セクション（how it works）</div>
+  </div>
+  <div class="lp-section">
+    <div class="lp-how">
+      <p class="section-title">3ステップで使える</p>
+      <div class="lp-step">
+        <div class="lp-step-num">1</div>
+        <div>
+          <div class="lp-step-text">相手の情報を入力</div>
+          <div class="lp-step-sub">年齢・趣味・返信内容など</div>
+        </div>
+      </div>
+      <div class="lp-step">
+        <div class="lp-step-num">2</div>
+        <div>
+          <div class="lp-step-text">AIがメッセージを生成</div>
+          <div class="lp-step-sub">3パターンの候補を提示</div>
+        </div>
+      </div>
+      <div class="lp-step">
+        <div class="lp-step-num">3</div>
+        <div>
+          <div class="lp-step-text">気に入ったものをコピーして送信</div>
+          <div class="lp-step-sub">結果を報告するとAIが賢くなる</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:8px;margin-top:16px;">
+    <div class="lp-label">ユーザーの声セクション</div>
+  </div>
+  <div class="lp-section">
+    <div class="lp-voice">
+      <p class="section-title">使った人の声</p>
+      <div class="lp-voice-card">
+        <p class="lp-voice-text">「最初のメッセージで悩む時間がゼロになった。マッチ後の返信率が明らかに上がった気がする。」</p>
+        <span class="lp-voice-user">20代・会社員</span>
+      </div>
+      <div class="lp-voice-card">
+        <p class="lp-voice-text">「3パターン出てきて選べるのが便利。自分じゃ思いつかない切り口があって面白い。」</p>
+        <span class="lp-voice-user">30代・フリーランス</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:8px;margin-top:16px;">
+    <div class="lp-label">最終CTAセクション</div>
+  </div>
+  <div class="lp-section">
+    <div style="padding:32px 24px;text-align:center;">
+      <p style="font-size:16px;font-weight:500;margin:0 0 8px;color:var(--color-text-primary);">まずは無料で試してみる</p>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 20px;">クレジットカード不要・30秒で登録完了</p>
+      <button class="lp-cta-main" style="max-width:280px;margin:0 auto 8px;">Googleアカウントで始める</button>
+      <p style="font-size:11px;color:var(--color-text-tertiary);margin:0;">登録することで利用規約・プライバシーポリシーに同意したことになります</p>
+    </div>
+  </div>
+
+  <div class="lp-section">
+    <div class="lp-footer">
+      <span style="font-size:12px;color:var(--color-text-tertiary);">© 2025 lovenavigation</span>
+      <div class="lp-footer-links">
+        <span class="lp-footer-link">利用規約</span>
+        <span class="lp-footer-link">プライバシーポリシー</span>
+        <span class="lp-footer-link">お問い合わせ</span>
+      </div>
+    </div>
+  </div>
+
+</div>

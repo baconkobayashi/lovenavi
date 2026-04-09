@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>返信メッセージを作る — lovenavigation</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    background: #f5f4f0;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px;
+    min-height: 100vh;
+    color: #1a1a18;
+  }
+
+  :root {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f1efe8;
+    --color-text-primary: #1a1a18;
+    --color-text-secondary: #5f5e5a;
+    --color-text-tertiary: #888780;
+    --color-border-tertiary: rgba(0,0,0,0.12);
+    --color-border-secondary: rgba(0,0,0,0.22);
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+  }
+
+  input, select, textarea, button {
+    font-family: inherit;
+    font-size: 14px;
+  }
+  input[type="text"], input[type="range"], select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 0.5px solid rgba(0,0,0,0.22);
+    border-radius: 8px;
+    background: #fff;
+    color: #1a1a18;
+    outline: none;
+    resize: vertical;
+  }
+  input[type="range"] {
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(83,74,183,0.15);
+    border-color: #AFA9EC;
+  }
+
+  .ri-wrap { max-width: 400px; width: 100%; font-size: 14px; }
+  .ri-frame {
+    border: 0.5px solid rgba(0,0,0,0.12);
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  /* Nav */
+  .ri-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.12);
+  }
+  .ri-back {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 0.5px solid rgba(0,0,0,0.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    flex-shrink: 0;
+  }
+  .ri-back:hover { background: #f1efe8; }
+  .ri-nav-title { font-size: 15px; font-weight: 500; flex: 1; }
+  .ri-home-btn {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: #888780;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 0.5px solid rgba(0,0,0,0.12);
+    background: transparent;
+    flex-shrink: 0;
+  }
+  .ri-home-btn:hover { background: #f1efe8; }
+
+  /* Body */
+  .ri-body { padding: 20px 16px; }
+  .ri-field { margin-bottom: 18px; }
+  .ri-field-label {
+    font-size: 12px; font-weight: 500;
+    color: #1a1a18;
+    margin: 0 0 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .ri-required {
+    font-size: 10px; color: #993556;
+    background: #FBEAF0;
+    padding: 2px 6px; border-radius: 99px; font-weight: 500;
+  }
+  .ri-optional { font-size: 10px; color: #888780; }
+  .ri-hint { font-size: 11px; color: #888780; margin: 4px 0 0; line-height: 1.5; }
+  .ri-input-area { width: 100%; }
+
+  /* Tip */
+  .ri-tip {
+    background: #EEEDFE;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .ri-tip-text { font-size: 11px; color: #3C3489; line-height: 1.5; }
+
+  /* Profile button */
+  .ri-profile-btn {
+    width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 0.5px solid rgba(0,0,0,0.22);
+    background: #f1efe8;
+    cursor: pointer; gap: 10px;
+  }
+  .ri-profile-btn:hover { background: #e8e6df; }
+  .ri-profile-btn-left { display: flex; align-items: center; gap: 10px; }
+  .ri-profile-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: #EEEDFE;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .ri-profile-text-main { font-size: 13px; font-weight: 500; color: #1a1a18; }
+  .ri-profile-text-sub { font-size: 11px; color: #888780; margin-top: 2px; }
+
+  .ri-profile-filled {
+    width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 0.5px solid #AFA9EC;
+    background: #EEEDFE;
+    cursor: pointer; gap: 10px;
+  }
+  .ri-profile-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .ri-profile-tag {
+    font-size: 11px; color: #3C3489;
+    background: #CECBF6;
+    padding: 2px 8px; border-radius: 99px;
+  }
+
+  /* Chips */
+  .ri-chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ri-chip {
+    font-size: 12px; padding: 6px 14px;
+    border-radius: 99px;
+    border: 0.5px solid rgba(0,0,0,0.22);
+    background: transparent;
+    cursor: pointer; color: #1a1a18;
+    transition: all 0.15s;
+  }
+  .ri-chip:hover { background: #f1efe8; }
+  .ri-chip.selected { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; font-weight: 500; }
+
+  /* Purpose cards */
+  .ri-purpose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ri-purpose-card {
+    border: 0.5px solid rgba(0,0,0,0.12);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer; text-align: center;
+    transition: all 0.15s;
+  }
+  .ri-purpose-card:hover { background: #f1efe8; }
+  .ri-purpose-card.selected { border-color: #AFA9EC; background: #EEEDFE; }
+  .ri-purpose-card p { margin: 0 0 2px; font-size: 12px; font-weight: 500; color: #1a1a18; }
+  .ri-purpose-card.selected p { color: #3C3489; }
+  .ri-purpose-card span { font-size: 11px; color: #5f5e5a; }
+
+  /* Bubbles */
+  .ri-bubble-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .ri-bubble-row { display: flex; gap: 8px; align-items: flex-end; }
+  .ri-bubble-row.mine { flex-direction: row-reverse; }
+  .ri-bubble {
+    font-size: 12px; line-height: 1.6;
+    padding: 8px 12px; border-radius: 12px; max-width: 75%;
+  }
+  .ri-bubble.hers {
+    background: #f1efe8; color: #1a1a18;
+    border-radius: 4px 12px 12px 12px;
+  }
+  .ri-bubble.mine {
+    background: #534AB7; color: #EEEDFE;
+    border-radius: 12px 4px 12px 12px;
+  }
+  .ri-bubble-time { font-size: 10px; color: #888780; white-space: nowrap; }
+  .ri-add-bubble {
+    width: 100%; margin-top: 8px; padding: 8px;
+    border-radius: 8px;
+    border: 1px dashed rgba(0,0,0,0.22);
+    background: transparent;
+    font-size: 12px; color: #888780; cursor: pointer;
+  }
+  .ri-add-bubble:hover { background: #f1efe8; }
+
+  /* Submit */
+  .ri-submit {
+    width: 100%; padding: 13px;
+    border-radius: 8px;
+    background: #534AB7; color: #EEEDFE;
+    font-size: 14px; font-weight: 500;
+    border: none; cursor: pointer; margin-top: 4px;
+    transition: background 0.15s;
+  }
+  .ri-submit:hover { background: #3C3489; }
+
+  /* Modal overlay */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    align-items: flex-end; justify-content: center;
+    z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    background: #fff;
+    border-radius: 16px 16px 0 0;
+    padding: 0 0 32px;
+    width: 100%; max-width: 400px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: rgba(0,0,0,0.22);
+    border-radius: 2px;
+    margin: 12px auto 0;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px 12px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.12);
+    position: sticky; top: 0;
+    background: #fff;
+  }
+  .modal-title { font-size: 15px; font-weight: 500; }
+  .modal-close {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 0.5px solid rgba(0,0,0,0.12);
+    background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: #f1efe8; }
+  .modal-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .modal-field label {
+    font-size: 12px; font-weight: 500;
+    display: block; margin-bottom: 6px; color: #1a1a18;
+  }
+  .modal-field .opt { font-size: 10px; color: #888780; margin-left: 4px; }
+
+  /* Relation cards in modal */
+  .modal-relation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .modal-relation-card {
+    border: 0.5px solid rgba(0,0,0,0.12);
+    border-radius: 8px; padding: 10px 12px;
+    cursor: pointer; text-align: center;
+    transition: all 0.15s;
+  }
+  .modal-relation-card:hover { background: #f1efe8; }
+  .modal-relation-card.selected { border-color: #AFA9EC; background: #EEEDFE; }
+  .modal-relation-card p { margin: 0 0 2px; font-size: 12px; font-weight: 500; color: #1a1a18; }
+  .modal-relation-card.selected p { color: #3C3489; }
+  .modal-relation-card span { font-size: 11px; color: #5f5e5a; }
+
+  /* Chips in modal */
+  .modal-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .modal-chip {
+    font-size: 12px; padding: 5px 12px;
+    border-radius: 99px;
+    border: 0.5px solid rgba(0,0,0,0.22);
+    background: transparent; cursor: pointer; color: #1a1a18;
+    transition: all 0.15s;
+  }
+  .modal-chip:hover { background: #f1efe8; }
+  .modal-chip.selected { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; font-weight: 500; }
+
+  /* Slider in modal */
+  .modal-slider-row { display: flex; align-items: center; gap: 10px; }
+  .modal-slider-val { font-size: 13px; font-weight: 500; min-width: 28px; text-align: right; }
+  .modal-input { width: 100%; box-sizing: border-box; }
+
+  /* Save button */
+  .modal-save {
+    width: 100%; padding: 12px;
+    border-radius: 8px;
+    background: #534AB7; color: #EEEDFE;
+    font-size: 14px; font-weight: 500;
+    border: none; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .modal-save:hover { background: #3C3489; }
+</style>
+</head>
+<body>
+
+<div class="ri-wrap">
+
+  <div class="ri-frame">
+    <div class="ri-nav">
+      <button class="ri-back">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#1a1a18" stroke-width="1.5" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
+      </button>
+      <span class="ri-nav-title">返信メッセージを作る</span>
+      <button class="ri-home-btn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z"/></svg>
+        ホーム
+      </button>
+    </div>
+
+    <div class="ri-body">
+
+      <div class="ri-tip">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;">
+          <circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/>
+        </svg>
+        <span class="ri-tip-text">相手の情報を追加するとより的確な返信が生成されます。</span>
+      </div>
+
+      <!-- 相手のプロフィール -->
+      <div class="ri-field">
+        <p class="ri-field-label">相手のプロフィール <span class="ri-optional">任意</span></p>
+        <div id="profile-empty" onclick="openModal()">
+          <div class="ri-profile-btn">
+            <div class="ri-profile-btn-left">
+              <div class="ri-profile-icon">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+                  <circle cx="9" cy="6" r="3"/><path d="M3 16c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+                </svg>
+              </div>
+              <div>
+                <div class="ri-profile-text-main">相手の情報を入力する</div>
+                <div class="ri-profile-text-sub">関係値・年齢・趣味・エリアなど</div>
+              </div>
+            </div>
+            <span style="font-size:18px;color:#888780;">›</span>
+          </div>
+        </div>
+        <div id="profile-filled" style="display:none;">
+          <div class="ri-profile-filled" onclick="openModal()">
+            <div class="ri-profile-btn-left">
+              <div class="ri-profile-icon">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+                  <circle cx="9" cy="6" r="3"/><path d="M3 16c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+                </svg>
+              </div>
+              <div>
+                <div class="ri-profile-text-main" style="color:#3C3489;">入力済み</div>
+                <div class="ri-profile-tags" id="profile-tags"></div>
+              </div>
+            </div>
+            <span style="font-size:12px;color:#534AB7;">編集 ›</span>
+          </div>
+        </div>
+        <p class="ri-hint">初回アプローチと同じ相手の場合は引き継がれます</p>
+      </div>
+
+      <!-- 相手の最新メッセージ -->
+      <div class="ri-field">
+        <p class="ri-field-label">相手の最新メッセージ <span class="ri-required">必須</span></p>
+        <textarea class="ri-input-area" rows="3" placeholder="例：そうなんだ〜、週末何してるの？"></textarea>
+        <p class="ri-hint">相手のメッセージをそのままコピペしてください</p>
+      </div>
+
+      <!-- やり取りの流れ -->
+      <div class="ri-field">
+        <p class="ri-field-label">これまでのやり取り <span class="ri-optional">任意</span></p>
+        <div class="ri-bubble-wrap">
+          <div class="ri-bubble-row">
+            <div class="ri-bubble hers">はじめまして！プロフィール見て気になりました</div>
+            <span class="ri-bubble-time">2日前</span>
+          </div>
+          <div class="ri-bubble-row mine">
+            <div class="ri-bubble mine">ありがとうございます！カフェ好きなんですね</div>
+            <span class="ri-bubble-time">2日前</span>
+          </div>
+          <div class="ri-bubble-row">
+            <div class="ri-bubble hers">そうなんだ〜、週末何してるの？</div>
+            <span class="ri-bubble-time">今日</span>
+          </div>
+        </div>
+        <button class="ri-add-bubble">+ やり取りを追加</button>
+        <p class="ri-hint">入れるほど会話の流れを読んだ返信になります</p>
+      </div>
+
+      <!-- やり取り回数 -->
+      <div class="ri-field">
+        <p class="ri-field-label">やり取りの回数 <span class="ri-required">必須</span></p>
+        <div class="ri-chip-group" id="count-chips">
+          <span class="ri-chip" onclick="selectChip(this,'count-chips')">初回</span>
+          <span class="ri-chip selected" onclick="selectChip(this,'count-chips')">2〜5回</span>
+          <span class="ri-chip" onclick="selectChip(this,'count-chips')">6〜10回</span>
+          <span class="ri-chip" onclick="selectChip(this,'count-chips')">11回以上</span>
+        </div>
+      </div>
+
+      <!-- 目的 -->
+      <div class="ri-field">
+        <p class="ri-field-label">今回の目的 <span class="ri-required">必須</span></p>
+        <div class="ri-purpose-grid" id="purpose-cards">
+          <div class="ri-purpose-card selected" onclick="selectPurpose(this)">
+            <p>会話を続ける</p><span>仲良くなりたい</span>
+          </div>
+          <div class="ri-purpose-card" onclick="selectPurpose(this)">
+            <p>デートに誘う</p><span>会う約束をしたい</span>
+          </div>
+          <div class="ri-purpose-card" onclick="selectPurpose(this)">
+            <p>LINE交換</p><span>アプリ外に移行したい</span>
+          </div>
+          <div class="ri-purpose-card" onclick="selectPurpose(this)">
+            <p>関係を温める</p><span>もっと距離を縮めたい</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 相手のトーン -->
+      <div class="ri-field">
+        <p class="ri-field-label">相手のトーン <span class="ri-optional">任意</span></p>
+        <div class="ri-chip-group" id="tone-chips">
+          <span class="ri-chip" onclick="selectChip(this,'tone-chips')">テンション高め</span>
+          <span class="ri-chip selected" onclick="selectChip(this,'tone-chips')">普通</span>
+          <span class="ri-chip" onclick="selectChip(this,'tone-chips')">素っ気ない</span>
+          <span class="ri-chip" onclick="selectChip(this,'tone-chips')">わからない</span>
+        </div>
+      </div>
+
+      <button class="ri-submit">返信を生成する</button>
+    </div>
+  </div>
+</div>
+
+<!-- プロフィールモーダル -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">相手のプロフィール</span>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1a1a18" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l10 10M11 1L1 11"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-field">
+        <label>関係値 <span class="opt">必須</span></label>
+        <div class="modal-relation-grid" id="mc-relation">
+          <div class="modal-relation-card selected" onclick="selectRelation(this)">
+            <p>マッチング直後</p><span>まだ会話していない</span>
+          </div>
+          <div class="modal-relation-card" onclick="selectRelation(this)">
+            <p>数回やり取り済み</p><span>少し話したことある</span>
+          </div>
+          <div class="modal-relation-card" onclick="selectRelation(this)">
+            <p>会ったことある</p><span>オフラインで会った</span>
+          </div>
+          <div class="modal-relation-card" onclick="selectRelation(this)">
+            <p>付き合い中</p><span>交際中のやり取り</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label>年齢 <span class="opt">任意</span></label>
+        <div class="modal-slider-row">
+          <input type="range" min="18" max="45" value="25" step="1" style="flex:1;" oninput="document.getElementById('modal-age-val').textContent=this.value">
+          <span class="modal-slider-val" id="modal-age-val">25</span>
+          <span style="font-size:12px;color:#5f5e5a;">歳</span>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label>居住エリア <span class="opt">任意</span></label>
+        <div class="modal-chips" id="mc-area">
+          <span class="modal-chip selected" onclick="selectModalChip(this,'mc-area')">東京</span>
+          <span class="modal-chip" onclick="selectModalChip(this,'mc-area')">神奈川</span>
+          <span class="modal-chip" onclick="selectModalChip(this,'mc-area')">大阪</span>
+          <span class="modal-chip" onclick="selectModalChip(this,'mc-area')">名古屋</span>
+          <span class="modal-chip" onclick="selectModalChip(this,'mc-area')">その他</span>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label>趣味・好きなこと <span class="opt">任意</span></label>
+        <textarea class="modal-input" rows="2" placeholder="例：カフェ巡り、映画鑑賞"></textarea>
+      </div>
+
+      <div class="modal-field">
+        <label>プロフィール文（あれば） <span class="opt">任意</span></label>
+        <textarea class="modal-input" rows="2" placeholder="プロフィールをそのままコピペでもOK"></textarea>
+      </div>
+
+      <button class="modal-save" onclick="saveProfile()">保存して戻る</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openModal() {
+  document.getElementById('profile-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('profile-modal').classList.remove('open');
+}
+function saveProfile() {
+  closeModal();
+  document.getElementById('profile-empty').style.display = 'none';
+  document.getElementById('profile-filled').style.display = 'block';
+  var relation = document.querySelector('#mc-relation .selected p');
+  var area = document.querySelector('#mc-area .selected');
+  var age = document.getElementById('modal-age-val').textContent;
+  var tags = document.getElementById('profile-tags');
+  tags.innerHTML = '';
+  [relation ? relation.textContent : '', age + '歳', area ? area.textContent : ''].filter(Boolean).forEach(function(t) {
+    var span = document.createElement('span');
+    span.className = 'ri-profile-tag';
+    span.textContent = t;
+    tags.appendChild(span);
+  });
+}
+function selectChip(el, groupId) {
+  document.getElementById(groupId).querySelectorAll('.ri-chip').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+function selectPurpose(el) {
+  document.getElementById('purpose-cards').querySelectorAll('.ri-purpose-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+function selectModalChip(el, groupId) {
+  document.getElementById(groupId).querySelectorAll('.modal-chip').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+function selectRelation(el) {
+  document.getElementById('mc-relation').querySelectorAll('.modal-relation-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

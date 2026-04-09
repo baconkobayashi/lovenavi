@@ -1,0 +1,147 @@
+
+<style>
+  .home-wrap { max-width: 400px; margin: 0 auto; font-size: 14px; color: var(--color-text-primary); }
+  .home-section { margin-bottom: 8px; }
+  .home-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--color-text-tertiary); text-transform: uppercase; margin-bottom: 6px; }
+  .home-frame { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); background: var(--color-background-primary); overflow: hidden; }
+
+  .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .nav-logo { font-size: 14px; font-weight: 500; }
+  .nav-avatar { width: 30px; height: 30px; border-radius: 50%; background: #EEEDFE; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: #534AB7; }
+
+  .greeting { padding: 20px 16px 8px; }
+  .greeting-sub { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 2px; }
+  .greeting-main { font-size: 18px; font-weight: 500; margin: 0; color: var(--color-text-primary); }
+
+  .card-grid { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .func-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 20px; cursor: pointer; background: var(--color-background-primary); transition: background 0.15s; }
+  .func-card:hover { background: var(--color-background-secondary); }
+  .func-card-recommended { border: 2px solid #AFA9EC; }
+
+  .func-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 99px; background: #EEEDFE; color: #3C3489; font-weight: 500; margin-bottom: 12px; }
+  .func-icon-wrap { width: 44px; height: 44px; border-radius: var(--border-radius-md); background: #EEEDFE; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .func-icon-wrap svg { width: 20px; height: 20px; }
+  .func-title { font-size: 15px; font-weight: 500; margin: 0 0 6px; color: var(--color-text-primary); }
+  .func-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; margin: 0 0 14px; }
+  .func-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .func-tag { font-size: 11px; padding: 3px 8px; border-radius: 99px; background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+  .func-arrow { float: right; color: var(--color-text-tertiary); font-size: 16px; margin-top: -44px; }
+
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 16px; }
+  .stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; }
+  .stat-label { font-size: 11px; color: var(--color-text-secondary); margin: 0 0 4px; }
+  .stat-value { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+  .stat-sub { font-size: 11px; color: var(--color-text-tertiary); margin: 2px 0 0; }
+
+  .bottom-nav { display: flex; border-top: 0.5px solid var(--color-border-tertiary); }
+  .bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 4px; cursor: pointer; }
+  .bottom-nav-item.active .bnav-label { color: #534AB7; }
+  .bottom-nav-item.active .bnav-dot { background: #534AB7; }
+  .bnav-icon { width: 20px; height: 20px; }
+  .bnav-label { font-size: 10px; color: var(--color-text-tertiary); }
+  .bnav-dot { width: 4px; height: 4px; border-radius: 50%; background: transparent; }
+  .bottom-nav-item.active .bnav-dot { background: #534AB7; }
+</style>
+
+<div class="home-wrap">
+
+  <div class="home-section">
+    <div class="home-label">ホーム画面</div>
+  </div>
+
+  <div class="home-frame">
+
+    <div class="nav-bar">
+      <span class="nav-logo">lovenavigation</span>
+      <div class="nav-avatar">田</div>
+    </div>
+
+    <div class="greeting">
+      <p class="greeting-sub">おかえりなさい</p>
+      <p class="greeting-main">今日はどうする？</p>
+    </div>
+
+    <div class="card-grid">
+
+      <div class="func-card func-card-recommended" onclick="sendPrompt('初回アプローチ機能の入力画面の設計を詳しく教えて')">
+        <span class="func-badge">おすすめ</span>
+        <div class="func-icon-wrap">
+          <svg viewBox="0 0 20 20" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 2C5.6 2 2 5.1 2 9c0 2 .9 3.8 2.4 5.1L3.5 18l3.8-1.5C8.2 16.8 9.1 17 10 17c4.4 0 8-3.1 8-7s-3.6-8-8-8z"/>
+            <path d="M7 9h6M7 12h4"/>
+          </svg>
+        </div>
+        <p class="func-title">初回アプローチを作る</p>
+        <p class="func-desc">相手のプロフィールを入力すると、好印象を与える最初のメッセージを自動生成します。</p>
+        <div class="func-tags">
+          <span class="func-tag">相手の年齢</span>
+          <span class="func-tag">趣味・好み</span>
+          <span class="func-tag">居住エリア</span>
+        </div>
+        <div style="text-align:right;margin-top:12px;font-size:12px;color:#534AB7;font-weight:500;">使ってみる →</div>
+      </div>
+
+      <div class="func-card" onclick="sendPrompt('メール返信機能の入力画面の設計を詳しく教えて')">
+        <div class="func-icon-wrap">
+          <svg viewBox="0 0 20 20" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="16" height="12" rx="2"/>
+            <path d="M2 7l8 5 8-5"/>
+          </svg>
+        </div>
+        <p class="func-title">返信メッセージを作る</p>
+        <p class="func-desc">相手の返信内容と目的を入れると、状況に合った返信を3パターン提案します。</p>
+        <div class="func-tags">
+          <span class="func-tag">相手の返信</span>
+          <span class="func-tag">やり取り回数</span>
+          <span class="func-tag">目的</span>
+        </div>
+        <div style="text-align:right;margin-top:12px;font-size:12px;color:var(--color-text-secondary);font-weight:500;">使ってみる →</div>
+      </div>
+
+    </div>
+
+    <div style="padding: 0 16px 8px;">
+      <p style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin:0 0 8px;">あなたの履歴</p>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card">
+        <p class="stat-label">生成したメッセージ</p>
+        <p class="stat-value">12<span style="font-size:13px;font-weight:400;color:var(--color-text-secondary)"> 件</span></p>
+        <p class="stat-sub">今月</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">返信きた報告</p>
+        <p class="stat-value">8<span style="font-size:13px;font-weight:400;color:var(--color-text-secondary)"> 件</span></p>
+        <p class="stat-sub">返信率 67%</p>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="bottom-nav-item active">
+        <svg class="bnav-icon" viewBox="0 0 20 20" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+          <path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+        </svg>
+        <span class="bnav-label" style="color:#534AB7;">ホーム</span>
+        <div class="bnav-dot" style="background:#534AB7;"></div>
+      </div>
+      <div class="bottom-nav-item">
+        <svg class="bnav-icon" viewBox="0 0 20 20" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" stroke-linecap="round">
+          <path d="M4 6h12M4 10h8M4 14h5"/>
+        </svg>
+        <span class="bnav-label">履歴</span>
+        <div class="bnav-dot"></div>
+      </div>
+      <div class="bottom-nav-item">
+        <svg class="bnav-icon" viewBox="0 0 20 20" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="10" cy="7" r="3"/>
+          <path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+        </svg>
+        <span class="bnav-label">マイページ</span>
+        <div class="bnav-dot"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

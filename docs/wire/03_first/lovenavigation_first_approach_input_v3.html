@@ -1,0 +1,222 @@
+
+<style>
+  .fa-wrap { max-width: 400px; margin: 0 auto; font-size: 14px; color: var(--color-text-primary); }
+  .fa-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--color-text-tertiary); text-transform: uppercase; margin-bottom: 6px; }
+  .fa-frame { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); background: var(--color-background-primary); overflow: hidden; margin-bottom: 16px; }
+
+  .fa-nav { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .fa-back { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: center; cursor: pointer; background: transparent; flex-shrink: 0; }
+  .fa-nav-title { font-size: 15px; font-weight: 500; flex: 1; }
+  .fa-step-indicator { font-size: 12px; color: var(--color-text-tertiary); }
+  .fa-home-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-text-tertiary); cursor: pointer; padding: 4px 8px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); background: transparent; flex-shrink: 0; }
+
+  .fa-progress { height: 3px; background: var(--color-background-secondary); }
+  .fa-progress-bar { height: 100%; background: #534AB7; border-radius: 0 2px 2px 0; }
+
+  .fa-body { padding: 20px 16px; }
+  .fa-section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin: 0 0 12px; padding-bottom: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+
+  .fa-field { margin-bottom: 16px; }
+  .fa-field-label { font-size: 12px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 6px; display: flex; align-items: center; gap: 6px; }
+  .fa-required { font-size: 10px; color: #993556; background: #FBEAF0; padding: 2px 6px; border-radius: 99px; font-weight: 500; }
+  .fa-optional { font-size: 10px; color: var(--color-text-tertiary); }
+  .fa-input { width: 100%; box-sizing: border-box; }
+  .fa-hint { font-size: 11px; color: var(--color-text-tertiary); margin: 4px 0 0; }
+
+  .fa-chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .fa-chip { font-size: 12px; padding: 6px 14px; border-radius: 99px; border: 0.5px solid var(--color-border-secondary); background: transparent; cursor: pointer; color: var(--color-text-primary); }
+  .fa-chip.selected { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; font-weight: 500; }
+
+  .fa-relation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .fa-relation-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; cursor: pointer; text-align: center; }
+  .fa-relation-card.selected { border-color: #AFA9EC; background: #EEEDFE; }
+  .fa-relation-card p { margin: 0 0 2px; font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+  .fa-relation-card.selected p { color: #3C3489; }
+  .fa-relation-card span { font-size: 11px; color: var(--color-text-secondary); }
+
+  .fa-slider-row { display: flex; align-items: center; gap: 10px; }
+  .fa-slider-val { font-size: 13px; font-weight: 500; min-width: 28px; text-align: right; }
+
+  .fa-purpose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .fa-purpose-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; cursor: pointer; text-align: center; }
+  .fa-purpose-card.selected { border-color: #AFA9EC; background: #EEEDFE; }
+  .fa-purpose-card p { margin: 0 0 2px; font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+  .fa-purpose-card.selected p { color: #3C3489; }
+  .fa-purpose-card span { font-size: 11px; color: var(--color-text-secondary); }
+
+  .fa-tip { background: #EEEDFE; border-radius: var(--border-radius-md); padding: 10px 12px; margin-bottom: 16px; display: flex; gap: 8px; align-items: flex-start; }
+  .fa-tip-text { font-size: 11px; color: #3C3489; line-height: 1.5; }
+
+  .fa-btn-row { display: flex; gap: 8px; margin-top: 8px; }
+  .fa-submit { flex: 1; padding: 13px; border-radius: var(--border-radius-md); background: #534AB7; color: #EEEDFE; font-size: 14px; font-weight: 500; border: none; cursor: pointer; }
+  .fa-back-btn { padding: 13px 16px; border-radius: var(--border-radius-md); background: transparent; color: var(--color-text-secondary); font-size: 14px; border: 0.5px solid var(--color-border-secondary); cursor: pointer; white-space: nowrap; }
+</style>
+
+<div class="fa-wrap">
+
+  <div style="margin-bottom:8px;"><div class="fa-label">ステップ 1 — 相手の情報</div></div>
+  <div class="fa-frame">
+    <div class="fa-nav">
+      <button class="fa-back">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--color-text-primary)" stroke-width="1.5" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
+      </button>
+      <span class="fa-nav-title">初回アプローチを作る</span>
+      <span class="fa-step-indicator">1 / 2</span>
+      <button class="fa-home-btn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z"/></svg>
+        ホーム
+      </button>
+    </div>
+    <div class="fa-progress"><div class="fa-progress-bar" style="width:50%;"></div></div>
+
+    <div class="fa-body">
+      <p class="fa-section-title">相手のプロフィール情報</p>
+
+      <div class="fa-field">
+        <p class="fa-field-label">関係値 <span class="fa-required">必須</span></p>
+        <div class="fa-relation-grid" id="relation-cards">
+          <div class="fa-relation-card selected" onclick="selectRelation(this)">
+            <p>マッチング直後</p>
+            <span>まだ会話していない</span>
+          </div>
+          <div class="fa-relation-card" onclick="selectRelation(this)">
+            <p>数回やり取り済み</p>
+            <span>少し話したことある</span>
+          </div>
+          <div class="fa-relation-card" onclick="selectRelation(this)">
+            <p>会ったことある</p>
+            <span>オフラインで会った</span>
+          </div>
+          <div class="fa-relation-card" onclick="selectRelation(this)">
+            <p>付き合い中</p>
+            <span>交際中のやり取り</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fa-field">
+        <p class="fa-field-label">年齢 <span class="fa-required">必須</span></p>
+        <div class="fa-slider-row">
+          <input type="range" min="18" max="45" value="25" step="1" style="flex:1;" oninput="document.getElementById('age-val').textContent=this.value">
+          <span class="fa-slider-val" id="age-val">25</span>
+          <span style="font-size:12px;color:var(--color-text-secondary);">歳</span>
+        </div>
+      </div>
+
+      <div class="fa-field">
+        <p class="fa-field-label">居住エリア <span class="fa-optional">任意</span></p>
+        <div class="fa-chip-group" id="area-chips">
+          <span class="fa-chip selected" onclick="selectChip(this,'area-chips')">東京</span>
+          <span class="fa-chip" onclick="selectChip(this,'area-chips')">神奈川</span>
+          <span class="fa-chip" onclick="selectChip(this,'area-chips')">大阪</span>
+          <span class="fa-chip" onclick="selectChip(this,'area-chips')">名古屋</span>
+          <span class="fa-chip" onclick="selectChip(this,'area-chips')">その他</span>
+        </div>
+      </div>
+
+      <div class="fa-field">
+        <p class="fa-field-label">趣味・好きなこと <span class="fa-optional">任意</span></p>
+        <textarea class="fa-input" rows="3" placeholder="例：カフェ巡り、映画鑑賞、ヨガ&#10;プロフィール文をそのままコピペでもOK"></textarea>
+        <p class="fa-hint">入れるほど精度が上がります</p>
+      </div>
+
+      <div class="fa-field">
+        <p class="fa-field-label">プロフィール文（あれば） <span class="fa-optional">任意</span></p>
+        <textarea class="fa-input" rows="3" placeholder="例：週末はよくカフェでのんびりしています。旅行も好きで去年は京都に行きました。"></textarea>
+      </div>
+
+      <button class="fa-submit">次へ　→</button>
+    </div>
+  </div>
+
+  <div style="margin-bottom:8px;"><div class="fa-label">ステップ 2 — 自分の情報</div></div>
+  <div class="fa-frame">
+    <div class="fa-nav">
+      <button class="fa-back">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--color-text-primary)" stroke-width="1.5" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
+      </button>
+      <span class="fa-nav-title">初回アプローチを作る</span>
+      <span class="fa-step-indicator">2 / 2</span>
+      <button class="fa-home-btn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z"/></svg>
+        ホーム
+      </button>
+    </div>
+    <div class="fa-progress"><div class="fa-progress-bar" style="width:100%;"></div></div>
+
+    <div class="fa-body">
+      <p class="fa-section-title">あなたの情報・キャラ設定</p>
+
+      <div class="fa-tip">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;">
+          <circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/>
+        </svg>
+        <span class="fa-tip-text">入力した情報はマイページに保存されます。次回以降は自動で入力されます。</span>
+      </div>
+
+      <div class="fa-field">
+        <p class="fa-field-label">年齢 <span class="fa-required">必須</span></p>
+        <div class="fa-slider-row">
+          <input type="range" min="18" max="50" value="28" step="1" style="flex:1;" oninput="document.getElementById('my-age-val').textContent=this.value">
+          <span class="fa-slider-val" id="my-age-val">28</span>
+          <span style="font-size:12px;color:var(--color-text-secondary);">歳</span>
+        </div>
+      </div>
+
+      <div class="fa-field">
+        <p class="fa-field-label">職業 <span class="fa-optional">任意</span></p>
+        <select class="fa-input">
+          <option>会社員</option>
+          <option>フリーランス</option>
+          <option>公務員</option>
+          <option>経営者・自営業</option>
+          <option>その他</option>
+        </select>
+      </div>
+
+      <div class="fa-field">
+        <p class="fa-field-label">趣味・好きなこと <span class="fa-optional">任意</span></p>
+        <textarea class="fa-input" rows="2" placeholder="例：サッカー、映画、料理"></textarea>
+      </div>
+
+      <div class="fa-field">
+        <p class="fa-field-label">キャラ設定（トーン） <span class="fa-required">必須</span></p>
+        <div class="fa-purpose-grid" id="char-chips">
+          <div class="fa-purpose-card selected" onclick="selectCard(this,'char-chips')">
+            <p>積極的</p><span>グイグイいくタイプ</span>
+          </div>
+          <div class="fa-purpose-card" onclick="selectCard(this,'char-chips')">
+            <p>控えめ</p><span>ゆっくり距離を縮める</span>
+          </div>
+          <div class="fa-purpose-card" onclick="selectCard(this,'char-chips')">
+            <p>ユーモア系</p><span>笑いを取りに行く</span>
+          </div>
+          <div class="fa-purpose-card" onclick="selectCard(this,'char-chips')">
+            <p>誠実系</p><span>真面目・丁寧な印象</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fa-btn-row">
+        <button class="fa-back-btn">← 戻る</button>
+        <button class="fa-submit">メッセージを生成する</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function selectChip(el, groupId) {
+  document.getElementById(groupId).querySelectorAll('.fa-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectCard(el, groupId) {
+  document.getElementById(groupId).querySelectorAll('.fa-purpose-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectRelation(el) {
+  document.getElementById('relation-cards').querySelectorAll('.fa-relation-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>

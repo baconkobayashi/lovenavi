@@ -1,0 +1,226 @@
+
+<style>
+  .mp-wrap { max-width: 400px; margin: 0 auto; font-size: 14px; color: var(--color-text-primary); }
+  .mp-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--color-text-tertiary); text-transform: uppercase; margin-bottom: 6px; }
+  .mp-frame { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); background: var(--color-background-primary); overflow: hidden; margin-bottom: 16px; }
+
+  .mp-nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .mp-nav-title { font-size: 15px; font-weight: 500; }
+  .mp-edit-btn { font-size: 12px; color: #534AB7; cursor: pointer; padding: 4px 10px; border-radius: var(--border-radius-md); border: 0.5px solid #AFA9EC; background: transparent; }
+
+  .mp-profile-header { display: flex; align-items: center; gap: 14px; padding: 20px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .mp-avatar { width: 56px; height: 56px; border-radius: 50%; background: #EEEDFE; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 500; color: #534AB7; flex-shrink: 0; }
+  .mp-profile-name { font-size: 17px; font-weight: 500; margin: 0 0 4px; }
+  .mp-profile-sub { font-size: 12px; color: var(--color-text-secondary); margin: 0; }
+
+  .mp-stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .mp-stat-item { padding: 14px 12px; text-align: center; border-right: 0.5px solid var(--color-border-tertiary); }
+  .mp-stat-item:last-child { border-right: none; }
+  .mp-stat-val { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 2px; }
+  .mp-stat-label { font-size: 11px; color: var(--color-text-secondary); margin: 0; }
+
+  .mp-section { padding: 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .mp-section:last-child { border-bottom: none; }
+  .mp-section-title { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin: 0 0 12px; }
+
+  .mp-info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .mp-info-row:last-child { border-bottom: none; }
+  .mp-info-label { font-size: 13px; color: var(--color-text-secondary); }
+  .mp-info-value { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .mp-info-tag { font-size: 11px; padding: 3px 10px; border-radius: 99px; background: #EEEDFE; color: #3C3489; font-weight: 500; }
+
+  .mp-history-item { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
+  .mp-history-item:last-child { border-bottom: none; }
+  .mp-history-type { width: 32px; height: 32px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mp-history-type.first { background: #EEEDFE; }
+  .mp-history-type.reply { background: #E1F5EE; }
+  .mp-history-content { flex: 1; min-width: 0; }
+  .mp-history-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .mp-history-type-label { font-size: 11px; font-weight: 500; color: #534AB7; }
+  .mp-history-type-label.reply { color: #0F6E56; }
+  .mp-history-date { font-size: 11px; color: var(--color-text-tertiary); }
+  .mp-history-text { font-size: 12px; color: var(--color-text-primary); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; margin: 0 0 4px; }
+  .mp-history-result { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 99px; }
+  .mp-history-result.yes { background: #EAF3DE; color: #3B6D11; }
+  .mp-history-result.no { background: #FCEBEB; color: #A32D2D; }
+  .mp-history-result.pending { background: #FAEEDA; color: #633806; }
+
+  .mp-menu-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
+  .mp-menu-item:last-child { border-bottom: none; }
+  .mp-menu-label { font-size: 14px; color: var(--color-text-primary); }
+  .mp-menu-label.danger { color: #A32D2D; }
+  .mp-menu-arrow { font-size: 16px; color: var(--color-text-tertiary); }
+
+  .mp-see-all { width: 100%; padding: 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; font-size: 12px; color: var(--color-text-secondary); cursor: pointer; margin-top: 8px; }
+
+  .bottom-nav { display: flex; border-top: 0.5px solid var(--color-border-tertiary); }
+  .bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 3px; cursor: pointer; }
+  .bnav-label { font-size: 10px; color: var(--color-text-tertiary); }
+  .bnav-label.active { color: #534AB7; }
+  .bnav-dot { width: 4px; height: 4px; border-radius: 50%; }
+  .bnav-dot.active { background: #534AB7; }
+</style>
+
+<div class="mp-wrap">
+  <div style="margin-bottom:8px;"><div class="mp-label">マイページ</div></div>
+
+  <div class="mp-frame">
+
+    <div class="mp-nav">
+      <span class="mp-nav-title">マイページ</span>
+      <button class="mp-edit-btn">プロフィール編集</button>
+    </div>
+
+    <!-- プロフィールヘッダー -->
+    <div class="mp-profile-header">
+      <div class="mp-avatar">田</div>
+      <div>
+        <p class="mp-profile-name">田中 太郎</p>
+        <p class="mp-profile-sub">tanaka@example.com</p>
+      </div>
+    </div>
+
+    <!-- 利用サマリー -->
+    <div class="mp-stat-row">
+      <div class="mp-stat-item">
+        <p class="mp-stat-val">24</p>
+        <p class="mp-stat-label">生成数（今月）</p>
+      </div>
+      <div class="mp-stat-item">
+        <p class="mp-stat-val">67<span style="font-size:13px;font-weight:400;">%</span></p>
+        <p class="mp-stat-label">返信率</p>
+      </div>
+      <div class="mp-stat-item">
+        <p class="mp-stat-val">3</p>
+        <p class="mp-stat-label">デート獲得数</p>
+      </div>
+    </div>
+
+    <!-- 自分の基本情報 -->
+    <div class="mp-section">
+      <p class="mp-section-title">あなたの基本情報</p>
+      <div class="mp-info-row">
+        <span class="mp-info-label">年齢</span>
+        <span class="mp-info-value">28歳</span>
+      </div>
+      <div class="mp-info-row">
+        <span class="mp-info-label">職業</span>
+        <span class="mp-info-value">会社員</span>
+      </div>
+      <div class="mp-info-row">
+        <span class="mp-info-label">趣味</span>
+        <span class="mp-info-value">サッカー、映画、料理</span>
+      </div>
+      <div class="mp-info-row">
+        <span class="mp-info-label">キャラ設定</span>
+        <span class="mp-info-tag">積極的</span>
+      </div>
+    </div>
+
+    <!-- 生成履歴 -->
+    <div class="mp-section">
+      <p class="mp-section-title">最近の履歴（使ったもの）</p>
+
+      <div class="mp-history-item">
+        <div class="mp-history-type first">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+            <path d="M2 8C2 4.7 4.7 2 8 2s6 2.7 6 6-2.7 6-6 6H2.5L2 14V8z"/>
+          </svg>
+        </div>
+        <div class="mp-history-content">
+          <div class="mp-history-meta">
+            <span class="mp-history-type-label">初回アプローチ</span>
+            <span class="mp-history-date">今日</span>
+          </div>
+          <p class="mp-history-text">「プロフィール見てたらカフェ好きって書いてましたね！」</p>
+          <span class="mp-history-result yes">返信きた</span>
+        </div>
+      </div>
+
+      <div class="mp-history-item">
+        <div class="mp-history-type reply">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round">
+            <rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M2 7l6 4 6-4"/>
+          </svg>
+        </div>
+        <div class="mp-history-content">
+          <div class="mp-history-meta">
+            <span class="mp-history-type-label reply">メール返信</span>
+            <span class="mp-history-date">昨日</span>
+          </div>
+          <p class="mp-history-text">「週末は大体友達とサッカーしてるよ！○○さんは？」</p>
+          <span class="mp-history-result pending">まだ待ち中</span>
+        </div>
+      </div>
+
+      <div class="mp-history-item">
+        <div class="mp-history-type first">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+            <path d="M2 8C2 4.7 4.7 2 8 2s6 2.7 6 6-2.7 6-6 6H2.5L2 14V8z"/>
+          </svg>
+        </div>
+        <div class="mp-history-content">
+          <div class="mp-history-meta">
+            <span class="mp-history-type-label">初回アプローチ</span>
+            <span class="mp-history-date">3日前</span>
+          </div>
+          <p class="mp-history-text">「はじめまして！映画好きって書いてましたが…」</p>
+          <span class="mp-history-result no">既読スルー</span>
+        </div>
+      </div>
+
+      <button class="mp-see-all">すべての履歴を見る</button>
+    </div>
+
+    <!-- アカウント設定 -->
+    <div class="mp-section">
+      <p class="mp-section-title">アカウント設定</p>
+      <div class="mp-menu-item">
+        <span class="mp-menu-label">利用規約</span>
+        <span class="mp-menu-arrow">›</span>
+      </div>
+      <div class="mp-menu-item">
+        <span class="mp-menu-label">プライバシーポリシー</span>
+        <span class="mp-menu-arrow">›</span>
+      </div>
+      <div class="mp-menu-item">
+        <span class="mp-menu-label">お問い合わせ</span>
+        <span class="mp-menu-arrow">›</span>
+      </div>
+      <div class="mp-menu-item">
+        <span class="mp-menu-label">ログアウト</span>
+        <span class="mp-menu-arrow">›</span>
+      </div>
+      <div class="mp-menu-item">
+        <span class="mp-menu-label danger">退会する</span>
+        <span class="mp-menu-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- ボトムナビ -->
+    <div class="bottom-nav">
+      <div class="bottom-nav-item">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" stroke-linecap="round">
+          <path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+        </svg>
+        <span class="bnav-label">ホーム</span>
+        <div class="bnav-dot"></div>
+      </div>
+      <div class="bottom-nav-item">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" stroke-linecap="round">
+          <path d="M4 6h12M4 10h8M4 14h5"/>
+        </svg>
+        <span class="bnav-label">履歴</span>
+        <div class="bnav-dot"></div>
+      </div>
+      <div class="bottom-nav-item">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+        </svg>
+        <span class="bnav-label active">マイページ</span>
+        <div class="bnav-dot active"></div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,258 @@
+
+<style>
+  .r-wrap { max-width: 400px; margin: 0 auto; font-size: 14px; color: var(--color-text-primary); }
+  .r-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--color-text-tertiary); text-transform: uppercase; margin-bottom: 6px; }
+  .r-frame { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); background: var(--color-background-primary); overflow: hidden; margin-bottom: 16px; }
+
+  .r-nav { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .r-back { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: center; cursor: pointer; background: transparent; flex-shrink: 0; }
+  .r-nav-title { font-size: 15px; font-weight: 500; flex: 1; }
+  .r-home-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-text-tertiary); cursor: pointer; padding: 4px 8px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); background: transparent; flex-shrink: 0; }
+
+  .r-body { padding: 16px; }
+
+  .r-context { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; margin-bottom: 16px; }
+  .r-context-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .r-context-tag { font-size: 11px; color: var(--color-text-secondary); background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); padding: 3px 8px; border-radius: 99px; }
+  .r-context-message { margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--color-border-tertiary); }
+  .r-context-message-label { font-size: 10px; color: var(--color-text-tertiary); margin: 0 0 4px; }
+  .r-context-message-text { font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-primary); border-radius: var(--border-radius-md); padding: 6px 10px; border: 0.5px solid var(--color-border-tertiary); line-height: 1.5; }
+  .r-context-edit { font-size: 11px; color: #534AB7; cursor: pointer; text-align: right; margin-top: 6px; }
+
+  .r-section-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin: 0 0 10px; }
+
+  .r-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px; margin-bottom: 10px; cursor: pointer; background: var(--color-background-primary); }
+  .r-card.selected { border: 2px solid #AFA9EC; background: #EEEDFE; }
+  .r-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .r-pattern-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 99px; background: var(--color-background-secondary); color: var(--color-text-secondary); }
+  .r-card.selected .r-pattern-badge { background: #AFA9EC; color: #26215C; }
+  .r-tone-badge { font-size: 10px; padding: 2px 8px; border-radius: 99px; border: 0.5px solid var(--color-border-tertiary); color: var(--color-text-tertiary); }
+  .r-message { font-size: 13px; line-height: 1.7; color: var(--color-text-primary); margin: 0 0 12px; }
+  .r-card.selected .r-message { color: #26215C; }
+
+  .r-card-actions { display: flex; gap: 8px; }
+  .r-copy-btn { flex: 1; padding: 8px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; font-size: 12px; cursor: pointer; color: var(--color-text-primary); display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .r-copy-btn.copied { background: #EAF3DE; border-color: #97C459; color: #3B6D11; }
+  .r-used-btn { flex: 1; padding: 8px; border-radius: var(--border-radius-md); border: none; background: #534AB7; font-size: 12px; cursor: pointer; color: #EEEDFE; font-weight: 500; }
+  .r-used-btn.done { background: #EAF3DE; color: #3B6D11; cursor: default; border: 0.5px solid #97C459; }
+
+  .r-regen-btn { width: 100%; padding: 11px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; font-size: 13px; cursor: pointer; color: var(--color-text-secondary); margin-top: 4px; }
+
+  .r-regen-panel { display: none; margin-top: 12px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+  .r-regen-panel.open { display: block; }
+  .r-regen-panel-head { padding: 12px 14px; background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 12px; font-weight: 500; color: var(--color-text-secondary); }
+  .r-regen-panel-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .r-regen-field label { font-size: 12px; font-weight: 500; display: block; margin-bottom: 6px; color: var(--color-text-primary); }
+  .r-regen-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .r-regen-chip { font-size: 12px; padding: 5px 12px; border-radius: 99px; border: 0.5px solid var(--color-border-secondary); background: transparent; cursor: pointer; color: var(--color-text-primary); }
+  .r-regen-chip.selected { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; font-weight: 500; }
+  .r-regen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .r-regen-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 8px 10px; cursor: pointer; text-align: center; }
+  .r-regen-card.selected { border-color: #AFA9EC; background: #EEEDFE; }
+  .r-regen-card p { margin: 0 0 1px; font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+  .r-regen-card.selected p { color: #3C3489; }
+  .r-regen-card span { font-size: 11px; color: var(--color-text-secondary); }
+  .r-regen-submit { width: 100%; padding: 11px; border-radius: var(--border-radius-md); background: #534AB7; color: #EEEDFE; font-size: 13px; font-weight: 500; border: none; cursor: pointer; }
+
+  .modal-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); border-radius: var(--border-radius-lg); align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet { background: var(--color-background-primary); border-radius: 16px 16px 0 0; padding: 20px 16px 24px; width: 100%; }
+  .modal-handle { width: 36px; height: 4px; background: var(--color-border-secondary); border-radius: 2px; margin: 0 auto 16px; }
+  .modal-title { font-size: 15px; font-weight: 500; margin: 0 0 4px; text-align: center; }
+  .modal-sub { font-size: 12px; color: var(--color-text-secondary); text-align: center; margin: 0 0 16px; }
+  .modal-fb-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .modal-fb-btn { flex: 1; padding: 12px 6px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; font-size: 13px; cursor: pointer; color: var(--color-text-primary); font-weight: 500; text-align: center; }
+  .modal-fb-btn.active-yes { background: #EAF3DE; border-color: #97C459; color: #3B6D11; }
+  .modal-fb-btn.active-no { background: #FCEBEB; border-color: #F09595; color: #A32D2D; }
+  .modal-fb-btn.active-pending { background: #FAEEDA; border-color: #EF9F27; color: #633806; }
+  .modal-skip { width: 100%; padding: 10px; border-radius: var(--border-radius-md); border: none; background: transparent; font-size: 12px; color: var(--color-text-tertiary); cursor: pointer; }
+  .outer-rel { position: relative; }
+
+  .diff-badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 99px; background: #FAEEDA; color: #633806; border: 0.5px solid #EF9F27; margin-left: 6px; vertical-align: middle; }
+</style>
+
+<div class="r-wrap">
+  <div style="margin-bottom:8px;"><div class="r-label">生成結果画面 — メール返信</div></div>
+
+  <div class="outer-rel">
+    <div class="r-frame">
+      <div class="r-nav">
+        <button class="r-back">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--color-text-primary)" stroke-width="1.5" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
+        </button>
+        <span class="r-nav-title">生成結果</span>
+        <button class="r-home-btn">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z"/></svg>
+          ホーム
+        </button>
+      </div>
+
+      <div class="r-body">
+
+        <!-- コンテキスト：初回と差分あり（相手メッセージ表示を追加） -->
+        <div class="r-context">
+          <div class="r-context-tags">
+            <span class="r-context-tag">数回やり取り済み</span>
+            <span class="r-context-tag">2〜5回</span>
+            <span class="r-context-tag">会話を続ける</span>
+            <span class="r-context-tag">普通トーン</span>
+          </div>
+          <div class="r-context-message">
+            <p class="r-context-message-label">相手の最新メッセージ</p>
+            <p class="r-context-message-text">「そうなんだ〜、週末何してるの？」</p>
+          </div>
+          <p class="r-context-edit">条件を編集</p>
+        </div>
+
+        <p class="r-section-label">3つの候補から選んでください</p>
+
+        <div class="r-card selected" id="card1" onclick="selectCard(1)">
+          <div class="r-card-header">
+            <span class="r-pattern-badge">パターン A</span>
+            <span class="r-tone-badge">自然に続ける</span>
+          </div>
+          <p class="r-message">「週末は大体友達とサッカーしてるよ！○○さんは週末どんな感じ？」</p>
+          <div class="r-card-actions">
+            <button class="r-copy-btn" id="copy1" onclick="doCopy(event,1)">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M1 9V2a1 1 0 011-1h7"/></svg>
+              コピー
+            </button>
+            <button class="r-used-btn" id="used1" onclick="doUsed(event,1)">これを使う</button>
+          </div>
+        </div>
+
+        <div class="r-card" id="card2" onclick="selectCard(2)">
+          <div class="r-card-header">
+            <span class="r-pattern-badge">パターン B</span>
+            <span class="r-tone-badge">距離を縮める</span>
+          </div>
+          <p class="r-message">「週末はサッカーしたり映画見たりかな〜。○○さんって週末アクティブに動く派？それとものんびり派？」</p>
+          <div class="r-card-actions">
+            <button class="r-copy-btn" id="copy2" onclick="doCopy(event,2)">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M1 9V2a1 1 0 011-1h7"/></svg>
+              コピー
+            </button>
+            <button class="r-used-btn" id="used2" onclick="doUsed(event,2)">これを使う</button>
+          </div>
+        </div>
+
+        <div class="r-card" id="card3" onclick="selectCard(3)">
+          <div class="r-card-header">
+            <span class="r-pattern-badge">パターン C</span>
+            <span class="r-tone-badge">共通点を探る</span>
+          </div>
+          <p class="r-message">「サッカーと映画が多いかな！○○さんのプロフィール見てカフェ好きなの気になってたんだけど、週末もよく行く感じ？」</p>
+          <div class="r-card-actions">
+            <button class="r-copy-btn" id="copy3" onclick="doCopy(event,3)">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M1 9V2a1 1 0 011-1h7"/></svg>
+              コピー
+            </button>
+            <button class="r-used-btn" id="used3" onclick="doUsed(event,3)">これを使う</button>
+          </div>
+        </div>
+
+        <button class="r-regen-btn" onclick="toggleRegen()">条件を変えてもう一度生成する ↓</button>
+
+        <!-- 再生成パネル：初回と差分あり（目的・トーン・やり取り回数を編集） -->
+        <div class="r-regen-panel" id="regen-panel">
+          <div class="r-regen-panel-head">条件を編集して再生成</div>
+          <div class="r-regen-panel-body">
+            <div class="r-regen-field">
+              <label>今回の目的</label>
+              <div class="r-regen-grid" id="rc-purpose">
+                <div class="r-regen-card selected" onclick="selectRegenCard(this,'rc-purpose')">
+                  <p>会話を続ける</p><span>仲良くなりたい</span>
+                </div>
+                <div class="r-regen-card" onclick="selectRegenCard(this,'rc-purpose')">
+                  <p>デートに誘う</p><span>会う約束をしたい</span>
+                </div>
+                <div class="r-regen-card" onclick="selectRegenCard(this,'rc-purpose')">
+                  <p>LINE交換</p><span>アプリ外に移行</span>
+                </div>
+                <div class="r-regen-card" onclick="selectRegenCard(this,'rc-purpose')">
+                  <p>関係を温める</p><span>距離を縮めたい</span>
+                </div>
+              </div>
+            </div>
+            <div class="r-regen-field">
+              <label>やり取りの回数</label>
+              <div class="r-regen-chips" id="rc-count">
+                <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-count')">初回</span>
+                <span class="r-regen-chip selected" onclick="selectRegenChip(this,'rc-count')">2〜5回</span>
+                <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-count')">6〜10回</span>
+                <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-count')">11回以上</span>
+              </div>
+            </div>
+            <div class="r-regen-field">
+              <label>相手のトーン</label>
+              <div class="r-regen-chips" id="rc-tone">
+                <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-tone')">テンション高め</span>
+                <span class="r-regen-chip selected" onclick="selectRegenChip(this,'rc-tone')">普通</span>
+                <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-tone')">素っ気ない</span>
+              </div>
+            </div>
+            <button class="r-regen-submit">この条件で再生成する</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- フィードバックモーダル -->
+    <div class="modal-overlay" id="fb-modal">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <p class="modal-title">送って、どうでしたか？</p>
+        <p class="modal-sub">結果を教えてもらえるとAIが賢くなります</p>
+        <div class="modal-fb-row">
+          <button class="modal-fb-btn" id="mfb-yes" onclick="selectModalFb('yes')">返信きた</button>
+          <button class="modal-fb-btn" id="mfb-pending" onclick="selectModalFb('pending')">まだ待ち中</button>
+          <button class="modal-fb-btn" id="mfb-no" onclick="selectModalFb('no')">既読スルー</button>
+        </div>
+        <button class="modal-skip" onclick="closeModal()">あとで回答する</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function selectCard(n) {
+  [1,2,3].forEach(i => document.getElementById('card'+i).classList.remove('selected'));
+  document.getElementById('card'+n).classList.add('selected');
+}
+function doCopy(e, n) {
+  e.stopPropagation();
+  var btn = document.getElementById('copy'+n);
+  btn.classList.add('copied');
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 7l3 3 6-6"/></svg> コピー済み';
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M1 9V2a1 1 0 011-1h7"/></svg> コピー';
+  }, 2000);
+}
+function doUsed(e, n) {
+  e.stopPropagation();
+  var btn = document.getElementById('used'+n);
+  if (btn.classList.contains('done')) return;
+  btn.classList.add('done');
+  btn.textContent = '使った';
+  selectCard(n);
+  setTimeout(() => { document.getElementById('fb-modal').classList.add('open'); }, 400);
+}
+function closeModal() { document.getElementById('fb-modal').classList.remove('open'); }
+function selectModalFb(type) {
+  ['yes','pending','no'].forEach(t => document.getElementById('mfb-'+t).classList.remove('active-yes','active-no','active-pending'));
+  document.getElementById('mfb-'+type).classList.add('active-'+type);
+  setTimeout(() => closeModal(), 800);
+}
+function toggleRegen() { document.getElementById('regen-panel').classList.toggle('open'); }
+function selectRegenChip(el, groupId) {
+  document.getElementById(groupId).querySelectorAll('.r-regen-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectRegenCard(el, groupId) {
+  document.getElementById(groupId).querySelectorAll('.r-regen-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>

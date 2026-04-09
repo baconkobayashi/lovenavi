@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-page font-sans text-sm text-ink;
+  }
+  input[type='text'],
+  input[type='email'],
+  select,
+  textarea {
+    @apply w-full resize-y rounded-md border border-black/20 bg-white px-[10px] py-2 text-sm text-ink outline-none;
+  }
+  input[type='text']:focus,
+  select:focus,
+  textarea:focus {
+    @apply border-brand-border ring-[3px] ring-brand/15;
+  }
+  input[type='range'] {
+    @apply w-full cursor-pointer;
+  }
+}
+
+@layer components {
+  .frame {
+    @apply overflow-hidden rounded-lg border border-black/10 bg-white;
+  }
+  .btn-primary {
+    @apply w-full cursor-pointer rounded-md border-none bg-brand py-3 text-sm font-medium text-brand-light;
+  }
+  .btn-secondary {
+    @apply cursor-pointer whitespace-nowrap rounded-md border border-black/20 bg-transparent px-4 py-3 text-sm text-ink-secondary;
+  }
+  .chip {
+    @apply cursor-pointer rounded-full border border-black/20 bg-transparent px-[14px] py-[6px] text-xs text-ink;
+  }
+  .chip.selected {
+    @apply border-brand-border bg-brand-light font-medium text-brand-dark;
+  }
+  .select-card {
+    @apply cursor-pointer rounded-md border border-black/10 p-[10px_12px] text-center;
+  }
+  .select-card.selected {
+    @apply border-brand-border bg-brand-light;
+  }
+  .select-card p {
+    @apply m-0 mb-0.5 text-xs font-medium text-ink;
+  }
+  .select-card.selected p {
+    @apply text-brand-dark;
+  }
+  .select-card span {
+    @apply text-[11px] text-ink-secondary;
+  }
+}
