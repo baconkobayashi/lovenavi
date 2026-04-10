@@ -1,32 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 
-const PATTERNS = [
-  {
-    id: 1,
-    label: 'パターン A',
-    tone: '共通点を活かす',
-    message:
-      '「プロフィール見てたらカフェ好きって書いてましたね！自分もよく新しいカフェ開拓してて、○○さんのおすすめ聞いてみたいです。よかったらいろいろ教えてください！」',
-  },
-  {
-    id: 2,
-    label: 'パターン B',
-    tone: '質問で引き込む',
-    message:
-      '「はじめまして！映画好きって書いてましたが、最近観た中でおすすめってありますか？自分もよく観るんですが、最近ちょうどいい作品探してて。」',
-  },
-  {
-    id: 3,
-    label: 'パターン C',
-    tone: 'シンプル・自然',
-    message:
-      '「はじめまして！プロフィール読んでいて、なんか話してみたいなって思いました。カフェとか映画とかよく行くんですか？」',
-  },
-]
-
-const AREAS = ['東京', '神奈川', '大阪', 'その他']
-const CHARS = ['積極的', '控えめ', 'ユーモア系', '誠実系']
+interface Pattern {
+  id: number
+  label: string
+  tone: string
+  message: string
+}
 
 function CopyIcon() {
   return (
@@ -78,17 +59,75 @@ function HomeIcon() {
 
 export default function ResultPage() {
   const navigate = useNavigate()
+  const [patterns, setPatterns] = useState<Pattern[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [selected, setSelected] = useState(1)
   const [copied, setCopied] = useState<number | null>(null)
   const [used, setUsed] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [feedback, setFeedback] = useState<'yes' | 'no' | 'pending' | null>(null)
-  const [showRegen, setShowRegen] = useState(false)
-  const [regenArea, setRegenArea] = useState('東京')
-  const [regenChar, setRegenChar] = useState('積極的')
-  const [regenHobbies, setRegenHobbies] = useState('カフェ・映画')
+
+  useEffect(() => {
+    async function generate() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!session) return
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single()
+
+      if (!profile) {
+        setError('プロフィール情報が取得できませんでした')
+        setLoading(false)
+        return
+      }
+
+      const { data, error: fnError } = await supabase.functions.invoke('generate-message', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: {
+          targetRelation: profile.target_relation,
+          targetAge: profile.target_age,
+          targetArea: profile.target_area,
+          targetHobbies: profile.target_hobbies,
+          targetProfileText: profile.target_profile_text,
+          myAge: profile.my_age,
+          myJob: profile.my_job,
+          myHobbies: profile.my_hobbies,
+          tone: profile.tone,
+        },
+      })
+
+      if (fnError) {
+        console.error('Edge Function error:', fnError)
+        setError(`メッセージの生成に失敗しました: ${fnError.message}`)
+        setLoading(false)
+        return
+      }
+
+      const generated: Pattern[] = data.patterns.map(
+        (p: { tone: string; message: string }, i: number) => ({
+          id: i + 1,
+          label: `パターン ${'ABC'[i]}`,
+          tone: p.tone,
+          message: p.message,
+        }),
+      )
+      setPatterns(generated)
+      setLoading(false)
+    }
+    generate()
+  }, [])
 
   function handleCopy(id: number) {
+    const pattern = patterns.find((p) => p.id === id)
+    if (pattern) navigator.clipboard.writeText(pattern.message)
     setCopied(id)
     setTimeout(() => setCopied(null), 2000)
   }
@@ -138,156 +177,95 @@ export default function ResultPage() {
           </div>
 
           <div className="p-4">
-            {/* コンテキスト */}
-            <div className="mb-4 flex items-center justify-between rounded-md bg-surface p-[10px_12px]">
-              <div className="flex flex-wrap gap-1.5">
-                {['25歳', '東京', 'カフェ・映画', '積極的'].map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full border border-black/10 bg-white px-2 py-[3px] text-[11px] text-ink-secondary"
-                  >
-                    {t}
-                  </span>
-                ))}
+            {/* ローディング */}
+            {loading && (
+              <div className="flex flex-col items-center py-12">
+                <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+                <p className="text-sm text-ink-secondary">メッセージを生成中...</p>
               </div>
-            </div>
+            )}
 
-            <p className="mb-[10px] text-xs font-medium text-ink-secondary">
-              3つの候補から選んでください
-            </p>
-
-            {/* カード */}
-            {PATTERNS.map(({ id, label, tone, message }) => (
-              <div
-                key={id}
-                onClick={() => setSelected(id)}
-                className={`mb-[10px] cursor-pointer rounded-lg border p-[14px] transition-all ${
-                  selected === id
-                    ? 'border-2 border-brand-border bg-brand-light'
-                    : 'border border-black/10 bg-white hover:border-black/25'
-                }`}
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <span
-                    className={`rounded-full px-[10px] py-[3px] text-[11px] font-medium ${
-                      selected === id
-                        ? 'bg-brand-border text-brand-darker'
-                        : 'bg-surface text-ink-secondary'
-                    }`}
-                  >
-                    {label}
-                  </span>
-                  <span className="rounded-full border border-black/10 px-2 py-[2px] text-[10px] text-ink-tertiary">
-                    {tone}
-                  </span>
-                </div>
-                <p
-                  className={`mb-3 text-[13px] leading-[1.7] ${selected === id ? 'text-brand-darker' : 'text-ink'}`}
+            {/* エラー */}
+            {!loading && error && (
+              <div className="py-8 text-center">
+                <p className="mb-4 text-sm text-danger-text">{error}</p>
+                <button
+                  onClick={() => navigate(-1)}
+                  className="cursor-pointer rounded-md border border-black/20 bg-transparent px-4 py-2 text-sm text-ink-secondary"
                 >
-                  {message}
+                  戻る
+                </button>
+              </div>
+            )}
+
+            {/* 結果 */}
+            {!loading && !error && (
+              <>
+                <p className="mb-[10px] text-xs font-medium text-ink-secondary">
+                  3つの候補から選んでください
                 </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleCopy(id)
-                    }}
-                    className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border py-2 text-xs transition-all ${
-                      copied === id
-                        ? 'border-success-border bg-success-bg text-success-text'
-                        : 'border-black/20 bg-transparent text-ink hover:bg-surface'
+
+                {patterns.map(({ id, label, tone, message }) => (
+                  <div
+                    key={id}
+                    onClick={() => setSelected(id)}
+                    className={`mb-[10px] cursor-pointer rounded-lg border p-[14px] transition-all ${
+                      selected === id
+                        ? 'border-2 border-brand-border bg-brand-light'
+                        : 'border border-black/10 bg-white hover:border-black/25'
                     }`}
                   >
-                    {copied === id ? <CheckIcon /> : <CopyIcon />}
-                    {copied === id ? 'コピー済み' : 'コピー'}
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleUsed(id)
-                    }}
-                    className={`flex-1 cursor-pointer rounded-md border-none py-2 text-xs font-medium transition-all ${
-                      used === id
-                        ? 'border border-success-border bg-success-bg text-success-text'
-                        : 'bg-brand text-brand-light hover:bg-brand-dark'
-                    }`}
-                  >
-                    {used === id ? '使った' : 'これを使う'}
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {/* 再生成ボタン */}
-            <button
-              onClick={() => setShowRegen(!showRegen)}
-              className="mt-1 w-full cursor-pointer rounded-md border border-black/20 bg-transparent py-[11px] text-[13px] text-ink-secondary hover:bg-surface"
-            >
-              条件を変えてもう一度生成する ↓
-            </button>
-
-            {/* 再生成パネル */}
-            {showRegen && (
-              <div className="mt-3 overflow-hidden rounded-lg border border-black/10">
-                <div className="border-b border-black/10 bg-surface px-[14px] py-3 text-xs font-medium text-ink-secondary">
-                  条件を編集して再生成
-                </div>
-                <div className="flex flex-col gap-3 p-[14px]">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-ink">居住エリア</label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {AREAS.map((a) => (
-                        <button
-                          key={a}
-                          onClick={() => setRegenArea(a)}
-                          className={`cursor-pointer rounded-full border px-3 py-[5px] text-xs transition-all ${
-                            regenArea === a
-                              ? 'border-brand-border bg-brand-light font-medium text-brand-dark'
-                              : 'border-black/20 bg-transparent text-ink hover:bg-surface'
-                          }`}
-                        >
-                          {a}
-                        </button>
-                      ))}
+                    <div className="mb-2 flex items-center justify-between">
+                      <span
+                        className={`rounded-full px-[10px] py-[3px] text-[11px] font-medium ${
+                          selected === id
+                            ? 'bg-brand-border text-brand-darker'
+                            : 'bg-surface text-ink-secondary'
+                        }`}
+                      >
+                        {label}
+                      </span>
+                      <span className="rounded-full border border-black/10 px-2 py-[2px] text-[10px] text-ink-tertiary">
+                        {tone}
+                      </span>
+                    </div>
+                    <p
+                      className={`mb-3 text-[13px] leading-[1.7] ${selected === id ? 'text-brand-darker' : 'text-ink'}`}
+                    >
+                      {message}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleCopy(id)
+                        }}
+                        className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border py-2 text-xs transition-all ${
+                          copied === id
+                            ? 'border-success-border bg-success-bg text-success-text'
+                            : 'border-black/20 bg-transparent text-ink hover:bg-surface'
+                        }`}
+                      >
+                        {copied === id ? <CheckIcon /> : <CopyIcon />}
+                        {copied === id ? 'コピー済み' : 'コピー'}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleUsed(id)
+                        }}
+                        className={`flex-1 cursor-pointer rounded-md border-none py-2 text-xs font-medium transition-all ${
+                          used === id
+                            ? 'border border-success-border bg-success-bg text-success-text'
+                            : 'bg-brand text-brand-light hover:bg-brand-dark'
+                        }`}
+                      >
+                        {used === id ? '使った' : 'これを使う'}
+                      </button>
                     </div>
                   </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-ink">キャラ設定</label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {CHARS.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => setRegenChar(c)}
-                          className={`cursor-pointer rounded-full border px-3 py-[5px] text-xs transition-all ${
-                            regenChar === c
-                              ? 'border-brand-border bg-brand-light font-medium text-brand-dark'
-                              : 'border-black/20 bg-transparent text-ink hover:bg-surface'
-                          }`}
-                        >
-                          {c}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-ink">
-                      趣味・好きなこと
-                    </label>
-                    <input
-                      type="text"
-                      value={regenHobbies}
-                      onChange={(e) => setRegenHobbies(e.target.value)}
-                      placeholder="例：カフェ巡り、映画"
-                    />
-                  </div>
-                  <button
-                    onClick={() => setShowRegen(false)}
-                    className="w-full cursor-pointer rounded-md border-none bg-brand py-[11px] text-[13px] font-medium text-brand-light"
-                  >
-                    この条件で再生成する
-                  </button>
-                </div>
-              </div>
+                ))}
+              </>
             )}
           </div>
         </div>
