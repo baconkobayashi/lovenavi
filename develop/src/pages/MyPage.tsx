@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react'
 import BottomNav from '../components/BottomNav'
+import { supabase } from '../lib/supabase'
 
 type ResultTag = 'yes' | 'no' | 'pending'
 
@@ -69,7 +71,42 @@ function IconReply() {
   )
 }
 
+interface Profile {
+  my_age: number | null
+  my_job: string | null
+  my_hobbies: string | null
+  tone: string | null
+}
+
 export default function MyPage() {
+  const [email, setEmail] = useState('')
+  const [initial, setInitial] = useState('?')
+  const [profile, setProfile] = useState<Profile>({
+    my_age: null,
+    my_job: null,
+    my_hobbies: null,
+    tone: null,
+  })
+
+  useEffect(() => {
+    async function load() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) return
+      setEmail(user.email ?? '')
+      setInitial((user.email ?? '?')[0].toUpperCase())
+
+      const { data } = await supabase
+        .from('profiles')
+        .select('my_age, my_job, my_hobbies, tone')
+        .eq('user_id', user.id)
+        .single()
+      if (data) setProfile(data)
+    }
+    load()
+  }, [])
+
   return (
     <div className="flex min-h-screen justify-center bg-page px-4 py-8">
       <div className="w-full max-w-[400px]">
@@ -85,11 +122,10 @@ export default function MyPage() {
           {/* プロフィールヘッダー */}
           <div className="flex items-center gap-[14px] border-b border-black/10 px-4 py-5">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-light text-xl font-medium text-brand">
-              田
+              {initial}
             </div>
             <div>
-              <p className="mb-1 text-[17px] font-medium text-ink">田中 太郎</p>
-              <p className="text-xs text-ink-secondary">tanaka@example.com</p>
+              <p className="mb-1 text-[17px] font-medium text-ink">{email}</p>
             </div>
           </div>
 
@@ -114,25 +150,34 @@ export default function MyPage() {
           <div className="border-b border-black/10 p-4">
             <p className="mb-3 text-xs font-medium text-ink-secondary">あなたの基本情報</p>
             {[
-              { label: '年齢', value: '28歳', tag: false },
-              { label: '職業', value: '会社員', tag: false },
-              { label: '趣味', value: 'サッカー、映画、料理', tag: false },
-              { label: 'キャラ設定', value: '積極的', tag: true },
-            ].map(({ label, value, tag }) => (
+              { label: '年齢', value: profile.my_age ? `${profile.my_age}歳` : '未設定' },
+              { label: '職業', value: profile.my_job ?? '未設定' },
+              { label: '趣味', value: profile.my_hobbies ?? '未設定' },
+            ].map(({ label, value }) => (
               <div
                 key={label}
                 className="flex items-center justify-between border-b border-black/10 py-2 last:border-b-0"
               >
                 <span className="text-[13px] text-ink-secondary">{label}</span>
-                {tag ? (
-                  <span className="rounded-full bg-brand-light px-[10px] py-[3px] text-[11px] font-medium text-brand-dark">
-                    {value}
-                  </span>
-                ) : (
-                  <span className="text-[13px] font-medium text-ink">{value}</span>
-                )}
+                <span className="text-[13px] font-medium text-ink">{value}</span>
               </div>
             ))}
+            <div className="flex items-center justify-between py-2">
+              <span className="text-[13px] text-ink-secondary">キャラ設定</span>
+              {profile.tone ? (
+                <span className="rounded-full bg-brand-light px-[10px] py-[3px] text-[11px] font-medium text-brand-dark">
+                  {profile.tone === 'aggressive'
+                    ? '積極的'
+                    : profile.tone === 'reserved'
+                      ? '控えめ'
+                      : profile.tone === 'humorous'
+                        ? 'ユーモア系'
+                        : '誠実系'}
+                </span>
+              ) : (
+                <span className="text-[13px] font-medium text-ink">未設定</span>
+              )}
+            </div>
           </div>
 
           {/* 生成履歴 */}
