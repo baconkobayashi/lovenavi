@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 
 const IconChat = () => (
   <svg
@@ -27,9 +27,16 @@ const IconMail = () => (
   </svg>
 )
 
-export default function LandingPage() {
-  const navigate = useNavigate()
+async function signInWithGoogle() {
+  await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/home`,
+    },
+  })
+}
 
+export default function LandingPage() {
   return (
     <div className="flex min-h-screen justify-center bg-page px-4 py-8">
       <div className="w-full max-w-[480px]">
@@ -38,11 +45,14 @@ export default function LandingPage() {
           <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
             <span className="text-[15px] font-medium">lovenavigation</span>
             <div className="flex gap-2">
-              <button className="cursor-pointer rounded-md border border-black/20 bg-transparent px-[14px] py-[5px] text-xs text-ink">
+              <button
+                onClick={signInWithGoogle}
+                className="cursor-pointer rounded-md border border-black/20 bg-transparent px-[14px] py-[5px] text-xs text-ink"
+              >
                 ログイン
               </button>
               <button
-                onClick={() => navigate('/home')}
+                onClick={signInWithGoogle}
                 className="cursor-pointer rounded-md border border-brand bg-brand px-[14px] py-[5px] text-xs text-brand-light"
               >
                 無料で始める
@@ -68,7 +78,7 @@ export default function LandingPage() {
               メッセージを自動生成します。
             </p>
             <button
-              onClick={() => navigate('/home')}
+              onClick={signInWithGoogle}
               className="mb-2 block w-full cursor-pointer rounded-md border-none bg-brand py-3 text-sm font-medium text-brand-light"
             >
               無料で始める
@@ -174,7 +184,7 @@ export default function LandingPage() {
             <p className="mb-2 text-base font-medium text-ink">まずは無料で試してみる</p>
             <p className="mb-5 text-xs text-ink-secondary">クレジットカード不要・30秒で登録完了</p>
             <button
-              onClick={() => navigate('/home')}
+              onClick={signInWithGoogle}
               className="mx-auto mb-2 block w-full max-w-[280px] cursor-pointer rounded-md border-none bg-brand py-3 text-sm font-medium text-brand-light"
             >
               Googleアカウントで始める
