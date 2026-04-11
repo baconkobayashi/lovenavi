@@ -14,6 +14,7 @@
 | tone_b       | text                     | YES         | null              |
 | tone_c       | text                     | YES         | null              |
 | used_pattern | text                     | YES         | null              |
+| used_message | text                     | YES         | null              |
 | feedback     | text                     | YES         | null              |
 | reply_text   | text                     | YES         | null              |
 | created_at   | timestamp with time zone | YES         | now()             |
@@ -22,6 +23,7 @@
 - `pattern_a/b/c`: AIが生成した3パターンのメッセージ本文
 - `tone_a/b/c`: 各パターンのトーンラベル（例: 「積極的」）
 - `used_pattern`: ユーザーが実際に使ったパターン（`a` / `b` / `c`）
+- `used_message`: 実際に送ったメッセージのテキスト（会話履歴表示用）
 - `feedback`: 送った結果（`yes` / `no` / `pending`）
 - `reply_text`: 相手から来たメッセージ（`reply` 時のみ使用、`first_approach` は null）
 

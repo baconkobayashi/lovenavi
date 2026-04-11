@@ -61,9 +61,9 @@ function Badge({ required }: { required: boolean }) {
 export default function ReplyInputPage() {
   const navigate = useNavigate()
   const [latestMessage, setLatestMessage] = useState('')
-  const [count, setCount] = useState<Count>('2〜5回')
-  const [purpose, setPurpose] = useState<Purpose>('会話を続ける')
-  const [tone, setTone] = useState<Tone>('普通')
+  const [count, setCount] = useState<Count | null>(null)
+  const [purpose, setPurpose] = useState<Purpose | null>(null)
+  const [tone, setTone] = useState<Tone | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [profileFilled, setProfileFilled] = useState(false)
   const [relation, setRelation] = useState<Relation>('マッチング直後')
@@ -71,24 +71,150 @@ export default function ReplyInputPage() {
   const [area, setArea] = useState('東京')
   const [hobbies, setHobbies] = useState('')
   const [profileText, setProfileText] = useState('')
+  const [conversation, setConversation] = useState<{ id?: string; sender: 'me' | 'them'; text: string; createdAt: string }[]>([])
+  const [savingLatest, setSavingLatest] = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [genError, setGenError] = useState('')
+
+  function formatDate(iso: string) {
+    return new Date(iso).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  }
 
   useEffect(() => {
-    async function loadProfile() {
+    async function loadAll() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
+
+      // プロフィール読み込み
       const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
-      if (!data) return
-      if (data.target_relation && RELATION_MAP[data.target_relation]) {
-        setRelation(RELATION_MAP[data.target_relation])
+      if (data) {
+        if (data.target_relation && RELATION_MAP[data.target_relation]) {
+          setRelation(RELATION_MAP[data.target_relation])
+        }
+        if (data.target_age) setModalAge(data.target_age)
+        if (data.target_area) setArea(data.target_area)
+        if (data.target_hobbies) setHobbies(data.target_hobbies)
+        if (data.target_profile_text) setProfileText(data.target_profile_text)
+        setProfileFilled(true)
       }
-      if (data.target_age) setModalAge(data.target_age)
-      if (data.target_area) setArea(data.target_area)
-      if (data.target_hobbies) setHobbies(data.target_hobbies)
-      if (data.target_profile_text) setProfileText(data.target_profile_text)
-      setProfileFilled(true)
+
+      // 会話履歴読み込み
+      const { data: firstApproach } = await supabase
+        .from('messages')
+        .select('used_message, created_at')
+        .eq('user_id', user.id)
+        .eq('type', 'first_approach')
+        .maybeSingle()
+
+      const { data: replies } = await supabase
+        .from('messages')
+        .select('id, reply_text, used_message, created_at')
+        .eq('user_id', user.id)
+        .eq('type', 'reply')
+        .order('created_at', { ascending: true })
+
+      const items: { id?: string; sender: 'me' | 'them'; text: string; createdAt: string }[] = []
+      if (firstApproach?.used_message) {
+        items.push({ sender: 'me', text: firstApproach.used_message, createdAt: firstApproach.created_at })
+      }
+      for (const reply of replies ?? []) {
+        if (reply.reply_text) items.push({ id: reply.id, sender: 'them', text: reply.reply_text, createdAt: reply.created_at })
+        if (reply.used_message) items.push({ sender: 'me', text: reply.used_message, createdAt: reply.created_at })
+      }
+      setConversation(items)
     }
-    loadProfile()
+    loadAll()
   }, [])
+
+  async function saveLatestMessage() {
+    if (!latestMessage.trim()) return
+    setSavingLatest(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: inserted } = await supabase
+        .from('messages')
+        .insert({ user_id: user.id, type: 'reply', reply_text: latestMessage })
+        .select('id')
+        .single()
+      const now = new Date().toISOString()
+      setConversation((prev) => [...prev, { id: inserted?.id, sender: 'them', text: latestMessage, createdAt: now }])
+      setLatestMessage('')
+    }
+    setSavingLatest(false)
+  }
+
+  async function handleGenerate() {
+    setGenerating(true)
+    setGenError('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) { setGenerating(false); return }
+
+    const latestThemMessage = [...conversation].reverse().find((c) => c.sender === 'them')
+    const latestThemId = latestThemMessage?.id
+
+    const { data, error: fnError } = await supabase.functions.invoke('generate-reply', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      body: {
+        conversationHistory: conversation.map((c) => ({ sender: c.sender, text: c.text })),
+        latestMessage: latestThemMessage?.text ?? '',
+        count,
+        purpose,
+        tone,
+        targetRelation: Object.entries(RELATION_MAP).find(([, v]) => v === relation)?.[0],
+        targetAge: modalAge,
+        targetArea: area,
+        targetHobbies: hobbies,
+      },
+    })
+
+    if (fnError) {
+      setGenError('生成に失敗しました。もう一度お試しください。')
+      setGenerating(false)
+      return
+    }
+
+    const patterns = (data.patterns as { tone: string; message: string }[]).map((p, i) => ({
+      id: i + 1,
+      label: `パターン ${'ABC'[i]}`,
+      tone: p.tone,
+      message: p.message,
+    }))
+
+    // 最新の相手メッセージレコードにパターンを保存
+    if (latestThemId) {
+      await supabase.from('messages').update({
+        pattern_a: patterns[0]?.message ?? null,
+        pattern_b: patterns[1]?.message ?? null,
+        pattern_c: patterns[2]?.message ?? null,
+        tone_a: patterns[0]?.tone ?? null,
+        tone_b: patterns[1]?.tone ?? null,
+        tone_c: patterns[2]?.tone ?? null,
+      }).eq('id', latestThemId)
+    }
+
+    setGenerating(false)
+    navigate('/reply-result', {
+      state: {
+        patterns,
+        messageId: latestThemId,
+        latestMessage: latestThemMessage?.text ?? '',
+        count,
+        purpose,
+        tone,
+        conversationHistory: conversation.map((c) => ({ sender: c.sender, text: c.text })),
+        targetRelation: Object.entries(RELATION_MAP).find(([, v]) => v === relation)?.[0],
+        targetAge: modalAge,
+        targetArea: area,
+        targetHobbies: hobbies,
+      },
+    })
+  }
+
+  async function deleteReply(id: string) {
+    await supabase.from('messages').delete().eq('id', id)
+    setConversation((prev) => prev.filter((item) => item.id !== id))
+  }
 
   async function saveProfile() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -250,43 +376,58 @@ export default function ReplyInputPage() {
                 onChange={(e) => setLatestMessage(e.target.value)}
                 placeholder="例：そうなんだ〜、週末何してるの？"
               />
-              <p className="mt-1 text-[11px] text-ink-tertiary">
-                相手のメッセージをそのままコピペしてください
-              </p>
+              <div className="mt-2 flex items-center justify-between">
+                <p className="text-[11px] text-ink-tertiary">相手のメッセージをそのままコピペしてください</p>
+                <button
+                  onClick={saveLatestMessage}
+                  disabled={savingLatest || !latestMessage.trim()}
+                  className="cursor-pointer rounded-md border border-black/20 bg-transparent px-3 py-1.5 text-xs text-ink-secondary transition-all hover:bg-surface disabled:opacity-40"
+                >
+                  {savingLatest ? '保存中...' : '保存'}
+                </button>
+              </div>
             </div>
 
             {/* やり取りの流れ */}
-            <div className="mb-[18px]">
-              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                これまでのやり取り <Badge required={false} />
-              </p>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-end gap-2">
-                  <div className="max-w-[75%] rounded-[4px_12px_12px_12px] bg-surface px-3 py-2 text-xs leading-[1.6] text-ink">
-                    はじめまして！プロフィール見て気になりました
-                  </div>
-                  <span className="whitespace-nowrap text-[10px] text-ink-tertiary">2日前</span>
+            {conversation.length > 0 && (
+              <div className="mb-[18px]">
+                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                  これまでのやり取り <Badge required={false} />
+                </p>
+                <div className="flex flex-col gap-2">
+                  {conversation.map((item, i) =>
+                    item.sender === 'me' ? (
+                      <div key={i} className="flex items-end gap-2">
+                        <div className="max-w-[75%] rounded-[4px_12px_12px_12px] bg-surface px-3 py-2 text-xs leading-[1.6] text-ink">
+                          {item.text}
+                        </div>
+                        <span className="whitespace-nowrap text-[10px] text-ink-tertiary">{formatDate(item.createdAt)}</span>
+                      </div>
+                    ) : (
+                      <div key={i} className="flex flex-row-reverse items-end gap-2">
+                        <div className="max-w-[75%] rounded-[12px_4px_12px_12px] bg-brand px-3 py-2 text-xs leading-[1.6] text-brand-light">
+                          {item.text}
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="whitespace-nowrap text-[10px] text-ink-tertiary">{formatDate(item.createdAt)}</span>
+                          {item.id && (
+                            <button
+                              onClick={() => deleteReply(item.id!)}
+                              className="cursor-pointer rounded border border-black/10 bg-transparent px-1.5 py-0.5 text-[10px] text-ink-tertiary hover:border-danger-border hover:text-danger-text"
+                            >
+                              削除
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  )}
                 </div>
-                <div className="flex flex-row-reverse items-end gap-2">
-                  <div className="max-w-[75%] rounded-[12px_4px_12px_12px] bg-brand px-3 py-2 text-xs leading-[1.6] text-brand-light">
-                    ありがとうございます！カフェ好きなんですね
-                  </div>
-                  <span className="whitespace-nowrap text-[10px] text-ink-tertiary">2日前</span>
-                </div>
-                <div className="flex items-end gap-2">
-                  <div className="max-w-[75%] rounded-[4px_12px_12px_12px] bg-surface px-3 py-2 text-xs leading-[1.6] text-ink">
-                    そうなんだ〜、週末何してるの？
-                  </div>
-                  <span className="whitespace-nowrap text-[10px] text-ink-tertiary">今日</span>
-                </div>
+                <p className="mt-2 text-[11px] text-ink-tertiary">
+                  入れるほど会話の流れを読んだ返信になります
+                </p>
               </div>
-              <button className="mt-2 w-full cursor-pointer rounded-md border border-dashed border-black/20 bg-transparent py-2 text-xs text-ink-tertiary hover:bg-surface">
-                + やり取りを追加
-              </button>
-              <p className="mt-1 text-[11px] text-ink-tertiary">
-                入れるほど会話の流れを読んだ返信になります
-              </p>
-            </div>
+            )}
 
             {/* やり取り回数 */}
             <div className="mb-[18px]">
@@ -357,11 +498,15 @@ export default function ReplyInputPage() {
               </div>
             </div>
 
+            {genError && (
+              <p className="mb-3 text-center text-xs text-danger-text">{genError}</p>
+            )}
             <button
-              onClick={() => navigate('/reply-result')}
-              className="w-full cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light transition-colors hover:bg-brand-dark"
+              onClick={handleGenerate}
+              disabled={generating || !conversation.some((c) => c.sender === 'them') || count === null || purpose === null}
+              className="w-full cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light transition-colors hover:bg-brand-dark disabled:opacity-40"
             >
-              返信を生成する
+              {generating ? '生成中...' : '返信を生成する'}
             </button>
           </div>
         </div>

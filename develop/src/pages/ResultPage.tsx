@@ -148,7 +148,11 @@ export default function ResultPage() {
 
     if (messageId) {
       const usedPattern = ['a', 'b', 'c'][id - 1]
-      await supabase.from('messages').update({ used_pattern: usedPattern }).eq('id', messageId)
+      const usedMessage = patterns.find((p) => p.id === id)?.message ?? null
+      await supabase
+        .from('messages')
+        .update({ used_pattern: usedPattern, used_message: usedMessage })
+        .eq('id', messageId)
     }
 
     setTimeout(() => setShowModal(true), 400)
