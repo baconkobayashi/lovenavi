@@ -74,10 +74,8 @@ export default function ResultPage() {
     async function load() {
       // Router state から生成結果が渡されていればそのまま表示
       const statePatterns = location.state?.patterns
-      const stateMessageId = location.state?.messageId
-      if (statePatterns && stateMessageId) {
+      if (statePatterns) {
         setPatterns(statePatterns)
-        setMessageId(stateMessageId)
         setLoading(false)
         return
       }
@@ -146,9 +144,34 @@ export default function ResultPage() {
     setUsed(id)
     setSelected(id)
 
-    if (messageId) {
-      const usedPattern = ['a', 'b', 'c'][id - 1]
-      const usedMessage = patterns.find((p) => p.id === id)?.message ?? null
+    const usedPattern = ['a', 'b', 'c'][id - 1]
+    const usedMessage = patterns.find((p) => p.id === id)?.message ?? null
+
+    // DB にレコードがなければ INSERT、あれば UPDATE
+    if (!messageId) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        const { data: inserted } = await supabase
+          .from('messages')
+          .insert({
+            user_id: user.id,
+            type: 'first_approach',
+            pattern_a: patterns[0]?.message ?? null,
+            pattern_b: patterns[1]?.message ?? null,
+            pattern_c: patterns[2]?.message ?? null,
+            tone_a: patterns[0]?.tone ?? null,
+            tone_b: patterns[1]?.tone ?? null,
+            tone_c: patterns[2]?.tone ?? null,
+            used_pattern: usedPattern,
+            used_message: usedMessage,
+          })
+          .select('id')
+          .single()
+        setMessageId(inserted?.id ?? null)
+      }
+    } else {
       await supabase
         .from('messages')
         .update({ used_pattern: usedPattern, used_message: usedMessage })

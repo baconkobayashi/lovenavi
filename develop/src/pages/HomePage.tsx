@@ -11,7 +11,9 @@ export default function HomePage() {
 
   useEffect(() => {
     async function loadStats() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user) return
 
       const startOfMonth = new Date()
@@ -31,7 +33,9 @@ export default function HomePage() {
       const withFeedback = messages.filter((m) => m.feedback !== null)
       const replied = messages.filter((m) => m.feedback === 'yes')
       setReplyCount(replied.length)
-      setReplyRate(withFeedback.length > 0 ? Math.round((replied.length / withFeedback.length) * 100) : null)
+      setReplyRate(
+        withFeedback.length > 0 ? Math.round((replied.length / withFeedback.length) * 100) : null,
+      )
     }
     loadStats()
   }, [])

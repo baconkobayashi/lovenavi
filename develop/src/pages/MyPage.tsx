@@ -79,7 +79,9 @@ export default function MyPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user) return
       setEmail(user.email ?? '')
       setInitial((user.email ?? '?')[0].toUpperCase())
@@ -104,7 +106,9 @@ export default function MyPage() {
         setGeneratedCount(messages.length)
         const withFeedback = messages.filter((m) => m.feedback !== null)
         const replied = messages.filter((m) => m.feedback === 'yes')
-        setReplyRate(withFeedback.length > 0 ? Math.round((replied.length / withFeedback.length) * 100) : null)
+        setReplyRate(
+          withFeedback.length > 0 ? Math.round((replied.length / withFeedback.length) * 100) : null,
+        )
       }
 
       // 直近3件の履歴（使ったもの）
@@ -122,7 +126,7 @@ export default function MyPage() {
             date: formatRelativeDate(m.created_at),
             text: m.used_message,
             result: m.feedback as ResultTag | null,
-          }))
+          })),
         )
       }
     }
@@ -154,7 +158,10 @@ export default function MyPage() {
           {/* 利用サマリー */}
           <div className="grid grid-cols-3 border-b border-black/10">
             {[
-              { val: generatedCount !== null ? String(generatedCount) : '—', label: '生成数（今月）' },
+              {
+                val: generatedCount !== null ? String(generatedCount) : '—',
+                label: '生成数（今月）',
+              },
               { val: replyRate !== null ? `${replyRate}%` : '—', label: '返信率' },
               { val: '—', label: 'デート獲得数' },
             ].map(({ val, label }) => (
@@ -222,16 +229,18 @@ export default function MyPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="mb-[3px] flex items-center gap-1.5">
-                        <span className={`text-[11px] font-medium ${type === 'first' ? 'text-brand' : 'text-[#0F6E56]'}`}>
+                        <span
+                          className={`text-[11px] font-medium ${type === 'first' ? 'text-brand' : 'text-[#0F6E56]'}`}
+                        >
                           {type === 'first' ? '初回アプローチ' : '返信'}
                         </span>
                         <span className="text-[11px] text-ink-tertiary">{date}</span>
                       </div>
-                      <p className="mb-1 text-xs leading-[1.5] text-ink">
-                        {text}
-                      </p>
+                      <p className="mb-1 text-xs leading-[1.5] text-ink">{text}</p>
                       {style ? (
-                        <span className={`inline-block rounded-full px-2 py-[2px] text-[10px] ${style.bg} ${style.text}`}>
+                        <span
+                          className={`inline-block rounded-full px-2 py-[2px] text-[10px] ${style.bg} ${style.text}`}
+                        >
                           {style.label}
                         </span>
                       ) : (

@@ -71,20 +71,28 @@ export default function ReplyInputPage() {
   const [area, setArea] = useState('東京')
   const [hobbies, setHobbies] = useState('')
   const [profileText, setProfileText] = useState('')
-  const [conversation, setConversation] = useState<{ id?: string; sender: 'me' | 'them'; text: string; createdAt: string }[]>([])
-  const [savingLatest, setSavingLatest] = useState(false)
+  const [conversation, setConversation] = useState<
+    { id?: string; sender: 'me' | 'them'; text: string; createdAt: string }[]
+  >([])
   const [generating, setGenerating] = useState(false)
   const [genError, setGenError] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingText, setEditingText] = useState('')
 
   function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    return new Date(iso).toLocaleDateString('ja-JP', {
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   }
 
   useEffect(() => {
     async function loadAll() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user) return
 
       // プロフィール読み込み
@@ -117,11 +125,22 @@ export default function ReplyInputPage() {
 
       const items: { id?: string; sender: 'me' | 'them'; text: string; createdAt: string }[] = []
       if (firstApproach?.used_message) {
-        items.push({ sender: 'me', text: firstApproach.used_message, createdAt: firstApproach.created_at })
+        items.push({
+          sender: 'me',
+          text: firstApproach.used_message,
+          createdAt: firstApproach.created_at,
+        })
       }
       for (const reply of replies ?? []) {
-        if (reply.reply_text) items.push({ id: reply.id, sender: 'them', text: reply.reply_text, createdAt: reply.created_at })
-        if (reply.used_message) items.push({ sender: 'me', text: reply.used_message, createdAt: reply.created_at })
+        if (reply.reply_text)
+          items.push({
+            id: reply.id,
+            sender: 'them',
+            text: reply.reply_text,
+            createdAt: reply.created_at,
+          })
+        if (reply.used_message)
+          items.push({ sender: 'me', text: reply.used_message, createdAt: reply.created_at })
       }
       setConversation(items)
     }
@@ -130,30 +149,24 @@ export default function ReplyInputPage() {
 
   async function saveLatestMessage() {
     if (!latestMessage.trim()) return
-    setSavingLatest(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: inserted } = await supabase
-        .from('messages')
-        .insert({ user_id: user.id, type: 'reply', reply_text: latestMessage })
-        .select('id')
-        .single()
-      const now = new Date().toISOString()
-      setConversation((prev) => [...prev, { id: inserted?.id, sender: 'them', text: latestMessage, createdAt: now }])
-      setLatestMessage('')
-    }
-    setSavingLatest(false)
+    const now = new Date().toISOString()
+    setConversation((prev) => [...prev, { sender: 'them', text: latestMessage, createdAt: now }])
+    setLatestMessage('')
   }
 
   async function handleGenerate() {
     setGenerating(true)
     setGenError('')
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { setGenerating(false); return }
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) {
+      setGenerating(false)
+      return
+    }
 
     const latestThemMessage = [...conversation].reverse().find((c) => c.sender === 'them')
-    const latestThemId = latestThemMessage?.id
 
     const { data, error: fnError } = await supabase.functions.invoke('generate-reply', {
       headers: { Authorization: `Bearer ${session.access_token}` },
@@ -183,23 +196,10 @@ export default function ReplyInputPage() {
       message: p.message,
     }))
 
-    // 最新の相手メッセージレコードにパターンを保存
-    if (latestThemId) {
-      await supabase.from('messages').update({
-        pattern_a: patterns[0]?.message ?? null,
-        pattern_b: patterns[1]?.message ?? null,
-        pattern_c: patterns[2]?.message ?? null,
-        tone_a: patterns[0]?.tone ?? null,
-        tone_b: patterns[1]?.tone ?? null,
-        tone_c: patterns[2]?.tone ?? null,
-      }).eq('id', latestThemId)
-    }
-
     setGenerating(false)
     navigate('/reply-result', {
       state: {
         patterns,
-        messageId: latestThemId,
         latestMessage: latestThemMessage?.text ?? '',
         count,
         purpose,
@@ -222,14 +222,16 @@ export default function ReplyInputPage() {
     if (!editingText.trim()) return
     await supabase.from('messages').update({ reply_text: editingText }).eq('id', id)
     setConversation((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, text: editingText } : item))
+      prev.map((item) => (item.id === id ? { ...item, text: editingText } : item)),
     )
     setEditingId(null)
     setEditingText('')
   }
 
   async function saveProfile() {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
     if (user) {
       const relationKey = Object.entries(RELATION_MAP).find(([, v]) => v === relation)?.[0]
       await supabase.from('profiles').upsert(
@@ -389,13 +391,15 @@ export default function ReplyInputPage() {
                 placeholder="例：そうなんだ〜、週末何してるの？"
               />
               <div className="mt-2 flex items-center justify-between">
-                <p className="text-[11px] text-ink-tertiary">相手のメッセージをそのままコピペしてください</p>
+                <p className="text-[11px] text-ink-tertiary">
+                  相手のメッセージをそのままコピペしてください
+                </p>
                 <button
                   onClick={saveLatestMessage}
-                  disabled={savingLatest || !latestMessage.trim()}
+                  disabled={!latestMessage.trim()}
                   className="cursor-pointer rounded-md border border-black/20 bg-transparent px-3 py-1.5 text-xs text-ink-secondary transition-all hover:bg-surface disabled:opacity-40"
                 >
-                  {savingLatest ? '保存中...' : '保存'}
+                  追加
                 </button>
               </div>
             </div>
@@ -413,7 +417,9 @@ export default function ReplyInputPage() {
                         <div className="max-w-[75%] rounded-[4px_12px_12px_12px] bg-surface px-3 py-2 text-xs leading-[1.6] text-ink">
                           {item.text}
                         </div>
-                        <span className="whitespace-nowrap text-[10px] text-ink-tertiary">{formatDate(item.createdAt)}</span>
+                        <span className="whitespace-nowrap text-[10px] text-ink-tertiary">
+                          {formatDate(item.createdAt)}
+                        </span>
                       </div>
                     ) : (
                       <div key={i} className="flex flex-row-reverse items-end gap-2">
@@ -427,7 +433,10 @@ export default function ReplyInputPage() {
                             />
                             <div className="flex justify-end gap-1.5">
                               <button
-                                onClick={() => { setEditingId(null); setEditingText('') }}
+                                onClick={() => {
+                                  setEditingId(null)
+                                  setEditingText('')
+                                }}
                                 className="cursor-pointer rounded border border-black/10 bg-transparent px-2 py-0.5 text-[10px] text-ink-tertiary hover:bg-surface"
                               >
                                 キャンセル
@@ -446,11 +455,16 @@ export default function ReplyInputPage() {
                           </div>
                         )}
                         <div className="flex flex-col items-end gap-1">
-                          <span className="whitespace-nowrap text-[10px] text-ink-tertiary">{formatDate(item.createdAt)}</span>
+                          <span className="whitespace-nowrap text-[10px] text-ink-tertiary">
+                            {formatDate(item.createdAt)}
+                          </span>
                           {item.id && editingId !== item.id && (
                             <div className="flex gap-1">
                               <button
-                                onClick={() => { setEditingId(item.id!); setEditingText(item.text) }}
+                                onClick={() => {
+                                  setEditingId(item.id!)
+                                  setEditingText(item.text)
+                                }}
                                 className="cursor-pointer rounded border border-black/10 bg-transparent px-1.5 py-0.5 text-[10px] text-ink-tertiary hover:border-brand-border hover:text-brand"
                               >
                                 編集
@@ -465,7 +479,7 @@ export default function ReplyInputPage() {
                           )}
                         </div>
                       </div>
-                    )
+                    ),
                   )}
                 </div>
                 <p className="mt-2 text-[11px] text-ink-tertiary">
@@ -543,12 +557,15 @@ export default function ReplyInputPage() {
               </div>
             </div>
 
-            {genError && (
-              <p className="mb-3 text-center text-xs text-danger-text">{genError}</p>
-            )}
+            {genError && <p className="mb-3 text-center text-xs text-danger-text">{genError}</p>}
             <button
               onClick={handleGenerate}
-              disabled={generating || !conversation.some((c) => c.sender === 'them') || count === null || purpose === null}
+              disabled={
+                generating ||
+                !conversation.some((c) => c.sender === 'them') ||
+                count === null ||
+                purpose === null
+              }
               className="w-full cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light transition-colors hover:bg-brand-dark disabled:opacity-40"
             >
               {generating ? '生成中...' : '返信を生成する'}
@@ -658,7 +675,12 @@ export default function ReplyInputPage() {
                 <label className="mb-1.5 block text-xs font-medium text-ink">
                   趣味・好きなこと <span className="text-[10px] text-ink-tertiary">任意</span>
                 </label>
-                <textarea rows={2} value={hobbies} onChange={(e) => setHobbies(e.target.value)} placeholder="例：カフェ巡り、映画鑑賞" />
+                <textarea
+                  rows={2}
+                  value={hobbies}
+                  onChange={(e) => setHobbies(e.target.value)}
+                  placeholder="例：カフェ巡り、映画鑑賞"
+                />
               </div>
 
               {/* プロフィール文 */}
@@ -667,7 +689,12 @@ export default function ReplyInputPage() {
                   プロフィール文（あれば）{' '}
                   <span className="text-[10px] text-ink-tertiary">任意</span>
                 </label>
-                <textarea rows={2} value={profileText} onChange={(e) => setProfileText(e.target.value)} placeholder="プロフィールをそのままコピペでもOK" />
+                <textarea
+                  rows={2}
+                  value={profileText}
+                  onChange={(e) => setProfileText(e.target.value)}
+                  placeholder="プロフィールをそのままコピペでもOK"
+                />
               </div>
 
               <button

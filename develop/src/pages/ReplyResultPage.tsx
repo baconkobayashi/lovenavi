@@ -11,7 +11,15 @@ interface Pattern {
 
 function CopyIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 13 13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    >
       <rect x="4" y="4" width="8" height="8" rx="1.5" />
       <path d="M1 9V2a1 1 0 011-1h7" />
     </svg>
@@ -19,7 +27,15 @@ function CopyIcon() {
 }
 function CheckIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 13 13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    >
       <path d="M2 7l3 3 6-6" />
     </svg>
   )
@@ -29,7 +45,6 @@ export default function ReplyResultPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const initPatterns: Pattern[] = location.state?.patterns ?? []
-  const messageId: string | undefined = location.state?.messageId
   const latestMessage: string = location.state?.latestMessage ?? ''
   const count: string = location.state?.count ?? ''
   const purpose: string = location.state?.purpose ?? ''
@@ -46,6 +61,7 @@ export default function ReplyResultPage() {
   const [used, setUsed] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [feedback, setFeedback] = useState<'yes' | 'no' | 'pending' | null>(null)
+  const [savedMessageId, setSavedMessageId] = useState<string | null>(null)
   const [showRegen, setShowRegen] = useState(false)
   const [regenPurpose, setRegenPurpose] = useState(purpose)
   const [regenCount, setRegenCount] = useState(count)
@@ -54,8 +70,13 @@ export default function ReplyResultPage() {
 
   async function handleRegen() {
     setRegenerating(true)
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { setRegenerating(false); return }
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) {
+      setRegenerating(false)
+      return
+    }
 
     const { data, error } = await supabase.functions.invoke('generate-reply', {
       headers: { Authorization: `Bearer ${session.access_token}` },
@@ -99,13 +120,31 @@ export default function ReplyResultPage() {
     setUsed(id)
     setSelected(id)
 
-    if (messageId) {
-      const usedPattern = ['a', 'b', 'c'][id - 1]
-      const usedMessage = patterns.find((p) => p.id === id)?.message ?? null
-      await supabase
+    const usedPattern = ['a', 'b', 'c'][id - 1]
+    const usedMessage = patterns.find((p) => p.id === id)?.message ?? null
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (user) {
+      const { data: inserted } = await supabase
         .from('messages')
-        .update({ used_pattern: usedPattern, used_message: usedMessage })
-        .eq('id', messageId)
+        .insert({
+          user_id: user.id,
+          type: 'reply',
+          reply_text: latestMessage,
+          used_pattern: usedPattern,
+          used_message: usedMessage,
+          pattern_a: patterns[0]?.message ?? null,
+          pattern_b: patterns[1]?.message ?? null,
+          pattern_c: patterns[2]?.message ?? null,
+          tone_a: patterns[0]?.tone ?? null,
+          tone_b: patterns[1]?.tone ?? null,
+          tone_c: patterns[2]?.tone ?? null,
+        })
+        .select('id')
+        .single()
+      setSavedMessageId(inserted?.id ?? null)
     }
 
     setTimeout(() => setShowModal(true), 400)
@@ -113,8 +152,8 @@ export default function ReplyResultPage() {
 
   async function handleFeedback(type: 'yes' | 'no' | 'pending') {
     setFeedback(type)
-    if (messageId) {
-      await supabase.from('messages').update({ feedback: type }).eq('id', messageId)
+    if (savedMessageId) {
+      await supabase.from('messages').update({ feedback: type }).eq('id', savedMessageId)
     }
     setTimeout(() => setShowModal(false), 800)
   }
@@ -129,7 +168,15 @@ export default function ReplyResultPage() {
               onClick={() => navigate(-1)}
               className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent"
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#1a1a18" strokeWidth="1.5" strokeLinecap="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="#1a1a18"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              >
                 <path d="M9 2L4 7l5 5" />
               </svg>
             </button>
@@ -138,7 +185,16 @@ export default function ReplyResultPage() {
               onClick={() => navigate('/home')}
               className="flex cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary"
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#888780" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="#888780"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z" />
               </svg>
               ホーム
@@ -151,7 +207,10 @@ export default function ReplyResultPage() {
               <div className="mb-4 rounded-md bg-surface p-[10px_12px]">
                 <div className="flex flex-wrap gap-1.5">
                   {[count, purpose, tone].filter(Boolean).map((t) => (
-                    <span key={t} className="rounded-full border border-black/10 bg-white px-2 py-[3px] text-[11px] text-ink-secondary">
+                    <span
+                      key={t}
+                      className="rounded-full border border-black/10 bg-white px-2 py-[3px] text-[11px] text-ink-secondary"
+                    >
                       {t}
                     </span>
                   ))}
@@ -194,7 +253,9 @@ export default function ReplyResultPage() {
                     }`}
                   >
                     <div className="mb-2 flex items-center justify-between">
-                      <span className={`rounded-full px-[10px] py-[3px] text-[11px] font-medium ${selected === id ? 'bg-brand-border text-brand-darker' : 'bg-surface text-ink-secondary'}`}>
+                      <span
+                        className={`rounded-full px-[10px] py-[3px] text-[11px] font-medium ${selected === id ? 'bg-brand-border text-brand-darker' : 'bg-surface text-ink-secondary'}`}
+                      >
                         {label}
                       </span>
                       {tone && (
@@ -203,12 +264,17 @@ export default function ReplyResultPage() {
                         </span>
                       )}
                     </div>
-                    <p className={`mb-3 text-[13px] leading-[1.7] ${selected === id ? 'text-brand-darker' : 'text-ink'}`}>
+                    <p
+                      className={`mb-3 text-[13px] leading-[1.7] ${selected === id ? 'text-brand-darker' : 'text-ink'}`}
+                    >
                       {message}
                     </p>
                     <div className="flex gap-2">
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleCopy(id) }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleCopy(id)
+                        }}
                         className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border py-2 text-xs transition-all ${
                           copied === id
                             ? 'border-success-border bg-success-bg text-success-text'
@@ -219,7 +285,10 @@ export default function ReplyResultPage() {
                         {copied === id ? 'コピー済み' : 'コピー'}
                       </button>
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleUsed(id) }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleUsed(id)
+                        }}
                         className={`flex-1 cursor-pointer rounded-md border-none py-2 text-xs font-medium transition-all ${
                           used === id
                             ? 'border border-success-border bg-success-bg text-success-text'
@@ -251,9 +320,13 @@ export default function ReplyResultPage() {
                     </div>
                     <div className="flex flex-col gap-3 p-[14px]">
                       <div>
-                        <label className="mb-1.5 block text-xs font-medium text-ink">今回の目的</label>
+                        <label className="mb-1.5 block text-xs font-medium text-ink">
+                          今回の目的
+                        </label>
                         <div className="grid grid-cols-2 gap-2">
-                          {(['会話を続ける', 'デートに誘う', 'LINE交換', '関係を温める'] as const).map((p) => (
+                          {(
+                            ['会話を続ける', 'デートに誘う', 'LINE交換', '関係を温める'] as const
+                          ).map((p) => (
                             <button
                               key={p}
                               onClick={() => setRegenPurpose(p)}
@@ -265,7 +338,9 @@ export default function ReplyResultPage() {
                         </div>
                       </div>
                       <div>
-                        <label className="mb-1.5 block text-xs font-medium text-ink">やり取りの回数</label>
+                        <label className="mb-1.5 block text-xs font-medium text-ink">
+                          やり取りの回数
+                        </label>
                         <div className="flex flex-wrap gap-1.5">
                           {(['初回', '2〜5回', '6〜10回', '11回以上'] as const).map((c) => (
                             <button
@@ -279,17 +354,21 @@ export default function ReplyResultPage() {
                         </div>
                       </div>
                       <div>
-                        <label className="mb-1.5 block text-xs font-medium text-ink">相手のトーン</label>
+                        <label className="mb-1.5 block text-xs font-medium text-ink">
+                          相手のトーン
+                        </label>
                         <div className="flex flex-wrap gap-1.5">
-                          {(['テンション高め', '普通', '素っ気ない', 'わからない'] as const).map((t) => (
-                            <button
-                              key={t}
-                              onClick={() => setRegenTone(t)}
-                              className={`cursor-pointer rounded-full border px-3 py-[5px] text-xs transition-all ${regenTone === t ? 'border-brand-border bg-brand-light font-medium text-brand-dark' : 'border-black/20 bg-transparent text-ink hover:bg-surface'}`}
-                            >
-                              {t}
-                            </button>
-                          ))}
+                          {(['テンション高め', '普通', '素っ気ない', 'わからない'] as const).map(
+                            (t) => (
+                              <button
+                                key={t}
+                                onClick={() => setRegenTone(t)}
+                                className={`cursor-pointer rounded-full border px-3 py-[5px] text-xs transition-all ${regenTone === t ? 'border-brand-border bg-brand-light font-medium text-brand-dark' : 'border-black/20 bg-transparent text-ink hover:bg-surface'}`}
+                              >
+                                {t}
+                              </button>
+                            ),
+                          )}
                         </div>
                       </div>
                       <button
@@ -320,16 +399,30 @@ export default function ReplyResultPage() {
             <div className="mb-[10px] flex gap-2">
               {(
                 [
-                  { key: 'yes', label: '返信きた', active: 'bg-success-bg border-success-border text-success-text' },
-                  { key: 'pending', label: 'まだ待ち中', active: 'bg-warn-bg border-warn-border text-warn-text' },
-                  { key: 'no', label: '既読スルー', active: 'bg-danger-bg border-danger-border text-danger-text' },
+                  {
+                    key: 'yes',
+                    label: '返信きた',
+                    active: 'bg-success-bg border-success-border text-success-text',
+                  },
+                  {
+                    key: 'pending',
+                    label: 'まだ待ち中',
+                    active: 'bg-warn-bg border-warn-border text-warn-text',
+                  },
+                  {
+                    key: 'no',
+                    label: '既読スルー',
+                    active: 'bg-danger-bg border-danger-border text-danger-text',
+                  },
                 ] as const
               ).map(({ key, label, active }) => (
                 <button
                   key={key}
                   onClick={() => handleFeedback(key)}
                   className={`flex-1 cursor-pointer rounded-md border px-1.5 py-3 text-center text-[13px] font-medium transition-all ${
-                    feedback === key ? active : 'border-black/20 bg-transparent text-ink hover:bg-surface'
+                    feedback === key
+                      ? active
+                      : 'border-black/20 bg-transparent text-ink hover:bg-surface'
                   }`}
                 >
                   {label}

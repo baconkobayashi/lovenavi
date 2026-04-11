@@ -198,24 +198,8 @@ export default function FirstApproachPage() {
       message: p.message,
     }))
 
-    // messages テーブルに insert
-    const { data: inserted } = await supabase
-      .from('messages')
-      .insert({
-        user_id: session.user.id,
-        type: 'first_approach',
-        pattern_a: patterns[0]?.message ?? null,
-        pattern_b: patterns[1]?.message ?? null,
-        pattern_c: patterns[2]?.message ?? null,
-        tone_a: patterns[0]?.tone ?? null,
-        tone_b: patterns[1]?.tone ?? null,
-        tone_c: patterns[2]?.tone ?? null,
-      })
-      .select('id')
-      .single()
-
     setSaving(false)
-    navigate('/result', { state: { patterns, messageId: inserted?.id } })
+    navigate('/result', { state: { patterns } })
   }
 
   return (
