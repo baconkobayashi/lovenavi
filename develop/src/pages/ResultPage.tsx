@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 interface Pattern {
@@ -59,6 +59,7 @@ function HomeIcon() {
 
 export default function ResultPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [patterns, setPatterns] = useState<Pattern[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -67,62 +68,70 @@ export default function ResultPage() {
   const [used, setUsed] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [feedback, setFeedback] = useState<'yes' | 'no' | 'pending' | null>(null)
+  const [messageId, setMessageId] = useState<string | null>(null)
 
   useEffect(() => {
-    async function generate() {
+    async function load() {
+      // Router state から生成結果が渡されていればそのまま表示
+      const statePatterns = location.state?.patterns
+      const stateMessageId = location.state?.messageId
+      if (statePatterns && stateMessageId) {
+        setPatterns(statePatterns)
+        setMessageId(stateMessageId)
+        setLoading(false)
+        return
+      }
+
+      // リロード・直アクセス時はDBから読み込む
       const {
         data: { session },
       } = await supabase.auth.getSession()
       if (!session) return
 
-      const { data: profile } = await supabase
-        .from('profiles')
+      const { data: existing } = await supabase
+        .from('messages')
         .select('*')
         .eq('user_id', session.user.id)
-        .single()
+        .eq('type', 'first_approach')
+        .maybeSingle()
 
-      if (!profile) {
-        setError('プロフィール情報が取得できませんでした')
+      if (existing) {
+        const fromDb: Pattern[] = [
+          {
+            id: 1,
+            label: 'パターン A',
+            tone: existing.tone_a ?? '',
+            message: existing.pattern_a ?? '',
+          },
+          {
+            id: 2,
+            label: 'パターン B',
+            tone: existing.tone_b ?? '',
+            message: existing.pattern_b ?? '',
+          },
+          {
+            id: 3,
+            label: 'パターン C',
+            tone: existing.tone_c ?? '',
+            message: existing.pattern_c ?? '',
+          },
+        ].filter((p) => p.message !== '')
+        setPatterns(fromDb)
+        setMessageId(existing.id)
+        if (existing.used_pattern) {
+          const usedId = { a: 1, b: 2, c: 3 }[existing.used_pattern as 'a' | 'b' | 'c'] ?? null
+          setUsed(usedId)
+          setSelected(usedId ?? 1)
+        }
+        if (existing.feedback) setFeedback(existing.feedback as 'yes' | 'no' | 'pending')
         setLoading(false)
         return
       }
 
-      const { data, error: fnError } = await supabase.functions.invoke('generate-message', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: {
-          targetRelation: profile.target_relation,
-          targetAge: profile.target_age,
-          targetArea: profile.target_area,
-          targetHobbies: profile.target_hobbies,
-          targetProfileText: profile.target_profile_text,
-          myAge: profile.my_age,
-          myJob: profile.my_job,
-          myHobbies: profile.my_hobbies,
-          tone: profile.tone,
-        },
-      })
-
-      if (fnError) {
-        console.error('Edge Function error:', fnError)
-        setError(`メッセージの生成に失敗しました: ${fnError.message}`)
-        setLoading(false)
-        return
-      }
-
-      const generated: Pattern[] = data.patterns.map(
-        (p: { tone: string; message: string }, i: number) => ({
-          id: i + 1,
-          label: `パターン ${'ABC'[i]}`,
-          tone: p.tone,
-          message: p.message,
-        }),
-      )
-      setPatterns(generated)
+      setError('メッセージが見つかりませんでした')
       setLoading(false)
     }
-    generate()
+    load()
   }, [])
 
   function handleCopy(id: number) {
@@ -132,15 +141,24 @@ export default function ResultPage() {
     setTimeout(() => setCopied(null), 2000)
   }
 
-  function handleUsed(id: number) {
+  async function handleUsed(id: number) {
     if (used === id) return
     setUsed(id)
     setSelected(id)
+
+    if (messageId) {
+      const usedPattern = ['a', 'b', 'c'][id - 1]
+      await supabase.from('messages').update({ used_pattern: usedPattern }).eq('id', messageId)
+    }
+
     setTimeout(() => setShowModal(true), 400)
   }
 
-  function handleFeedback(type: 'yes' | 'no' | 'pending') {
+  async function handleFeedback(type: 'yes' | 'no' | 'pending') {
     setFeedback(type)
+    if (messageId) {
+      await supabase.from('messages').update({ feedback: type }).eq('id', messageId)
+    }
     setTimeout(() => setShowModal(false), 800)
   }
 

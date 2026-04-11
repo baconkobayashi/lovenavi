@@ -94,6 +94,7 @@ export default function FirstApproachPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [saving, setSaving] = useState(false)
+  const [genError, setGenError] = useState('')
   const [relation, setRelation] = useState<Relation>('matching')
   const [age, setAge] = useState(25)
   const [area, setArea] = useState<Area>('東京')
@@ -105,11 +106,24 @@ export default function FirstApproachPage() {
   const [tone, setTone] = useState<Tone>('aggressive')
 
   useEffect(() => {
-    async function loadProfile() {
+    async function init() {
       const {
         data: { user },
       } = await supabase.auth.getUser()
       if (!user) return
+
+      // 初回アプローチのメッセージがすでにある場合はresultへ飛ばす
+      const { data: existing } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('type', 'first_approach')
+        .maybeSingle()
+      if (existing) {
+        navigate('/result', { replace: true })
+        return
+      }
+
       const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
       if (!data) return
       if (data.target_relation) setRelation(data.target_relation as Relation)
@@ -122,19 +136,25 @@ export default function FirstApproachPage() {
       if (data.my_hobbies) setMyHobbies(data.my_hobbies)
       if (data.tone) setTone(data.tone as Tone)
     }
-    loadProfile()
+    init()
   }, [])
 
   async function handleGenerate() {
     setSaving(true)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) return
+    setGenError('')
 
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) {
+      setSaving(false)
+      return
+    }
+
+    // プロフィール保存
     await supabase.from('profiles').upsert(
       {
-        user_id: user.id,
+        user_id: session.user.id,
         my_age: myAge,
         my_job: myJob,
         my_hobbies: myHobbies,
@@ -149,8 +169,53 @@ export default function FirstApproachPage() {
       { onConflict: 'user_id' },
     )
 
+    // Gemini でメッセージ生成
+    const { data, error: fnError } = await supabase.functions.invoke('generate-message', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      body: {
+        targetRelation: relation,
+        targetAge: age,
+        targetArea: area,
+        targetHobbies: hobbies,
+        targetProfileText: profileText,
+        myAge,
+        myJob,
+        myHobbies,
+        tone,
+      },
+    })
+
+    if (fnError) {
+      setGenError('メッセージの生成に失敗しました。もう一度お試しください。')
+      setSaving(false)
+      return
+    }
+
+    const patterns = (data.patterns as { tone: string; message: string }[]).map((p, i) => ({
+      id: i + 1,
+      label: `パターン ${'ABC'[i]}`,
+      tone: p.tone,
+      message: p.message,
+    }))
+
+    // messages テーブルに insert
+    const { data: inserted } = await supabase
+      .from('messages')
+      .insert({
+        user_id: session.user.id,
+        type: 'first_approach',
+        pattern_a: patterns[0]?.message ?? null,
+        pattern_b: patterns[1]?.message ?? null,
+        pattern_c: patterns[2]?.message ?? null,
+        tone_a: patterns[0]?.tone ?? null,
+        tone_b: patterns[1]?.tone ?? null,
+        tone_c: patterns[2]?.tone ?? null,
+      })
+      .select('id')
+      .single()
+
     setSaving(false)
-    navigate('/result')
+    navigate('/result', { state: { patterns, messageId: inserted?.id } })
   }
 
   return (
@@ -408,6 +473,7 @@ export default function FirstApproachPage() {
                 </div>
               </div>
 
+              {genError && <p className="mb-3 text-center text-xs text-danger-text">{genError}</p>}
               <div className="mt-2 flex gap-2">
                 <button
                   onClick={() => setStep(1)}
@@ -420,7 +486,7 @@ export default function FirstApproachPage() {
                   disabled={saving}
                   className="flex-1 cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light disabled:opacity-50"
                 >
-                  {saving ? '保存中...' : 'メッセージを生成する'}
+                  {saving ? '生成中...' : 'メッセージを生成する'}
                 </button>
               </div>
             </div>
