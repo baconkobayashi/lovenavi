@@ -8,29 +8,15 @@ interface HistoryItem {
   type: 'first' | 'reply'
   date: string
   text: string
-  result: ResultTag
+  result: ResultTag | null
 }
 
-const HISTORY: HistoryItem[] = [
-  {
-    type: 'first',
-    date: '今日',
-    text: '「プロフィール見てたらカフェ好きって書いてましたね！」',
-    result: 'yes',
-  },
-  {
-    type: 'reply',
-    date: '昨日',
-    text: '「週末は大体友達とサッカーしてるよ！○○さんは？」',
-    result: 'pending',
-  },
-  {
-    type: 'first',
-    date: '3日前',
-    text: '「はじめまして！映画好きって書いてましたが…」',
-    result: 'no',
-  },
-]
+function formatRelativeDate(iso: string) {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
+  if (diff === 0) return '今日'
+  if (diff === 1) return '昨日'
+  return `${diff}日前`
+}
 
 const RESULT_STYLES: Record<ResultTag, { bg: string; text: string; label: string }> = {
   yes: { bg: 'bg-success-bg', text: 'text-success-text', label: '返信きた' },
@@ -87,22 +73,58 @@ export default function MyPage() {
     my_hobbies: null,
     tone: null,
   })
+  const [generatedCount, setGeneratedCount] = useState<number | null>(null)
+  const [replyRate, setReplyRate] = useState<number | null>(null)
+  const [history, setHistory] = useState<HistoryItem[]>([])
 
   useEffect(() => {
     async function load() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
       setEmail(user.email ?? '')
       setInitial((user.email ?? '?')[0].toUpperCase())
 
-      const { data } = await supabase
+      const { data: profileData } = await supabase
         .from('profiles')
         .select('my_age, my_job, my_hobbies, tone')
         .eq('user_id', user.id)
         .single()
-      if (data) setProfile(data)
+      if (profileData) setProfile(profileData)
+
+      // 今月の生成数・返信率
+      const startOfMonth = new Date()
+      startOfMonth.setDate(1)
+      startOfMonth.setHours(0, 0, 0, 0)
+      const { data: messages } = await supabase
+        .from('messages')
+        .select('feedback')
+        .eq('user_id', user.id)
+        .gte('created_at', startOfMonth.toISOString())
+      if (messages) {
+        setGeneratedCount(messages.length)
+        const withFeedback = messages.filter((m) => m.feedback !== null)
+        const replied = messages.filter((m) => m.feedback === 'yes')
+        setReplyRate(withFeedback.length > 0 ? Math.round((replied.length / withFeedback.length) * 100) : null)
+      }
+
+      // 直近3件の履歴（使ったもの）
+      const { data: recent } = await supabase
+        .from('messages')
+        .select('type, used_message, feedback, created_at')
+        .eq('user_id', user.id)
+        .not('used_message', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(3)
+      if (recent) {
+        setHistory(
+          recent.map((m) => ({
+            type: m.type === 'first_approach' ? 'first' : 'reply',
+            date: formatRelativeDate(m.created_at),
+            text: m.used_message,
+            result: m.feedback as ResultTag | null,
+          }))
+        )
+      }
     }
     load()
   }, [])
@@ -132,9 +154,9 @@ export default function MyPage() {
           {/* 利用サマリー */}
           <div className="grid grid-cols-3 border-b border-black/10">
             {[
-              { val: '24', label: '生成数（今月）' },
-              { val: '67%', label: '返信率' },
-              { val: '3', label: 'デート獲得数' },
+              { val: generatedCount !== null ? String(generatedCount) : '—', label: '生成数（今月）' },
+              { val: replyRate !== null ? `${replyRate}%` : '—', label: '返信率' },
+              { val: '—', label: 'デート獲得数' },
             ].map(({ val, label }) => (
               <div
                 key={label}
@@ -183,42 +205,45 @@ export default function MyPage() {
           {/* 生成履歴 */}
           <div className="border-b border-black/10 p-4">
             <p className="mb-3 text-xs font-medium text-ink-secondary">最近の履歴（使ったもの）</p>
-            {HISTORY.map(({ type, date, text, result }, i) => {
-              const style = RESULT_STYLES[result]
-              return (
-                <div
-                  key={i}
-                  className="flex cursor-pointer items-start gap-3 border-b border-black/10 py-[10px] last:border-b-0"
-                >
+            {history.length === 0 ? (
+              <p className="py-4 text-center text-xs text-ink-tertiary">履歴がありません</p>
+            ) : (
+              history.map(({ type, date, text, result }, i) => {
+                const style = result ? RESULT_STYLES[result] : null
+                return (
                   <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${type === 'first' ? 'bg-brand-light' : 'bg-[#E1F5EE]'}`}
+                    key={i}
+                    className="flex items-start gap-3 border-b border-black/10 py-[10px] last:border-b-0"
                   >
-                    {type === 'first' ? <IconFirst /> : <IconReply />}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-[3px] flex items-center gap-1.5">
-                      <span
-                        className={`text-[11px] font-medium ${type === 'first' ? 'text-brand' : 'text-[#0F6E56]'}`}
-                      >
-                        {type === 'first' ? '初回アプローチ' : 'メール返信'}
-                      </span>
-                      <span className="text-[11px] text-ink-tertiary">{date}</span>
-                    </div>
-                    <p className="mb-1 max-w-[240px] truncate text-xs leading-[1.5] text-ink">
-                      {text}
-                    </p>
-                    <span
-                      className={`inline-block rounded-full px-2 py-[2px] text-[10px] ${style.bg} ${style.text}`}
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${type === 'first' ? 'bg-brand-light' : 'bg-[#E1F5EE]'}`}
                     >
-                      {style.label}
-                    </span>
+                      {type === 'first' ? <IconFirst /> : <IconReply />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-[3px] flex items-center gap-1.5">
+                        <span className={`text-[11px] font-medium ${type === 'first' ? 'text-brand' : 'text-[#0F6E56]'}`}>
+                          {type === 'first' ? '初回アプローチ' : '返信'}
+                        </span>
+                        <span className="text-[11px] text-ink-tertiary">{date}</span>
+                      </div>
+                      <p className="mb-1 text-xs leading-[1.5] text-ink">
+                        {text}
+                      </p>
+                      {style ? (
+                        <span className={`inline-block rounded-full px-2 py-[2px] text-[10px] ${style.bg} ${style.text}`}>
+                          {style.label}
+                        </span>
+                      ) : (
+                        <span className="inline-block rounded-full bg-surface px-2 py-[2px] text-[10px] text-ink-tertiary">
+                          フィードバック未記録
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )
-            })}
-            <button className="mt-2 w-full cursor-pointer rounded-md border border-black/20 bg-transparent py-[10px] text-xs text-ink-secondary">
-              すべての履歴を見る
-            </button>
+                )
+              })
+            )}
           </div>
 
           {/* アカウント設定 */}
