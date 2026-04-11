@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const IconChat = () => (
@@ -37,6 +38,8 @@ async function signInWithGoogle() {
 }
 
 export default function LandingPage() {
+  const [showGuide, setShowGuide] = useState(false)
+
   return (
     <div className="flex min-h-screen justify-center bg-page px-4 py-8">
       <div className="w-full max-w-[480px]">
@@ -83,8 +86,11 @@ export default function LandingPage() {
             >
               無料で始める
             </button>
-            <button className="block w-full cursor-pointer rounded-md border border-black/10 bg-transparent py-[10px] text-[13px] text-ink-secondary">
-              使い方を見る
+            <button
+              onClick={() => setShowGuide((v) => !v)}
+              className="block w-full cursor-pointer rounded-md border border-black/10 bg-transparent py-[10px] text-[13px] text-ink-secondary"
+            >
+              {showGuide ? '閉じる ▲' : '使い方を見る ▼'}
             </button>
           </div>
           <div className="border-b border-black/10 px-5 py-4">
@@ -104,96 +110,112 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* 機能紹介セクション */}
-        <div className="frame mb-3">
-          <div className="p-5 pb-2">
-            <p className="mb-4 text-center text-base font-medium text-ink">2つの機能でサポート</p>
-            <div className="mb-4 flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-light">
-                <IconChat />
+        {/* 機能紹介〜最終CTA（使い方を見るで表示） */}
+        {showGuide && (
+          <>
+            {/* 機能紹介セクション */}
+            <div className="frame mb-3">
+              <div className="p-5 pb-2">
+                <p className="mb-4 text-center text-base font-medium text-ink">
+                  2つの機能でサポート
+                </p>
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-light">
+                    <IconChat />
+                  </div>
+                  <div>
+                    <p className="mb-0.5 text-[13px] font-medium text-ink">初回アプローチ生成</p>
+                    <p className="text-xs leading-[1.5] text-ink-secondary">
+                      相手のプロフィールを入力するだけで、自然で好印象を与える最初のメッセージを自動生成。
+                    </p>
+                  </div>
+                </div>
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-light">
+                    <IconMail />
+                  </div>
+                  <div>
+                    <p className="mb-0.5 text-[13px] font-medium text-ink">返信メッセージ生成</p>
+                    <p className="text-xs leading-[1.5] text-ink-secondary">
+                      相手の返信と目的（デート誘いたい
+                      etc.）を入れると、状況に合った返信を3パターン提案。
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="mb-0.5 text-[13px] font-medium text-ink">初回アプローチ生成</p>
-                <p className="text-xs leading-[1.5] text-ink-secondary">
-                  相手のプロフィールを入力するだけで、自然で好印象を与える最初のメッセージを自動生成。
+            </div>
+
+            {/* 使い方セクション */}
+            <div className="frame mb-3">
+              <div className="p-5">
+                <p className="mb-4 text-center text-base font-medium text-ink">3ステップで使える</p>
+                {[
+                  { n: 1, text: '相手の情報を入力', sub: '年齢・趣味・返信内容など' },
+                  { n: 2, text: 'AIがメッセージを生成', sub: '3パターンの候補を提示' },
+                  {
+                    n: 3,
+                    text: '気に入ったものをコピーして送信',
+                    sub: '結果を報告するとAIが賢くなる',
+                  },
+                ].map(({ n, text, sub }) => (
+                  <div key={n} className="mb-4 flex items-start gap-3 last:mb-0">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-light text-xs font-medium text-brand">
+                      {n}
+                    </div>
+                    <div>
+                      <div className="pt-0.5 text-[13px] leading-[1.5] text-ink">{text}</div>
+                      <div className="mt-0.5 text-xs text-ink-secondary">{sub}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ユーザーの声 */}
+            <div className="frame mb-3">
+              <div className="p-5">
+                <p className="mb-4 text-center text-base font-medium text-ink">使った人の声</p>
+                {[
+                  {
+                    text: '「最初のメッセージで悩む時間がゼロになった。マッチ後の返信率が明らかに上がった気がする。」',
+                    user: '20代・会社員',
+                  },
+                  {
+                    text: '「3パターン出てきて選べるのが便利。自分じゃ思いつかない切り口があって面白い。」',
+                    user: '30代・フリーランス',
+                  },
+                ].map(({ text, user }) => (
+                  <div
+                    key={user}
+                    className="mb-[10px] rounded-md bg-surface px-[14px] py-3 last:mb-0"
+                  >
+                    <p className="mb-2 text-xs leading-[1.6] text-ink">{text}</p>
+                    <span className="text-[11px] text-ink-tertiary">{user}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 最終CTA */}
+            <div className="frame mb-3">
+              <div className="px-6 py-8 text-center">
+                <p className="mb-2 text-base font-medium text-ink">まずは無料で試してみる</p>
+                <p className="mb-5 text-xs text-ink-secondary">
+                  クレジットカード不要・30秒で登録完了
+                </p>
+                <button
+                  onClick={signInWithGoogle}
+                  className="mx-auto mb-2 block w-full max-w-[280px] cursor-pointer rounded-md border-none bg-brand py-3 text-sm font-medium text-brand-light"
+                >
+                  Googleアカウントで始める
+                </button>
+                <p className="text-[11px] text-ink-tertiary">
+                  登録することで利用規約・プライバシーポリシーに同意したことになります
                 </p>
               </div>
             </div>
-            <div className="mb-4 flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-light">
-                <IconMail />
-              </div>
-              <div>
-                <p className="mb-0.5 text-[13px] font-medium text-ink">返信メッセージ生成</p>
-                <p className="text-xs leading-[1.5] text-ink-secondary">
-                  相手の返信と目的（デート誘いたい
-                  etc.）を入れると、状況に合った返信を3パターン提案。
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 使い方セクション */}
-        <div className="frame mb-3">
-          <div className="p-5">
-            <p className="mb-4 text-center text-base font-medium text-ink">3ステップで使える</p>
-            {[
-              { n: 1, text: '相手の情報を入力', sub: '年齢・趣味・返信内容など' },
-              { n: 2, text: 'AIがメッセージを生成', sub: '3パターンの候補を提示' },
-              { n: 3, text: '気に入ったものをコピーして送信', sub: '結果を報告するとAIが賢くなる' },
-            ].map(({ n, text, sub }) => (
-              <div key={n} className="mb-4 flex items-start gap-3 last:mb-0">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-light text-xs font-medium text-brand">
-                  {n}
-                </div>
-                <div>
-                  <div className="pt-0.5 text-[13px] leading-[1.5] text-ink">{text}</div>
-                  <div className="mt-0.5 text-xs text-ink-secondary">{sub}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ユーザーの声 */}
-        <div className="frame mb-3">
-          <div className="p-5">
-            <p className="mb-4 text-center text-base font-medium text-ink">使った人の声</p>
-            {[
-              {
-                text: '「最初のメッセージで悩む時間がゼロになった。マッチ後の返信率が明らかに上がった気がする。」',
-                user: '20代・会社員',
-              },
-              {
-                text: '「3パターン出てきて選べるのが便利。自分じゃ思いつかない切り口があって面白い。」',
-                user: '30代・フリーランス',
-              },
-            ].map(({ text, user }) => (
-              <div key={user} className="mb-[10px] rounded-md bg-surface px-[14px] py-3 last:mb-0">
-                <p className="mb-2 text-xs leading-[1.6] text-ink">{text}</p>
-                <span className="text-[11px] text-ink-tertiary">{user}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 最終CTA */}
-        <div className="frame mb-3">
-          <div className="px-6 py-8 text-center">
-            <p className="mb-2 text-base font-medium text-ink">まずは無料で試してみる</p>
-            <p className="mb-5 text-xs text-ink-secondary">クレジットカード不要・30秒で登録完了</p>
-            <button
-              onClick={signInWithGoogle}
-              className="mx-auto mb-2 block w-full max-w-[280px] cursor-pointer rounded-md border-none bg-brand py-3 text-sm font-medium text-brand-light"
-            >
-              Googleアカウントで始める
-            </button>
-            <p className="text-[11px] text-ink-tertiary">
-              登録することで利用規約・プライバシーポリシーに同意したことになります
-            </p>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* フッター */}
         <div className="frame">

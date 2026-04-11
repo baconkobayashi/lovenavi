@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { supabase } from '../lib/supabase'
 
@@ -65,6 +66,7 @@ interface Profile {
 }
 
 export default function MyPage() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [initial, setInitial] = useState('?')
   const [profile, setProfile] = useState<Profile>({
@@ -259,14 +261,22 @@ export default function MyPage() {
           <div className="border-b border-black/10 p-4">
             <p className="mb-3 text-xs font-medium text-ink-secondary">アカウント設定</p>
             {[
-              { label: '利用規約', danger: false },
-              { label: 'プライバシーポリシー', danger: false },
-              { label: 'お問い合わせ', danger: false },
-              { label: 'ログアウト', danger: false },
-              { label: '退会する', danger: true },
-            ].map(({ label, danger }) => (
+              { label: '利用規約', danger: false, onClick: undefined },
+              { label: 'プライバシーポリシー', danger: false, onClick: undefined },
+              { label: 'お問い合わせ', danger: false, onClick: undefined },
+              {
+                label: 'ログアウト',
+                danger: false,
+                onClick: async () => {
+                  await supabase.auth.signOut()
+                  navigate('/')
+                },
+              },
+              { label: '退会する', danger: true, onClick: undefined },
+            ].map(({ label, danger, onClick }) => (
               <div
                 key={label}
+                onClick={onClick}
                 className="flex cursor-pointer items-center justify-between border-b border-black/10 py-[13px] last:border-b-0"
               >
                 <span className={`text-sm ${danger ? 'text-danger-text' : 'text-ink'}`}>
