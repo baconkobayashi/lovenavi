@@ -75,6 +75,8 @@ export default function ReplyInputPage() {
   const [savingLatest, setSavingLatest] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [genError, setGenError] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingText, setEditingText] = useState('')
 
   function formatDate(iso: string) {
     return new Date(iso).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -214,6 +216,16 @@ export default function ReplyInputPage() {
   async function deleteReply(id: string) {
     await supabase.from('messages').delete().eq('id', id)
     setConversation((prev) => prev.filter((item) => item.id !== id))
+  }
+
+  async function saveEdit(id: string) {
+    if (!editingText.trim()) return
+    await supabase.from('messages').update({ reply_text: editingText }).eq('id', id)
+    setConversation((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, text: editingText } : item))
+    )
+    setEditingId(null)
+    setEditingText('')
   }
 
   async function saveProfile() {
@@ -405,18 +417,51 @@ export default function ReplyInputPage() {
                       </div>
                     ) : (
                       <div key={i} className="flex flex-row-reverse items-end gap-2">
-                        <div className="max-w-[75%] rounded-[12px_4px_12px_12px] bg-brand px-3 py-2 text-xs leading-[1.6] text-brand-light">
-                          {item.text}
-                        </div>
+                        {editingId === item.id ? (
+                          <div className="flex w-[75%] flex-col gap-1">
+                            <textarea
+                              rows={2}
+                              value={editingText}
+                              onChange={(e) => setEditingText(e.target.value)}
+                              className="w-full rounded-[12px_4px_12px_12px] border border-brand-border bg-brand-light px-3 py-2 text-xs leading-[1.6] text-ink outline-none"
+                            />
+                            <div className="flex justify-end gap-1.5">
+                              <button
+                                onClick={() => { setEditingId(null); setEditingText('') }}
+                                className="cursor-pointer rounded border border-black/10 bg-transparent px-2 py-0.5 text-[10px] text-ink-tertiary hover:bg-surface"
+                              >
+                                キャンセル
+                              </button>
+                              <button
+                                onClick={() => saveEdit(item.id!)}
+                                className="cursor-pointer rounded border-none bg-brand px-2 py-0.5 text-[10px] text-brand-light"
+                              >
+                                保存
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="max-w-[75%] rounded-[12px_4px_12px_12px] bg-brand px-3 py-2 text-xs leading-[1.6] text-brand-light">
+                            {item.text}
+                          </div>
+                        )}
                         <div className="flex flex-col items-end gap-1">
                           <span className="whitespace-nowrap text-[10px] text-ink-tertiary">{formatDate(item.createdAt)}</span>
-                          {item.id && (
-                            <button
-                              onClick={() => deleteReply(item.id!)}
-                              className="cursor-pointer rounded border border-black/10 bg-transparent px-1.5 py-0.5 text-[10px] text-ink-tertiary hover:border-danger-border hover:text-danger-text"
-                            >
-                              削除
-                            </button>
+                          {item.id && editingId !== item.id && (
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => { setEditingId(item.id!); setEditingText(item.text) }}
+                                className="cursor-pointer rounded border border-black/10 bg-transparent px-1.5 py-0.5 text-[10px] text-ink-tertiary hover:border-brand-border hover:text-brand"
+                              >
+                                編集
+                              </button>
+                              <button
+                                onClick={() => deleteReply(item.id!)}
+                                className="cursor-pointer rounded border border-black/10 bg-transparent px-1.5 py-0.5 text-[10px] text-ink-tertiary hover:border-danger-border hover:text-danger-text"
+                              >
+                                削除
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
