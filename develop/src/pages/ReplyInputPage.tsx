@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 
 type Count = '初回' | '2〜5回' | '6〜10回' | '11回以上'
 type Purpose = '会話を続ける' | 'デートに誘う' | 'LINE交換' | '関係を温める'
@@ -21,6 +22,13 @@ const RELATIONS: { label: Relation; sub: string }[] = [
   { label: '会ったことある', sub: 'オフラインで会った' },
   { label: '付き合い中', sub: '交際中のやり取り' },
 ]
+
+const RELATION_MAP: Record<string, Relation> = {
+  matching: 'マッチング直後',
+  chatted: '数回やり取り済み',
+  met: '会ったことある',
+  dating: '付き合い中',
+}
 
 function InfoIcon() {
   return (
@@ -61,8 +69,44 @@ export default function ReplyInputPage() {
   const [relation, setRelation] = useState<Relation>('マッチング直後')
   const [modalAge, setModalAge] = useState(25)
   const [area, setArea] = useState('東京')
+  const [hobbies, setHobbies] = useState('')
+  const [profileText, setProfileText] = useState('')
 
-  function saveProfile() {
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+      if (!data) return
+      if (data.target_relation && RELATION_MAP[data.target_relation]) {
+        setRelation(RELATION_MAP[data.target_relation])
+      }
+      if (data.target_age) setModalAge(data.target_age)
+      if (data.target_area) setArea(data.target_area)
+      if (data.target_hobbies) setHobbies(data.target_hobbies)
+      if (data.target_profile_text) setProfileText(data.target_profile_text)
+      setProfileFilled(true)
+    }
+    loadProfile()
+  }, [])
+
+  async function saveProfile() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const relationKey = Object.entries(RELATION_MAP).find(([, v]) => v === relation)?.[0]
+      await supabase.from('profiles').upsert(
+        {
+          user_id: user.id,
+          target_relation: relationKey,
+          target_age: modalAge,
+          target_area: area,
+          target_hobbies: hobbies,
+          target_profile_text: profileText,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' },
+      )
+    }
     setProfileFilled(true)
     setShowModal(false)
   }
@@ -424,7 +468,7 @@ export default function ReplyInputPage() {
                 <label className="mb-1.5 block text-xs font-medium text-ink">
                   趣味・好きなこと <span className="text-[10px] text-ink-tertiary">任意</span>
                 </label>
-                <textarea rows={2} placeholder="例：カフェ巡り、映画鑑賞" />
+                <textarea rows={2} value={hobbies} onChange={(e) => setHobbies(e.target.value)} placeholder="例：カフェ巡り、映画鑑賞" />
               </div>
 
               {/* プロフィール文 */}
@@ -433,7 +477,7 @@ export default function ReplyInputPage() {
                   プロフィール文（あれば）{' '}
                   <span className="text-[10px] text-ink-tertiary">任意</span>
                 </label>
-                <textarea rows={2} placeholder="プロフィールをそのままコピペでもOK" />
+                <textarea rows={2} value={profileText} onChange={(e) => setProfileText(e.target.value)} placeholder="プロフィールをそのままコピペでもOK" />
               </div>
 
               <button
