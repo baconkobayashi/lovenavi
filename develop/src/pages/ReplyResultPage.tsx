@@ -124,7 +124,9 @@ export default function ReplyResultPage() {
     const usedPattern = ['a', 'b', 'c'][id - 1]
     const usedMessage = patterns.find((p) => p.id === id)?.message ?? null
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
     if (user) {
       const { data: inserted } = await supabase
         .from('messages')
@@ -413,17 +415,17 @@ export default function ReplyResultPage() {
                   {
                     key: 'yes',
                     label: '返信きた',
-                    active: 'bg-success-bg border-success-border text-success-text',
+                    active: 'bg-[#EAF3DE] border-[#B6D98A] text-[#3B6D11]',
                   },
                   {
                     key: 'pending',
                     label: 'まだ待ち中',
-                    active: 'bg-warn-bg border-warn-border text-warn-text',
+                    active: 'bg-[#FAEEDA] border-[#F0C87A] text-[#633806]',
                   },
                   {
                     key: 'no',
                     label: '既読スルー',
-                    active: 'bg-danger-bg border-danger-border text-danger-text',
+                    active: 'bg-[#FCEBEB] border-[#F0A0A0] text-[#A32D2D]',
                   },
                 ] as const
               ).map(({ key, label, active }) => (

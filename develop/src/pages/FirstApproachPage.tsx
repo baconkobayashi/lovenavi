@@ -24,7 +24,16 @@ const JOBS: Job[] = ['会社員', 'フリーランス', '公務員', '経営者�
 
 function InfoIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 1 }}>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="#534AB7"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      style={{ flexShrink: 0, marginTop: 1 }}
+    >
       <circle cx="8" cy="8" r="6" />
       <path d="M8 7v4M8 5.5v.5" />
     </svg>
@@ -32,14 +41,31 @@ function InfoIcon() {
 }
 function BackIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#1a1a18" strokeWidth="1.5" strokeLinecap="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="#1a1a18"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    >
       <path d="M9 2L4 7l5 5" />
     </svg>
   )
 }
 function HomeIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#888780" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="#888780"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z" />
     </svg>
   )
@@ -47,7 +73,11 @@ function HomeIcon() {
 
 function Badge({ label, required }: { label: string; required: boolean }) {
   if (required)
-    return <span className="rounded-full bg-danger-bg px-1.5 py-0.5 text-[10px] font-medium text-danger-text">{label}</span>
+    return (
+      <span className="rounded-full bg-danger-bg px-1.5 py-0.5 text-[10px] font-medium text-danger-text">
+        {label}
+      </span>
+    )
   return <span className="text-[10px] text-ink-tertiary">{label}</span>
 }
 
@@ -73,7 +103,9 @@ export default function FirstApproachPage() {
 
   useEffect(() => {
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user) return
       const { data } = await supabase
         .from('profiles')
@@ -93,19 +125,41 @@ export default function FirstApproachPage() {
     setSaving(true)
     setGenError('')
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { setSaving(false); return }
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) {
+      setSaving(false)
+      return
+    }
 
     // 自分のプロフィール保存
-    await supabase.from('profiles').upsert(
-      { user_id: session.user.id, my_age: myAge, my_job: myJob, my_hobbies: myHobbies, tone, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id' },
-    )
+    await supabase
+      .from('profiles')
+      .upsert(
+        {
+          user_id: session.user.id,
+          my_age: myAge,
+          my_job: myJob,
+          my_hobbies: myHobbies,
+          tone,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' },
+      )
 
     // 相手（target）を新規作成
     const { data: target, error: targetError } = await supabase
       .from('targets')
-      .insert({ user_id: session.user.id, nickname, relation, age, area, hobbies, profile_text: profileText })
+      .insert({
+        user_id: session.user.id,
+        nickname,
+        relation,
+        age,
+        area,
+        hobbies,
+        profile_text: profileText,
+      })
       .select('id')
       .single()
 
@@ -118,7 +172,17 @@ export default function FirstApproachPage() {
     // メッセージ生成
     const { data, error: fnError } = await supabase.functions.invoke('generate-message', {
       headers: { Authorization: `Bearer ${session.access_token}` },
-      body: { targetRelation: relation, targetAge: age, targetArea: area, targetHobbies: hobbies, targetProfileText: profileText, myAge, myJob, myHobbies, tone },
+      body: {
+        targetRelation: relation,
+        targetAge: age,
+        targetArea: area,
+        targetHobbies: hobbies,
+        targetProfileText: profileText,
+        myAge,
+        myJob,
+        myHobbies,
+        tone,
+      },
     })
 
     if (fnError) {
@@ -141,18 +205,24 @@ export default function FirstApproachPage() {
   return (
     <div className="flex min-h-screen justify-center bg-page px-4 py-8">
       <div className="w-full max-w-[400px]">
-
         {/* ステップ1 */}
         {step === 1 && (
           <div className="frame mb-4">
             <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
-              <button onClick={() => navigate('/home')} className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent">
+              <button
+                onClick={() => navigate('/home')}
+                className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent"
+              >
                 <BackIcon />
               </button>
               <span className="flex-1 text-[15px] font-medium">初回アプローチを作る</span>
               <span className="text-xs text-ink-tertiary">1 / 2</span>
-              <button onClick={() => navigate('/home')} className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary">
-                <HomeIcon />ホーム
+              <button
+                onClick={() => navigate('/home')}
+                className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary"
+              >
+                <HomeIcon />
+                ホーム
               </button>
             </div>
 
@@ -161,7 +231,9 @@ export default function FirstApproachPage() {
             </div>
 
             <div className="p-4">
-              <p className="mb-3 border-b border-black/10 pb-2 text-[13px] font-medium text-ink-secondary">相手のプロフィール情報</p>
+              <p className="mb-3 border-b border-black/10 pb-2 text-[13px] font-medium text-ink-secondary">
+                相手のプロフィール情報
+              </p>
 
               {/* ニックネーム */}
               <div className="mb-4">
@@ -185,9 +257,16 @@ export default function FirstApproachPage() {
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {RELATIONS.map(({ key, label, sub }) => (
-                    <button key={key} onClick={() => setRelation(key)}
-                      className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${relation === key ? 'border-brand-border bg-brand-light' : 'border-black/10'}`}>
-                      <p className={`mb-0.5 text-xs font-medium ${relation === key ? 'text-brand-dark' : 'text-ink'}`}>{label}</p>
+                    <button
+                      key={key}
+                      onClick={() => setRelation(key)}
+                      className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${relation === key ? 'border-brand-border bg-brand-light' : 'border-black/10'}`}
+                    >
+                      <p
+                        className={`mb-0.5 text-xs font-medium ${relation === key ? 'text-brand-dark' : 'text-ink'}`}
+                      >
+                        {label}
+                      </p>
                       <span className="text-[11px] text-ink-secondary">{sub}</span>
                     </button>
                   ))}
@@ -200,7 +279,15 @@ export default function FirstApproachPage() {
                   年齢 <Badge label="必須" required />
                 </p>
                 <div className="flex items-center gap-[10px]">
-                  <input type="range" min={18} max={45} value={age} step={1} onChange={(e) => setAge(Number(e.target.value))} className="flex-1" />
+                  <input
+                    type="range"
+                    min={18}
+                    max={45}
+                    value={age}
+                    step={1}
+                    onChange={(e) => setAge(Number(e.target.value))}
+                    className="flex-1"
+                  />
                   <span className="min-w-[28px] text-right text-[13px] font-medium">{age}</span>
                   <span className="text-xs text-ink-secondary">歳</span>
                 </div>
@@ -213,8 +300,11 @@ export default function FirstApproachPage() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {AREAS.map((a) => (
-                    <button key={a} onClick={() => setArea(a)}
-                      className={`cursor-pointer rounded-full border px-[14px] py-1.5 text-xs transition-all ${area === a ? 'border-brand-border bg-brand-light font-medium text-brand-dark' : 'border-black/20 bg-transparent text-ink'}`}>
+                    <button
+                      key={a}
+                      onClick={() => setArea(a)}
+                      className={`cursor-pointer rounded-full border px-[14px] py-1.5 text-xs transition-all ${area === a ? 'border-brand-border bg-brand-light font-medium text-brand-dark' : 'border-black/20 bg-transparent text-ink'}`}
+                    >
                       {a}
                     </button>
                   ))}
@@ -226,8 +316,14 @@ export default function FirstApproachPage() {
                 <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
                   趣味・好きなこと <Badge label="任意" required={false} />
                 </p>
-                <textarea rows={3} value={hobbies} onChange={(e) => setHobbies(e.target.value)}
-                  placeholder={'例：カフェ巡り、映画鑑賞、ヨガ\nプロフィール文をそのままコピペでもOK'} />
+                <textarea
+                  rows={3}
+                  value={hobbies}
+                  onChange={(e) => setHobbies(e.target.value)}
+                  placeholder={
+                    '例：カフェ巡り、映画鑑賞、ヨガ\nプロフィール文をそのままコピペでもOK'
+                  }
+                />
                 <p className="mt-1 text-[11px] text-ink-tertiary">入れるほど精度が上がります</p>
               </div>
 
@@ -236,12 +332,19 @@ export default function FirstApproachPage() {
                 <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
                   プロフィール文（あれば） <Badge label="任意" required={false} />
                 </p>
-                <textarea rows={3} value={profileText} onChange={(e) => setProfileText(e.target.value)}
-                  placeholder="例：週末はよくカフェでのんびりしています。旅行も好きで去年は京都に行きました。" />
+                <textarea
+                  rows={3}
+                  value={profileText}
+                  onChange={(e) => setProfileText(e.target.value)}
+                  placeholder="例：週末はよくカフェでのんびりしています。旅行も好きで去年は京都に行きました。"
+                />
               </div>
 
               <button
-                onClick={() => { setStep(2); window.scrollTo(0, 0) }}
+                onClick={() => {
+                  setStep(2)
+                  window.scrollTo(0, 0)
+                }}
                 disabled={!nickname.trim()}
                 className="w-full cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light disabled:opacity-50"
               >
@@ -255,13 +358,20 @@ export default function FirstApproachPage() {
         {step === 2 && (
           <div className="frame">
             <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
-              <button onClick={() => setStep(1)} className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent">
+              <button
+                onClick={() => setStep(1)}
+                className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent"
+              >
                 <BackIcon />
               </button>
               <span className="flex-1 text-[15px] font-medium">初回アプローチを作る</span>
               <span className="text-xs text-ink-tertiary">2 / 2</span>
-              <button onClick={() => navigate('/home')} className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary">
-                <HomeIcon />ホーム
+              <button
+                onClick={() => navigate('/home')}
+                className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary"
+              >
+                <HomeIcon />
+                ホーム
               </button>
             </div>
 
@@ -270,7 +380,9 @@ export default function FirstApproachPage() {
             </div>
 
             <div className="p-4">
-              <p className="mb-3 border-b border-black/10 pb-2 text-[13px] font-medium text-ink-secondary">あなたの情報・キャラ設定</p>
+              <p className="mb-3 border-b border-black/10 pb-2 text-[13px] font-medium text-ink-secondary">
+                あなたの情報・キャラ設定
+              </p>
 
               <div className="mb-4 flex items-start gap-2 rounded-md bg-brand-light p-[10px_12px]">
                 <InfoIcon />
@@ -285,7 +397,15 @@ export default function FirstApproachPage() {
                   年齢 <Badge label="必須" required />
                 </p>
                 <div className="flex items-center gap-[10px]">
-                  <input type="range" min={18} max={50} value={myAge} step={1} onChange={(e) => setMyAge(Number(e.target.value))} className="flex-1" />
+                  <input
+                    type="range"
+                    min={18}
+                    max={50}
+                    value={myAge}
+                    step={1}
+                    onChange={(e) => setMyAge(Number(e.target.value))}
+                    className="flex-1"
+                  />
                   <span className="min-w-[28px] text-right text-[13px] font-medium">{myAge}</span>
                   <span className="text-xs text-ink-secondary">歳</span>
                 </div>
@@ -297,7 +417,9 @@ export default function FirstApproachPage() {
                   職業 <Badge label="任意" required={false} />
                 </p>
                 <select value={myJob} onChange={(e) => setMyJob(e.target.value as Job)}>
-                  {JOBS.map((j) => <option key={j}>{j}</option>)}
+                  {JOBS.map((j) => (
+                    <option key={j}>{j}</option>
+                  ))}
                 </select>
               </div>
 
@@ -306,7 +428,12 @@ export default function FirstApproachPage() {
                 <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
                   趣味・好きなこと <Badge label="任意" required={false} />
                 </p>
-                <textarea rows={2} value={myHobbies} onChange={(e) => setMyHobbies(e.target.value)} placeholder="例：サッカー、映画、料理" />
+                <textarea
+                  rows={2}
+                  value={myHobbies}
+                  onChange={(e) => setMyHobbies(e.target.value)}
+                  placeholder="例：サッカー、映画、料理"
+                />
               </div>
 
               {/* キャラ設定 */}
@@ -316,9 +443,16 @@ export default function FirstApproachPage() {
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {TONES.map(({ key, label, sub }) => (
-                    <button key={key} onClick={() => setTone(key)}
-                      className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${tone === key ? 'border-brand-border bg-brand-light' : 'border-black/10'}`}>
-                      <p className={`mb-0.5 text-xs font-medium ${tone === key ? 'text-brand-dark' : 'text-ink'}`}>{label}</p>
+                    <button
+                      key={key}
+                      onClick={() => setTone(key)}
+                      className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${tone === key ? 'border-brand-border bg-brand-light' : 'border-black/10'}`}
+                    >
+                      <p
+                        className={`mb-0.5 text-xs font-medium ${tone === key ? 'text-brand-dark' : 'text-ink'}`}
+                      >
+                        {label}
+                      </p>
                       <span className="text-[11px] text-ink-secondary">{sub}</span>
                     </button>
                   ))}
@@ -327,11 +461,17 @@ export default function FirstApproachPage() {
 
               {genError && <p className="mb-3 text-center text-xs text-danger-text">{genError}</p>}
               <div className="mt-2 flex gap-2">
-                <button onClick={() => setStep(1)} className="cursor-pointer whitespace-nowrap rounded-md border border-black/20 bg-transparent px-4 py-[13px] text-sm text-ink-secondary">
+                <button
+                  onClick={() => setStep(1)}
+                  className="cursor-pointer whitespace-nowrap rounded-md border border-black/20 bg-transparent px-4 py-[13px] text-sm text-ink-secondary"
+                >
                   ← 戻る
                 </button>
-                <button onClick={handleGenerate} disabled={saving}
-                  className="flex-1 cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light disabled:opacity-50">
+                <button
+                  onClick={handleGenerate}
+                  disabled={saving}
+                  className="flex-1 cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light disabled:opacity-50"
+                >
                   {saving ? '生成中...' : 'メッセージを生成する'}
                 </button>
               </div>

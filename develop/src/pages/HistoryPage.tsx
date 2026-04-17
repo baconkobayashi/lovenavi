@@ -12,13 +12,18 @@ interface MessageRow {
   used_message: string | null
   feedback: FeedbackType
   created_at: string
+  target_id: string | null
   targets: { nickname: string } | null
 }
 
 function getDateLabel(dateStr: string): string {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const target = new Date(new Date(dateStr).getFullYear(), new Date(dateStr).getMonth(), new Date(dateStr).getDate())
+  const target = new Date(
+    new Date(dateStr).getFullYear(),
+    new Date(dateStr).getMonth(),
+    new Date(dateStr).getDate(),
+  )
   const diffDays = Math.round((today.getTime() - target.getTime()) / (1000 * 60 * 60 * 24))
   if (diffDays === 0) return '今日'
   if (diffDays === 1) return '昨日'
@@ -31,12 +36,28 @@ function formatTime(dateStr: string): string {
 }
 
 const IconFirst = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" strokeWidth="1.5" strokeLinecap="round">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="#534AB7"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+  >
     <path d="M2 8C2 4.7 4.7 2 8 2s6 2.7 6 6-2.7 6-6 6H2.5L2 14V8z" />
   </svg>
 )
 const IconReply = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#0F6E56" strokeWidth="1.5" strokeLinecap="round">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="#0F6E56"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+  >
     <rect x="2" y="4" width="12" height="9" rx="1.5" />
     <path d="M2 7l6 4 6-4" />
   </svg>
@@ -50,18 +71,23 @@ export default function HistoryPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user) return
       const { data } = await supabase
         .from('messages')
-        .select('id, type, used_message, feedback, created_at, targets(nickname)')
+        .select('id, type, used_message, feedback, created_at, target_id, targets(nickname)')
         .eq('user_id', user.id)
         .not('used_message', 'is', null)
         .order('created_at', { ascending: false })
-      if (data) setMessages(data.map((m) => ({
-        ...m,
-        targets: Array.isArray(m.targets) ? (m.targets[0] ?? null) : m.targets,
-      })) as MessageRow[])
+      if (data)
+        setMessages(
+          data.map((m) => ({
+            ...m,
+            targets: Array.isArray(m.targets) ? (m.targets[0] ?? null) : m.targets,
+          })) as MessageRow[],
+        )
     }
     load()
   }, [])
@@ -101,8 +127,20 @@ export default function HistoryPage() {
           {/* ナビ */}
           <div className="flex items-center justify-between border-b border-black/10 px-4 py-[14px]">
             <span className="text-[15px] font-medium">履歴</span>
-            <button onClick={() => navigate('/home')} className="flex cursor-pointer items-center gap-1 rounded-lg border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary hover:bg-surface">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#888780" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <button
+              onClick={() => navigate('/home')}
+              className="flex cursor-pointer items-center gap-1 rounded-lg border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary hover:bg-surface"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="#888780"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z" />
               </svg>
               ホーム
@@ -112,8 +150,11 @@ export default function HistoryPage() {
           {/* フィルターチップ */}
           <div className="flex gap-2 overflow-x-auto border-b border-black/10 px-4 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {chips.map(({ key, label }) => (
-              <button key={key} onClick={() => setFilter(key)}
-                className={`shrink-0 cursor-pointer rounded-full px-3 py-[5px] text-xs whitespace-nowrap transition-all ${filter === key ? 'border border-[#AFA9EC] bg-[#EEEDFE] font-medium text-[#3C3489]' : 'border border-black/20 bg-transparent text-ink hover:bg-surface'}`}>
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`shrink-0 cursor-pointer whitespace-nowrap rounded-full px-3 py-[5px] text-xs transition-all ${filter === key ? 'border border-[#AFA9EC] bg-[#EEEDFE] font-medium text-[#3C3489]' : 'border border-black/20 bg-transparent text-ink hover:bg-surface'}`}
+              >
                 {label}
               </button>
             ))}
@@ -138,19 +179,28 @@ export default function HistoryPage() {
             )}
             {groups.map(({ label, items }) => (
               <div key={label}>
-                <p className="pb-1.5 pt-3 text-[11px] font-medium uppercase tracking-[0.04em] text-ink-tertiary">{label}</p>
+                <p className="pb-1.5 pt-3 text-[11px] font-medium uppercase tracking-[0.04em] text-ink-tertiary">
+                  {label}
+                </p>
                 {items.map((msg) => {
                   const isFirst = msg.type === 'first_approach'
                   const answered = msg.feedback !== null
                   return (
-                    <div key={msg.id} className="flex gap-3 border-b border-black/10 py-3 last:border-none">
-                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isFirst ? 'bg-[#EEEDFE]' : 'bg-[#E1F5EE]'}`}>
+                    <div
+                      key={msg.id}
+                      className="flex gap-3 border-b border-black/10 py-3 last:border-none"
+                    >
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isFirst ? 'bg-[#EEEDFE]' : 'bg-[#E1F5EE]'}`}
+                      >
                         {isFirst ? <IconFirst /> : <IconReply />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="mb-[3px] flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            <span className={`text-[11px] font-medium ${isFirst ? 'text-[#534AB7]' : 'text-[#0F6E56]'}`}>
+                            <span
+                              className={`text-[11px] font-medium ${isFirst ? 'text-[#534AB7]' : 'text-[#0F6E56]'}`}
+                            >
                               {isFirst ? '初回アプローチ' : 'メール返信'}
                             </span>
                             {msg.targets?.nickname && (
@@ -159,31 +209,55 @@ export default function HistoryPage() {
                               </span>
                             )}
                           </div>
-                          <span className="text-[11px] text-ink-tertiary">{formatTime(msg.created_at)}</span>
+                          <span className="text-[11px] text-ink-tertiary">
+                            {formatTime(msg.created_at)}
+                          </span>
                         </div>
                         <p className="mb-1.5 max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-ink">
                           {msg.used_message}
                         </p>
                         <div className="flex items-center gap-1.5">
                           {msg.feedback === 'yes' && (
-                            <span className="rounded-full bg-[#EAF3DE] px-2 py-[2px] text-[10px] font-medium text-[#3B6D11]">返信きた</span>
+                            <span className="rounded-full bg-[#EAF3DE] px-2 py-[2px] text-[10px] font-medium text-[#3B6D11]">
+                              返信きた
+                            </span>
                           )}
                           {msg.feedback === 'no' && (
-                            <span className="rounded-full bg-[#FCEBEB] px-2 py-[2px] text-[10px] font-medium text-[#A32D2D]">既読スルー</span>
+                            <span className="rounded-full bg-[#FCEBEB] px-2 py-[2px] text-[10px] font-medium text-[#A32D2D]">
+                              既読スルー
+                            </span>
                           )}
                           {msg.feedback === 'pending' && (
-                            <span className="rounded-full bg-[#FAEEDA] px-2 py-[2px] text-[10px] font-medium text-[#633806]">まだ待ち中</span>
+                            <span className="rounded-full bg-[#FAEEDA] px-2 py-[2px] text-[10px] font-medium text-[#633806]">
+                              まだ待ち中
+                            </span>
                           )}
                           <div className="flex items-center gap-1">
-                            <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${answered ? 'bg-[#639922]' : 'bg-[#EF9F27]'}`} />
-                            <span className={`text-[10px] ${answered ? 'text-[#3B6D11]' : 'text-[#633806]'}`}>
+                            <div
+                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${answered ? 'bg-[#639922]' : 'bg-[#EF9F27]'}`}
+                            />
+                            <span
+                              className={`text-[10px] ${answered ? 'text-[#3B6D11]' : 'text-[#633806]'}`}
+                            >
                               {answered ? '回答済み' : '未回答'}
                             </span>
                           </div>
                           {!answered && (
-                            <button onClick={() => setEditingId(msg.id)}
-                              className="ml-auto cursor-pointer rounded-full border border-[#AFA9EC] bg-transparent px-2 py-[2px] text-[10px] text-[#534AB7] transition-colors hover:bg-[#EEEDFE]">
+                            <button
+                              onClick={() => setEditingId(msg.id)}
+                              className="cursor-pointer rounded-full border border-[#AFA9EC] bg-transparent px-2 py-[2px] text-[10px] text-[#534AB7] transition-colors hover:bg-[#EEEDFE]"
+                            >
                               結果を入力する
+                            </button>
+                          )}
+                          {msg.target_id && (
+                            <button
+                              onClick={() =>
+                                navigate('/reply', { state: { targetId: msg.target_id } })
+                              }
+                              className="ml-auto cursor-pointer rounded-full border border-[#0F6E56]/30 bg-transparent px-2 py-[2px] text-[10px] text-[#0F6E56] transition-colors hover:bg-[#E1F5EE]"
+                            >
+                              返信する →
                             </button>
                           )}
                         </div>
@@ -205,22 +279,42 @@ export default function HistoryPage() {
           <div className="w-full max-w-[400px] rounded-[16px_16px_0_0] bg-white px-4 pb-8 pt-5">
             <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-black/20" />
             <p className="mb-1 text-center text-[15px] font-medium">送って、どうでしたか？</p>
-            <p className="mb-4 text-center text-xs text-ink-secondary">結果を教えてもらえるとAIが賢くなります</p>
+            <p className="mb-4 text-center text-xs text-ink-secondary">
+              結果を教えてもらえるとAIが賢くなります
+            </p>
             <div className="mb-[10px] flex gap-2">
               {(
                 [
-                  { key: 'yes', label: '返信きた', cls: 'bg-success-bg border-success-border text-success-text' },
-                  { key: 'pending', label: 'まだ待ち中', cls: 'bg-warn-bg border-warn-border text-warn-text' },
-                  { key: 'no', label: '既読スルー', cls: 'bg-danger-bg border-danger-border text-danger-text' },
+                  {
+                    key: 'yes',
+                    label: '返信きた',
+                    cls: 'bg-success-bg border-success-border text-success-text',
+                  },
+                  {
+                    key: 'pending',
+                    label: 'まだ待ち中',
+                    cls: 'bg-warn-bg border-warn-border text-warn-text',
+                  },
+                  {
+                    key: 'no',
+                    label: '既読スルー',
+                    cls: 'bg-danger-bg border-danger-border text-danger-text',
+                  },
                 ] as const
               ).map(({ key, label, cls }) => (
-                <button key={key} onClick={() => handleFeedback(editingId, key)}
-                  className={`flex-1 cursor-pointer rounded-md border px-1.5 py-3 text-center text-[13px] font-medium transition-all border-black/20 bg-transparent text-ink hover:${cls}`}>
+                <button
+                  key={key}
+                  onClick={() => handleFeedback(editingId, key)}
+                  className={`flex-1 cursor-pointer rounded-md border border-black/20 bg-transparent px-1.5 py-3 text-center text-[13px] font-medium text-ink transition-all hover:${cls}`}
+                >
                   {label}
                 </button>
               ))}
             </div>
-            <button onClick={() => setEditingId(null)} className="w-full cursor-pointer rounded-md border-none bg-transparent py-[10px] text-xs text-ink-tertiary hover:text-ink-secondary">
+            <button
+              onClick={() => setEditingId(null)}
+              className="w-full cursor-pointer rounded-md border-none bg-transparent py-[10px] text-xs text-ink-tertiary hover:text-ink-secondary"
+            >
               キャンセル
             </button>
           </div>

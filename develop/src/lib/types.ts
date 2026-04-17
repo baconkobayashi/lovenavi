@@ -36,9 +36,9 @@ export interface ConversationTurn {
   id: string
   user_id: string
   target_id: string
-  message_id: string | null   // sender='me' のとき messages.id を参照
+  message_id: string | null // sender='me' のとき messages.id を参照
   sender: SenderType
-  raw_text: string | null      // sender='target' のとき相手のメッセージ本文
+  raw_text: string | null // sender='target' のとき相手のメッセージ本文
   feedback: FeedbackType | null // sender='me' のとき相手が返信したか
   created_at: string
 }

@@ -9,11 +9,8 @@ export default function HomePage() {
       <div className="w-full max-w-[400px]">
         <div className="frame">
           {/* ナビバー */}
-          <div className="flex items-center justify-between border-b border-black/10 px-4 py-[14px]">
+          <div className="flex items-center border-b border-black/10 px-4 py-[14px]">
             <span className="text-sm font-medium">lovenavigation</span>
-            <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-brand-light text-xs font-medium text-brand">
-              田
-            </div>
           </div>
 
           {/* グリーティング */}

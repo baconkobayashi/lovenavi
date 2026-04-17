@@ -242,7 +242,9 @@ export default function MyPage() {
                           {type === 'first' ? '初回アプローチ' : '返信'}
                         </span>
                         {nickname && (
-                          <span className="rounded-full bg-surface px-1.5 py-[1px] text-[10px] text-ink-tertiary">{nickname}</span>
+                          <span className="rounded-full bg-surface px-1.5 py-[1px] text-[10px] text-ink-tertiary">
+                            {nickname}
+                          </span>
                         )}
                         <span className="text-[11px] text-ink-tertiary">{date}</span>
                       </div>
