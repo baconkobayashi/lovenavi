@@ -78,8 +78,6 @@ export default function MyPage() {
     my_hobbies: null,
     tone: null,
   })
-  const [generatedCount, setGeneratedCount] = useState<number | null>(null)
-  const [replyRate, setReplyRate] = useState<number | null>(null)
   const [history, setHistory] = useState<HistoryItem[]>([])
 
   const [showProfileSheet, setShowProfileSheet] = useState(false)
@@ -104,24 +102,6 @@ export default function MyPage() {
         .eq('user_id', user.id)
         .single()
       if (profileData) setProfile(profileData)
-
-      // 今月の生成数・返信率
-      const startOfMonth = new Date()
-      startOfMonth.setDate(1)
-      startOfMonth.setHours(0, 0, 0, 0)
-      const { data: messages } = await supabase
-        .from('messages')
-        .select('feedback')
-        .eq('user_id', user.id)
-        .gte('created_at', startOfMonth.toISOString())
-      if (messages) {
-        setGeneratedCount(messages.length)
-        const withFeedback = messages.filter((m) => m.feedback !== null)
-        const replied = messages.filter((m) => m.feedback === 'yes')
-        setReplyRate(
-          withFeedback.length > 0 ? Math.round((replied.length / withFeedback.length) * 100) : null,
-        )
-      }
 
       // 直近3件の履歴（使ったもの）
       const { data: recent } = await supabase
@@ -209,25 +189,6 @@ export default function MyPage() {
           </div>
 
           {/* 利用サマリー */}
-          <div className="grid grid-cols-3 border-b border-black/10">
-            {[
-              {
-                val: generatedCount !== null ? String(generatedCount) : '—',
-                label: '生成数（今月）',
-              },
-              { val: replyRate !== null ? `${replyRate}%` : '—', label: '返信率' },
-              { val: '—', label: 'デート獲得数' },
-            ].map(({ val, label }) => (
-              <div
-                key={label}
-                className="border-r border-black/10 px-3 py-[14px] text-center last:border-r-0"
-              >
-                <p className="mb-0.5 text-xl font-medium text-ink">{val}</p>
-                <p className="text-[11px] text-ink-secondary">{label}</p>
-              </div>
-            ))}
-          </div>
-
           {/* 基本情報 */}
           <div className="border-b border-black/10 p-4">
             <p className="mb-3 text-xs font-medium text-ink-secondary">あなたの基本情報</p>
