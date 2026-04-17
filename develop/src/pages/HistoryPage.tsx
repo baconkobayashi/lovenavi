@@ -188,7 +188,8 @@ export default function HistoryPage() {
                   return (
                     <div
                       key={msg.id}
-                      className="flex gap-3 border-b border-black/10 py-3 last:border-none"
+                      onClick={() => msg.target_id && navigate('/reply', { state: { targetId: msg.target_id } })}
+                      className={`flex gap-3 border-b border-black/10 py-3 last:border-none ${msg.target_id ? 'cursor-pointer transition-colors hover:bg-surface' : ''}`}
                     >
                       <div
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isFirst ? 'bg-[#EEEDFE]' : 'bg-[#E1F5EE]'}`}
@@ -196,68 +197,43 @@ export default function HistoryPage() {
                         {isFirst ? <IconFirst /> : <IconReply />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="mb-[3px] flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span
-                              className={`text-[11px] font-medium ${isFirst ? 'text-[#534AB7]' : 'text-[#0F6E56]'}`}
-                            >
-                              {isFirst ? '初回アプローチ' : 'メール返信'}
-                            </span>
-                            {msg.targets?.nickname && (
-                              <span className="rounded-full bg-surface px-1.5 py-[1px] text-[10px] text-ink-tertiary">
-                                {msg.targets.nickname}
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-[11px] text-ink-tertiary">
-                            {formatTime(msg.created_at)}
+                        <div className="mb-[3px] flex items-center">
+                          <span className={`text-[11px] font-medium ${isFirst ? 'text-[#534AB7]' : 'text-[#0F6E56]'}`}>
+                            {isFirst ? '初回アプローチ' : 'メール返信'}
                           </span>
+                          {msg.targets?.nickname && (
+                            <>
+                              <span className="mx-1 text-[10px] text-ink-tertiary">·</span>
+                              <span className="text-[11px] font-medium text-ink-secondary">{msg.targets.nickname}</span>
+                            </>
+                          )}
+                          <span className="ml-auto text-[11px] text-ink-tertiary">{formatTime(msg.created_at)}</span>
                         </div>
                         <p className="mb-1.5 max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-ink">
                           {msg.used_message}
                         </p>
                         <div className="flex items-center gap-1.5">
                           {msg.feedback === 'yes' && (
-                            <span className="rounded-full bg-[#EAF3DE] px-2 py-[2px] text-[10px] font-medium text-[#3B6D11]">
-                              返信きた
-                            </span>
+                            <span className="rounded-full bg-[#EAF3DE] px-2 py-[2px] text-[10px] font-medium text-[#3B6D11]">返信きた</span>
                           )}
                           {msg.feedback === 'no' && (
-                            <span className="rounded-full bg-[#FCEBEB] px-2 py-[2px] text-[10px] font-medium text-[#A32D2D]">
-                              既読スルー
-                            </span>
+                            <span className="rounded-full bg-[#FCEBEB] px-2 py-[2px] text-[10px] font-medium text-[#A32D2D]">既読スルー</span>
                           )}
                           {msg.feedback === 'pending' && (
-                            <span className="rounded-full bg-[#FAEEDA] px-2 py-[2px] text-[10px] font-medium text-[#633806]">
-                              まだ待ち中
-                            </span>
+                            <span className="rounded-full bg-[#FAEEDA] px-2 py-[2px] text-[10px] font-medium text-[#633806]">まだ待ち中</span>
                           )}
                           <div className="flex items-center gap-1">
-                            <div
-                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${answered ? 'bg-[#639922]' : 'bg-[#EF9F27]'}`}
-                            />
-                            <span
-                              className={`text-[10px] ${answered ? 'text-[#3B6D11]' : 'text-[#633806]'}`}
-                            >
+                            <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${answered ? 'bg-[#639922]' : 'bg-[#EF9F27]'}`} />
+                            <span className={`text-[10px] ${answered ? 'text-[#3B6D11]' : 'text-[#633806]'}`}>
                               {answered ? '回答済み' : '未回答'}
                             </span>
                           </div>
                           {!answered && (
                             <button
-                              onClick={() => setEditingId(msg.id)}
-                              className="cursor-pointer rounded-full border border-[#AFA9EC] bg-transparent px-2 py-[2px] text-[10px] text-[#534AB7] transition-colors hover:bg-[#EEEDFE]"
+                              onClick={(e) => { e.stopPropagation(); setEditingId(msg.id) }}
+                              className="ml-auto cursor-pointer rounded-full border border-[#AFA9EC] bg-transparent px-2 py-[2px] text-[10px] text-[#534AB7] transition-colors hover:bg-[#EEEDFE]"
                             >
                               結果を入力する
-                            </button>
-                          )}
-                          {msg.target_id && (
-                            <button
-                              onClick={() =>
-                                navigate('/reply', { state: { targetId: msg.target_id } })
-                              }
-                              className="ml-auto cursor-pointer rounded-full border border-[#0F6E56]/30 bg-transparent px-2 py-[2px] text-[10px] text-[#0F6E56] transition-colors hover:bg-[#E1F5EE]"
-                            >
-                              返信する →
                             </button>
                           )}
                         </div>
