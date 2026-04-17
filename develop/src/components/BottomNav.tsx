@@ -58,7 +58,7 @@ export default function BottomNav({ active }: Props) {
       key: 'history',
       label: '履歴',
       icon: <IconHistory active={active === 'history'} />,
-      path: '/home',
+      path: '/history',
     },
     {
       key: 'mypage',

@@ -1,44 +1,8 @@
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
-import { supabase } from '../lib/supabase'
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const [generatedCount, setGeneratedCount] = useState<number | null>(null)
-  const [replyCount, setReplyCount] = useState<number | null>(null)
-  const [replyRate, setReplyRate] = useState<number | null>(null)
-
-  useEffect(() => {
-    async function loadStats() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) return
-
-      const startOfMonth = new Date()
-      startOfMonth.setDate(1)
-      startOfMonth.setHours(0, 0, 0, 0)
-
-      const { data: messages } = await supabase
-        .from('messages')
-        .select('feedback')
-        .eq('user_id', user.id)
-        .gte('created_at', startOfMonth.toISOString())
-
-      if (!messages) return
-
-      setGeneratedCount(messages.length)
-
-      const withFeedback = messages.filter((m) => m.feedback !== null)
-      const replied = messages.filter((m) => m.feedback === 'yes')
-      setReplyCount(replied.length)
-      setReplyRate(
-        withFeedback.length > 0 ? Math.round((replied.length / withFeedback.length) * 100) : null,
-      )
-    }
-    loadStats()
-  }, [])
 
   return (
     <div className="flex min-h-screen justify-center bg-page px-4 py-8">
@@ -136,31 +100,6 @@ export default function HomePage() {
                 使ってみる →
               </div>
             </button>
-          </div>
-
-          {/* 履歴サマリー */}
-          <div className="px-4 pb-2">
-            <p className="mb-2 text-xs font-medium text-ink-secondary">あなたの履歴</p>
-          </div>
-          <div className="grid grid-cols-2 gap-2 px-4 pb-4">
-            <div className="rounded-md bg-surface p-3">
-              <p className="mb-1 text-[11px] text-ink-secondary">生成したメッセージ</p>
-              <p className="text-xl font-medium text-ink">
-                {generatedCount ?? '—'}
-                <span className="text-[13px] font-normal text-ink-secondary"> 件</span>
-              </p>
-              <p className="mt-0.5 text-[11px] text-ink-tertiary">今月</p>
-            </div>
-            <div className="rounded-md bg-surface p-3">
-              <p className="mb-1 text-[11px] text-ink-secondary">返信きた報告</p>
-              <p className="text-xl font-medium text-ink">
-                {replyCount ?? '—'}
-                <span className="text-[13px] font-normal text-ink-secondary"> 件</span>
-              </p>
-              <p className="mt-0.5 text-[11px] text-ink-tertiary">
-                {replyRate !== null ? `返信率 ${replyRate}%` : 'フィードバック未記録'}
-              </p>
-            </div>
           </div>
 
           <BottomNav active="home" />

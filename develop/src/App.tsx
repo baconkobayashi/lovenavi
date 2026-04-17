@@ -7,6 +7,7 @@ import ResultPage from './pages/ResultPage'
 import ReplyInputPage from './pages/ReplyInputPage'
 import ReplyResultPage from './pages/ReplyResultPage'
 import MyPage from './pages/MyPage'
+import HistoryPage from './pages/HistoryPage'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -64,6 +65,14 @@ export default function App() {
         element={
           <PrivateRoute>
             <MyPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <PrivateRoute>
+            <HistoryPage />
           </PrivateRoute>
         }
       />
