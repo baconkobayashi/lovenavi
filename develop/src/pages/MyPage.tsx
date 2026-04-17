@@ -10,6 +10,7 @@ interface HistoryItem {
   date: string
   text: string
   result: ResultTag | null
+  nickname: string | null
 }
 
 function formatRelativeDate(iso: string) {
@@ -116,19 +117,23 @@ export default function MyPage() {
       // 直近3件の履歴（使ったもの）
       const { data: recent } = await supabase
         .from('messages')
-        .select('type, used_message, feedback, created_at')
+        .select('type, used_message, feedback, created_at, targets(nickname)')
         .eq('user_id', user.id)
         .not('used_message', 'is', null)
         .order('created_at', { ascending: false })
         .limit(3)
       if (recent) {
         setHistory(
-          recent.map((m) => ({
-            type: m.type === 'first_approach' ? 'first' : 'reply',
-            date: formatRelativeDate(m.created_at),
-            text: m.used_message,
-            result: m.feedback as ResultTag | null,
-          })),
+          recent.map((m) => {
+            const t = Array.isArray(m.targets) ? (m.targets[0] ?? null) : m.targets
+            return {
+              type: m.type === 'first_approach' ? 'first' : 'reply',
+              date: formatRelativeDate(m.created_at),
+              text: m.used_message,
+              result: m.feedback as ResultTag | null,
+              nickname: (t as { nickname: string } | null)?.nickname ?? null,
+            }
+          }),
         )
       }
     }
@@ -217,7 +222,7 @@ export default function MyPage() {
             {history.length === 0 ? (
               <p className="py-4 text-center text-xs text-ink-tertiary">履歴がありません</p>
             ) : (
-              history.map(({ type, date, text, result }, i) => {
+              history.map(({ type, date, text, result, nickname }, i) => {
                 const style = result ? RESULT_STYLES[result] : null
                 return (
                   <div
@@ -236,6 +241,9 @@ export default function MyPage() {
                         >
                           {type === 'first' ? '初回アプローチ' : '返信'}
                         </span>
+                        {nickname && (
+                          <span className="rounded-full bg-surface px-1.5 py-[1px] text-[10px] text-ink-tertiary">{nickname}</span>
+                        )}
                         <span className="text-[11px] text-ink-tertiary">{date}</span>
                       </div>
                       <p className="mb-1 text-xs leading-[1.5] text-ink">{text}</p>

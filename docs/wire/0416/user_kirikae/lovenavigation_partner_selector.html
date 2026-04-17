@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>返信メッセージを作る — lovenavigation</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    background: #f5f4f0;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px;
+    min-height: 100vh;
+    color: #1a1a18;
+  }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f1efe8;
+    --text: #1a1a18;
+    --text2: #5f5e5a;
+    --text3: #888780;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --r: 8px;
+    --rl: 12px;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+    font-size: 14px;
+  }
+
+  .wrap { width: 400px; }
+  .frame {
+    border: 0.5px solid var(--border);
+    border-radius: var(--rl);
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  /* Nav */
+  .nav {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .back {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; flex-shrink: 0; cursor: pointer;
+  }
+  .back:hover { background: var(--bg2); }
+  .nav-title { font-size: 15px; font-weight: 500; flex: 1; }
+  .home-btn {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--text3);
+    padding: 4px 8px; border-radius: var(--r);
+    border: 0.5px solid var(--border);
+    background: transparent; flex-shrink: 0; cursor: pointer;
+  }
+  .home-btn:hover { background: var(--bg2); }
+
+  /* Body */
+  .body { padding: 20px 16px; }
+  .tip {
+    background: #EEEDFE; border-radius: var(--r);
+    padding: 10px 12px; margin-bottom: 16px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .tip-text { font-size: 11px; color: #3C3489; line-height: 1.5; }
+  .field { margin-bottom: 18px; }
+  .field-label {
+    font-size: 12px; font-weight: 500; color: var(--text);
+    margin: 0 0 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .req { font-size: 10px; color: #993556; background: #FBEAF0; padding: 2px 6px; border-radius: 99px; font-weight: 500; }
+  .opt { font-size: 10px; color: var(--text3); }
+  .hint { font-size: 11px; color: var(--text3); margin: 4px 0 0; line-height: 1.5; }
+  textarea, input[type=text], select {
+    width: 100%; padding: 8px 10px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--r); background: #fff; color: var(--text);
+    outline: none; resize: vertical;
+  }
+  textarea:focus, input[type=text]:focus, select:focus {
+    box-shadow: 0 0 0 3px rgba(83,74,183,0.15); border-color: #AFA9EC;
+  }
+
+  /* Profile button */
+  .profile-btn {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; border-radius: var(--r);
+    border: 0.5px solid var(--border2);
+    background: var(--bg2); cursor: pointer; gap: 10px;
+    transition: background 0.15s;
+  }
+  .profile-btn:hover { background: #e8e6df; }
+  .profile-btn.filled { border-color: #AFA9EC; background: #EEEDFE; }
+  .profile-btn.filled:hover { background: #E4E2FC; }
+  .profile-left { display: flex; align-items: center; gap: 10px; }
+  .profile-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #EEEDFE; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .profile-icon.filled { background: #CECBF6; }
+  .profile-text-main { font-size: 13px; font-weight: 500; color: var(--text); }
+  .profile-text-main.filled { color: #3C3489; }
+  .profile-text-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .profile-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+  .profile-tag { font-size: 10px; color: #3C3489; background: #CECBF6; padding: 2px 7px; border-radius: 99px; }
+
+  /* Chips */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 12px; padding: 6px 14px; border-radius: 99px;
+    border: 0.5px solid var(--border2); background: transparent;
+    cursor: pointer; color: var(--text); transition: all 0.15s;
+  }
+  .chip:hover { background: var(--bg2); }
+  .chip.sel { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; font-weight: 500; }
+
+  /* Purpose cards */
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .purpose-card {
+    border: 0.5px solid var(--border); border-radius: var(--r);
+    padding: 10px 12px; cursor: pointer; text-align: center;
+    transition: all 0.15s;
+  }
+  .purpose-card:hover { background: var(--bg2); }
+  .purpose-card.sel { border-color: #AFA9EC; background: #EEEDFE; }
+  .purpose-card p { font-size: 12px; font-weight: 500; color: var(--text); margin: 0 0 2px; }
+  .purpose-card.sel p { color: #3C3489; }
+  .purpose-card span { font-size: 11px; color: var(--text2); }
+
+  /* Bubble */
+  .bubble-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .bubble-row { display: flex; gap: 8px; align-items: flex-end; }
+  .bubble-row.mine { flex-direction: row-reverse; }
+  .bubble { font-size: 12px; line-height: 1.6; padding: 8px 12px; border-radius: 12px; max-width: 75%; }
+  .bubble.hers { background: var(--bg2); color: var(--text); border-radius: 4px 12px 12px 12px; }
+  .bubble.mine { background: #534AB7; color: #EEEDFE; border-radius: 12px 4px 12px 12px; }
+  .bubble-time { font-size: 10px; color: var(--text3); white-space: nowrap; }
+  .add-bubble {
+    width: 100%; margin-top: 8px; padding: 8px;
+    border-radius: var(--r); border: 1px dashed var(--border2);
+    background: transparent; font-size: 12px; color: var(--text3);
+    cursor: pointer; text-align: center;
+  }
+  .add-bubble:hover { background: var(--bg2); }
+
+  /* Submit */
+  .btn-main {
+    width: 100%; padding: 13px; border-radius: var(--r);
+    background: #534AB7; color: #EEEDFE;
+    font-size: 14px; font-weight: 500; border: none; cursor: pointer;
+    margin-top: 4px; transition: background 0.15s;
+  }
+  .btn-main:hover { background: #3C3489; }
+
+  /* Overlay */
+  .overlay {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    align-items: flex-end; justify-content: center;
+    z-index: 100;
+  }
+  .overlay.open { display: flex; }
+
+  /* Bottom sheet */
+  .sheet {
+    background: var(--bg);
+    border-radius: 16px 16px 0 0;
+    width: 100%; max-width: 400px;
+    padding-bottom: 24px;
+  }
+  .sheet-handle {
+    width: 36px; height: 4px; background: var(--border2);
+    border-radius: 2px; margin: 12px auto 0;
+  }
+  .sheet-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px 12px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .sheet-title { font-size: 15px; font-weight: 500; }
+  .sheet-close {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 0.5px solid var(--border);
+    background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sheet-close:hover { background: var(--bg2); }
+
+  /* Scroll list */
+  .sheet-scroll {
+    max-height: 300px; overflow-y: auto;
+    padding: 0 16px;
+  }
+  .sheet-scroll::-webkit-scrollbar { width: 4px; }
+  .sheet-scroll::-webkit-scrollbar-track { background: transparent; }
+  .sheet-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* Partner items */
+  .partner-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 0; border-bottom: 0.5px solid var(--border);
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .partner-item:hover { opacity: 0.75; }
+  .partner-item:last-child { border-bottom: none; }
+  .partner-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500; flex-shrink: 0;
+  }
+  .partner-info { flex: 1; min-width: 0; }
+  .partner-name-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+  .partner-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .partner-date { font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .partner-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+  .partner-tag {
+    font-size: 10px; color: var(--text2);
+    background: var(--bg2); padding: 2px 7px;
+    border-radius: 99px; border: 0.5px solid var(--border);
+  }
+  .partner-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .partner-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #534AB7; display: flex; align-items: center; justify-content: center;
+  }
+  .partner-radio {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid var(--border2);
+  }
+  .edit-btn {
+    font-size: 11px; color: #534AB7;
+    padding: 3px 9px; border-radius: 99px;
+    border: 0.5px solid #AFA9EC; background: transparent;
+    cursor: pointer; white-space: nowrap;
+  }
+  .edit-btn:hover { background: #EEEDFE; }
+
+  /* Scroll hint */
+  .scroll-hint {
+    text-align: center; padding: 8px 0 4px;
+    font-size: 11px; color: var(--text3);
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="frame">
+    <div class="nav">
+      <button class="back">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#1a1a18" stroke-width="1.5" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
+      </button>
+      <span class="nav-title">返信メッセージを作る</span>
+      <button class="home-btn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round"><path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z"/></svg>
+        ホーム
+      </button>
+    </div>
+
+    <div class="body">
+
+      <div class="tip">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/></svg>
+        <span class="tip-text">相手の情報を追加するとより的確な返信が生成されます。</span>
+      </div>
+
+      <!-- 相手プロフィール -->
+      <div class="field">
+        <p class="field-label">相手のプロフィール <span class="opt">任意</span></p>
+        <div id="profile-empty" onclick="openSheet()">
+          <div class="profile-btn">
+            <div class="profile-left">
+              <div class="profile-icon">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="6" r="3"/><path d="M3 16c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+              </div>
+              <div>
+                <div class="profile-text-main">相手の情報を入力する</div>
+                <div class="profile-text-sub">関係値・年齢・趣味・エリアなど</div>
+              </div>
+            </div>
+            <span style="font-size:18px;color:#888780;">›</span>
+          </div>
+        </div>
+        <div id="profile-filled" style="display:none;" onclick="openSheet()">
+          <div class="profile-btn filled">
+            <div class="profile-left">
+              <div class="profile-icon filled">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="6" r="3"/><path d="M3 16c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+              </div>
+              <div>
+                <div class="profile-text-main filled" id="selected-name-display">相手A · マッチング直後 · 25歳</div>
+                <div class="profile-tags" id="selected-tags-display">
+                  <span class="profile-tag">東京</span>
+                  <span class="profile-tag">カフェ</span>
+                  <span class="profile-tag">映画</span>
+                </div>
+              </div>
+            </div>
+            <span style="font-size:12px;color:#534AB7;font-weight:500;">変更 ›</span>
+          </div>
+        </div>
+        <p class="hint" id="profile-hint-empty">タップして相手を選択できます</p>
+        <p class="hint" id="profile-hint-filled" style="display:none;">タップして相手を切り替え・編集できます</p>
+      </div>
+
+      <!-- 相手の最新メッセージ -->
+      <div class="field">
+        <p class="field-label">相手の最新メッセージ <span class="req">必須</span></p>
+        <textarea rows="3" placeholder="例：そうなんだ〜、週末何してるの？"></textarea>
+        <p class="hint">相手のメッセージをそのままコピペしてください</p>
+      </div>
+
+      <!-- やり取り -->
+      <div class="field">
+        <p class="field-label">これまでのやり取り <span class="opt">任意</span></p>
+        <div class="bubble-wrap">
+          <div class="bubble-row">
+            <div class="bubble hers">はじめまして！プロフィール見て気になりました</div>
+            <span class="bubble-time">2日前</span>
+          </div>
+          <div class="bubble-row mine">
+            <div class="bubble mine">ありがとうございます！カフェ好きなんですね</div>
+            <span class="bubble-time">2日前</span>
+          </div>
+          <div class="bubble-row">
+            <div class="bubble hers">そうなんだ〜、週末何してるの？</div>
+            <span class="bubble-time">今日</span>
+          </div>
+        </div>
+        <button class="add-bubble">+ やり取りを追加</button>
+        <p class="hint">入れるほど会話の流れを読んだ返信になります</p>
+      </div>
+
+      <!-- やり取り回数 -->
+      <div class="field">
+        <p class="field-label">やり取りの回数 <span class="req">必須</span></p>
+        <div class="chip-group" id="count-chips">
+          <button class="chip" onclick="selectChip(this,'count-chips')">初回</button>
+          <button class="chip sel" onclick="selectChip(this,'count-chips')">2〜5回</button>
+          <button class="chip" onclick="selectChip(this,'count-chips')">6〜10回</button>
+          <button class="chip" onclick="selectChip(this,'count-chips')">11回以上</button>
+        </div>
+      </div>
+
+      <!-- 目的 -->
+      <div class="field">
+        <p class="field-label">今回の目的 <span class="req">必須</span></p>
+        <div class="card-grid" id="purpose-cards">
+          <div class="purpose-card sel" onclick="selectPurpose(this)"><p>会話を続ける</p><span>仲良くなりたい</span></div>
+          <div class="purpose-card" onclick="selectPurpose(this)"><p>デートに誘う</p><span>会う約束をしたい</span></div>
+          <div class="purpose-card" onclick="selectPurpose(this)"><p>LINE交換</p><span>アプリ外に移行したい</span></div>
+          <div class="purpose-card" onclick="selectPurpose(this)"><p>関係を温める</p><span>もっと距離を縮めたい</span></div>
+        </div>
+      </div>
+
+      <!-- トーン -->
+      <div class="field">
+        <p class="field-label">相手のトーン <span class="opt">任意</span></p>
+        <div class="chip-group" id="tone-chips">
+          <button class="chip" onclick="selectChip(this,'tone-chips')">テンション高め</button>
+          <button class="chip sel" onclick="selectChip(this,'tone-chips')">普通</button>
+          <button class="chip" onclick="selectChip(this,'tone-chips')">素っ気ない</button>
+          <button class="chip" onclick="selectChip(this,'tone-chips')">わからない</button>
+        </div>
+      </div>
+
+      <button class="btn-main">返信を生成する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ボトムシート オーバーレイ -->
+<div class="overlay" id="sheet-overlay" onclick="onOverlayClick(event)">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <span class="sheet-title">相手を選ぶ</span>
+      <button class="sheet-close" onclick="closeSheet()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1a1a18" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l10 10M11 1L1 11"/></svg>
+      </button>
+    </div>
+
+    <div class="sheet-scroll" id="partner-list">
+
+      <div class="partner-item" data-id="A" onclick="selectPartner(this)">
+        <div class="partner-avatar" style="background:#EEEDFE;color:#534AB7;">A</div>
+        <div class="partner-info">
+          <div class="partner-name-row">
+            <span class="partner-name">相手A</span>
+            <span class="partner-date">今日 14:32</span>
+          </div>
+          <div class="partner-tags">
+            <span class="partner-tag">マッチング直後</span>
+            <span class="partner-tag">25歳</span>
+            <span class="partner-tag">東京</span>
+            <span class="partner-tag">カフェ・映画</span>
+          </div>
+        </div>
+        <div class="partner-right">
+          <button class="edit-btn" onclick="editPartner(event,'A')">編集</button>
+          <div class="partner-check" style="display:none;">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>
+          </div>
+          <div class="partner-radio"></div>
+        </div>
+      </div>
+
+      <div class="partner-item" data-id="B" onclick="selectPartner(this)">
+        <div class="partner-avatar" style="background:#E1F5EE;color:#0F6E56;">B</div>
+        <div class="partner-info">
+          <div class="partner-name-row">
+            <span class="partner-name">相手B</span>
+            <span class="partner-date">昨日 18:50</span>
+          </div>
+          <div class="partner-tags">
+            <span class="partner-tag">数回やり取り済み</span>
+            <span class="partner-tag">28歳</span>
+            <span class="partner-tag">神奈川</span>
+          </div>
+        </div>
+        <div class="partner-right">
+          <div class="partner-check" style="display:none;">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>
+          </div>
+          <div class="partner-radio"></div>
+        </div>
+      </div>
+
+      <div class="partner-item" data-id="C" onclick="selectPartner(this)">
+        <div class="partner-avatar" style="background:#FAEEDA;color:#633806;">C</div>
+        <div class="partner-info">
+          <div class="partner-name-row">
+            <span class="partner-name">相手C</span>
+            <span class="partner-date">3日前 09:22</span>
+          </div>
+          <div class="partner-tags">
+            <span class="partner-tag">会ったことある</span>
+            <span class="partner-tag">23歳</span>
+            <span class="partner-tag">大阪</span>
+          </div>
+        </div>
+        <div class="partner-right">
+          <div class="partner-check" style="display:none;">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>
+          </div>
+          <div class="partner-radio"></div>
+        </div>
+      </div>
+
+      <div class="partner-item" data-id="D" onclick="selectPartner(this)">
+        <div class="partner-avatar" style="background:#FBEAF0;color:#993556;">D</div>
+        <div class="partner-info">
+          <div class="partner-name-row">
+            <span class="partner-name">相手D</span>
+            <span class="partner-date">5日前 20:11</span>
+          </div>
+          <div class="partner-tags">
+            <span class="partner-tag">マッチング直後</span>
+            <span class="partner-tag">26歳</span>
+            <span class="partner-tag">名古屋</span>
+          </div>
+        </div>
+        <div class="partner-right">
+          <div class="partner-check" style="display:none;">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>
+          </div>
+          <div class="partner-radio"></div>
+        </div>
+      </div>
+
+      <div class="partner-item" data-id="E" onclick="selectPartner(this)">
+        <div class="partner-avatar" style="background:#EAF3DE;color:#3B6D11;">E</div>
+        <div class="partner-info">
+          <div class="partner-name-row">
+            <span class="partner-name">相手E</span>
+            <span class="partner-date">1週間前 11:04</span>
+          </div>
+          <div class="partner-tags">
+            <span class="partner-tag">数回やり取り済み</span>
+            <span class="partner-tag">24歳</span>
+            <span class="partner-tag">東京</span>
+          </div>
+        </div>
+        <div class="partner-right">
+          <div class="partner-check" style="display:none;">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>
+          </div>
+          <div class="partner-radio"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="scroll-hint">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round"><path d="M7 2v10M3 8l4 4 4-4"/></svg>
+      スクロールして他の相手を表示
+    </div>
+
+  </div>
+</div>
+
+<script>
+var currentPartnerId = null;
+
+function openSheet() {
+  document.getElementById('sheet-overlay').classList.add('open');
+}
+
+function closeSheet() {
+  document.getElementById('sheet-overlay').classList.remove('open');
+}
+
+function onOverlayClick(e) {
+  if (e.target === document.getElementById('sheet-overlay')) closeSheet();
+}
+
+function selectPartner(item) {
+  var id = item.dataset.id;
+  currentPartnerId = id;
+
+  var allItems = document.querySelectorAll('.partner-item');
+  allItems.forEach(function(el) {
+    var check = el.querySelector('.partner-check');
+    var radio = el.querySelector('.partner-radio');
+    var editBtn = el.querySelector('.edit-btn');
+    var isSelected = el.dataset.id === id;
+
+    if (check) check.style.display = isSelected ? 'flex' : 'none';
+    if (radio) radio.style.display = isSelected ? 'none' : 'block';
+    if (editBtn) {
+      if (!isSelected) {
+        editBtn.remove();
+      }
+    } else if (isSelected && !el.querySelector('.edit-btn')) {
+      var btn = document.createElement('button');
+      btn.className = 'edit-btn';
+      btn.textContent = '編集';
+      btn.onclick = function(e) { editPartner(e, id); };
+      var right = el.querySelector('.partner-right');
+      right.insertBefore(btn, right.firstChild);
+    }
+  });
+
+  var name = item.querySelector('.partner-name').textContent;
+  var tags = Array.from(item.querySelectorAll('.partner-tag')).map(function(t) { return t.textContent; });
+
+  document.getElementById('selected-name-display').textContent = name + ' · ' + (tags[0] || '') + (tags[1] ? ' · ' + tags[1] : '');
+  var tagsEl = document.getElementById('selected-tags-display');
+  tagsEl.innerHTML = tags.slice(2).map(function(t) { return '<span class="profile-tag">' + t + '</span>'; }).join('');
+
+  document.getElementById('profile-empty').style.display = 'none';
+  document.getElementById('profile-filled').style.display = 'block';
+  document.getElementById('profile-hint-empty').style.display = 'none';
+  document.getElementById('profile-hint-filled').style.display = 'block';
+
+  setTimeout(closeSheet, 200);
+}
+
+function editPartner(e, id) {
+  e.stopPropagation();
+  alert('相手' + id + 'の編集モーダルを開きます（実装時に編集フォームへ接続）');
+}
+
+function selectChip(el, groupId) {
+  document.getElementById(groupId).querySelectorAll('.chip').forEach(function(c) { c.classList.remove('sel'); });
+  el.classList.add('sel');
+}
+
+function selectPurpose(el) {
+  document.getElementById('purpose-cards').querySelectorAll('.purpose-card').forEach(function(c) { c.classList.remove('sel'); });
+  el.classList.add('sel');
+}
+</script>
+</body>
+</html>

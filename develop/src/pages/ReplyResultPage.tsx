@@ -54,6 +54,7 @@ export default function ReplyResultPage() {
   const targetAge = location.state?.targetAge ?? null
   const targetArea = location.state?.targetArea ?? ''
   const targetHobbies = location.state?.targetHobbies ?? ''
+  const targetId: string | null = location.state?.targetId ?? null
 
   const [patterns, setPatterns] = useState<Pattern[]>(initPatterns)
   const [selected, setSelected] = useState(1)
@@ -123,16 +124,14 @@ export default function ReplyResultPage() {
     const usedPattern = ['a', 'b', 'c'][id - 1]
     const usedMessage = patterns.find((p) => p.id === id)?.message ?? null
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const { data: inserted } = await supabase
         .from('messages')
         .insert({
           user_id: user.id,
+          target_id: targetId,
           type: 'reply',
-          reply_text: latestMessage,
           used_pattern: usedPattern,
           used_message: usedMessage,
           pattern_a: patterns[0]?.message ?? null,
@@ -144,7 +143,19 @@ export default function ReplyResultPage() {
         })
         .select('id')
         .single()
-      setSavedMessageId(inserted?.id ?? null)
+
+      if (inserted) {
+        setSavedMessageId(inserted.id)
+        if (targetId) {
+          await supabase.from('conversation_turns').insert({
+            user_id: user.id,
+            target_id: targetId,
+            message_id: inserted.id,
+            sender: 'me',
+            raw_text: usedMessage,
+          })
+        }
+      }
     }
 
     setTimeout(() => setShowModal(true), 400)
