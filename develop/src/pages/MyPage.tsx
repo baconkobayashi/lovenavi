@@ -143,7 +143,7 @@ export default function MyPage() {
   }, [])
 
   return (
-    <div className="flex min-h-screen justify-center bg-page px-4 py-8">
+    <div className="flex min-h-screen justify-center bg-page px-4 py-8 pb-[64px]">
       <div className="w-full max-w-[400px]">
         <div className="frame">
           {/* ナビ */}
@@ -308,10 +308,9 @@ export default function MyPage() {
               </div>
             ))}
           </div>
-
-          <BottomNav active="mypage" />
         </div>
       </div>
+      <BottomNav active="mypage" />
     </div>
   )
 }

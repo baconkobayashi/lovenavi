@@ -121,7 +121,7 @@ export default function HistoryPage() {
   ]
 
   return (
-    <div className="flex min-h-screen justify-center bg-page px-4 py-8">
+    <div className="flex min-h-screen justify-center bg-page px-4 py-8 pb-[64px]">
       <div className="w-full max-w-[400px]">
         <div className="frame">
           {/* ナビ */}
@@ -268,10 +268,9 @@ export default function HistoryPage() {
               </div>
             ))}
           </div>
-
-          <BottomNav active="history" />
         </div>
       </div>
+      <BottomNav active="history" />
 
       {/* フィードバックモーダル */}
       {editingId && (

@@ -69,23 +69,29 @@ export default function BottomNav({ active }: Props) {
   ]
 
   return (
-    <div className="flex border-t border-black/10">
-      {items.map(({ key, label, icon, path }) => {
-        const isActive = active === key
-        return (
-          <button
-            key={key}
-            onClick={() => navigate(path)}
-            className="flex flex-1 cursor-pointer flex-col items-center gap-1 border-none bg-transparent py-[10px]"
-          >
-            {icon}
-            <span className={`text-[10px] ${isActive ? 'text-brand' : 'text-ink-tertiary'}`}>
-              {label}
-            </span>
-            <div className={`h-1 w-1 rounded-full ${isActive ? 'bg-brand' : 'bg-transparent'}`} />
-          </button>
-        )
-      })}
+    <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
+      <div className="w-full max-w-[400px] border-t border-black/10 bg-white">
+        <div className="flex">
+          {items.map(({ key, label, icon, path }) => {
+            const isActive = active === key
+            return (
+              <button
+                key={key}
+                onClick={() => navigate(path)}
+                className="flex flex-1 cursor-pointer flex-col items-center gap-1 border-none bg-transparent py-[10px]"
+              >
+                {icon}
+                <span className={`text-[10px] ${isActive ? 'text-brand' : 'text-ink-tertiary'}`}>
+                  {label}
+                </span>
+                <div
+                  className={`h-1 w-1 rounded-full ${isActive ? 'bg-brand' : 'bg-transparent'}`}
+                />
+              </button>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

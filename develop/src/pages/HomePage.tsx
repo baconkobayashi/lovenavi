@@ -5,7 +5,7 @@ export default function HomePage() {
   const navigate = useNavigate()
 
   return (
-    <div className="flex min-h-screen justify-center bg-page px-4 py-8">
+    <div className="flex min-h-screen justify-center bg-page px-4 py-8 pb-[64px]">
       <div className="w-full max-w-[400px]">
         <div className="frame">
           {/* ナビバー */}
@@ -98,10 +98,9 @@ export default function HomePage() {
               </div>
             </button>
           </div>
-
-          <BottomNav active="home" />
         </div>
       </div>
+      <BottomNav active="home" />
     </div>
   )
 }

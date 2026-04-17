@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import BottomNav from '../components/BottomNav'
 
 type Relation = 'matching' | 'chatted' | 'met' | 'dating'
 type Area = '東京' | '神奈川' | '大阪' | '名古屋' | 'その他'
@@ -201,7 +202,7 @@ export default function FirstApproachPage() {
   }
 
   return (
-    <div className="flex min-h-screen justify-center bg-page px-4 py-8">
+    <div className="flex min-h-screen justify-center bg-page px-4 py-8 pb-[64px]">
       <div className="w-full max-w-[400px]">
         {/* ステップ1 */}
         {step === 1 && (
@@ -477,6 +478,7 @@ export default function FirstApproachPage() {
           </div>
         )}
       </div>
+      <BottomNav active="home" />
     </div>
   )
 }

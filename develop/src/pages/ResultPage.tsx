@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import BottomNav from '../components/BottomNav'
 
 interface Pattern {
   id: number
@@ -159,7 +160,7 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="flex min-h-screen justify-center bg-page px-4 py-8">
+    <div className="flex min-h-screen justify-center bg-page px-4 py-8 pb-[64px]">
       <div className="w-full max-w-[400px]">
         <div className="frame mb-4">
           <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
@@ -299,6 +300,7 @@ export default function ResultPage() {
           </div>
         </div>
       )}
+      <BottomNav active="home" />
     </div>
   )
 }

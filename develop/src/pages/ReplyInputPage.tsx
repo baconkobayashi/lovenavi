@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import BottomNav from '../components/BottomNav'
 
 type Count = '初回' | '2〜5回' | '6〜10回' | '11回以上'
 type Purpose = '会話を続ける' | 'デートに誘う' | 'LINE交換' | '関係を温める'
@@ -347,7 +348,7 @@ export default function ReplyInputPage() {
     : []
 
   return (
-    <div className="flex min-h-screen justify-center bg-page px-4 py-8">
+    <div className="flex min-h-screen justify-center bg-page px-4 py-8 pb-[64px]">
       <div className="w-full max-w-[400px]">
         <div className="frame mb-4">
           {/* ナビ */}
@@ -935,6 +936,7 @@ export default function ReplyInputPage() {
           </div>
         </div>
       )}
+      <BottomNav active="home" />
     </div>
   )
 }
