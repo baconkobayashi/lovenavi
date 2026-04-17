@@ -11,6 +11,7 @@ interface HistoryItem {
   text: string
   result: ResultTag | null
   nickname: string | null
+  targetId: string | null
 }
 
 function formatRelativeDate(iso: string) {
@@ -117,7 +118,7 @@ export default function MyPage() {
       // 直近3件の履歴（使ったもの）
       const { data: recent } = await supabase
         .from('messages')
-        .select('type, used_message, feedback, created_at, targets(nickname)')
+        .select('type, used_message, feedback, created_at, target_id, targets(nickname)')
         .eq('user_id', user.id)
         .not('used_message', 'is', null)
         .order('created_at', { ascending: false })
@@ -132,6 +133,7 @@ export default function MyPage() {
               text: m.used_message,
               result: m.feedback as ResultTag | null,
               nickname: (t as { nickname: string } | null)?.nickname ?? null,
+              targetId: m.target_id ?? null,
             }
           }),
         )
@@ -222,7 +224,7 @@ export default function MyPage() {
             {history.length === 0 ? (
               <p className="py-4 text-center text-xs text-ink-tertiary">履歴がありません</p>
             ) : (
-              history.map(({ type, date, text, result, nickname }, i) => {
+              history.map(({ type, date, text, result, nickname, targetId }, i) => {
                 const style = result ? RESULT_STYLES[result] : null
                 return (
                   <div
@@ -249,17 +251,27 @@ export default function MyPage() {
                         <span className="text-[11px] text-ink-tertiary">{date}</span>
                       </div>
                       <p className="mb-1 text-xs leading-[1.5] text-ink">{text}</p>
-                      {style ? (
-                        <span
-                          className={`inline-block rounded-full px-2 py-[2px] text-[10px] ${style.bg} ${style.text}`}
-                        >
-                          {style.label}
-                        </span>
-                      ) : (
-                        <span className="inline-block rounded-full bg-surface px-2 py-[2px] text-[10px] text-ink-tertiary">
-                          フィードバック未記録
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {style ? (
+                          <span
+                            className={`inline-block rounded-full px-2 py-[2px] text-[10px] ${style.bg} ${style.text}`}
+                          >
+                            {style.label}
+                          </span>
+                        ) : (
+                          <span className="inline-block rounded-full bg-surface px-2 py-[2px] text-[10px] text-ink-tertiary">
+                            フィードバック未記録
+                          </span>
+                        )}
+                        {targetId && (
+                          <button
+                            onClick={() => navigate('/reply', { state: { targetId } })}
+                            className="ml-auto cursor-pointer rounded-full border border-[#0F6E56]/30 bg-transparent px-2 py-[2px] text-[10px] text-[#0F6E56] transition-colors hover:bg-[#E1F5EE]"
+                          >
+                            返信する →
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )

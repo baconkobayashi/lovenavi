@@ -134,19 +134,17 @@ export default function FirstApproachPage() {
     }
 
     // 自分のプロフィール保存
-    await supabase
-      .from('profiles')
-      .upsert(
-        {
-          user_id: session.user.id,
-          my_age: myAge,
-          my_job: myJob,
-          my_hobbies: myHobbies,
-          tone,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' },
-      )
+    await supabase.from('profiles').upsert(
+      {
+        user_id: session.user.id,
+        my_age: myAge,
+        my_job: myJob,
+        my_hobbies: myHobbies,
+        tone,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' },
+    )
 
     // 相手（target）を新規作成
     const { data: target, error: targetError } = await supabase

@@ -415,17 +415,17 @@ export default function ReplyResultPage() {
                   {
                     key: 'yes',
                     label: '返信きた',
-                    active: 'bg-[#EAF3DE] border-[#B6D98A] text-[#3B6D11]',
+                    active: 'bg-success-bg border-success-border text-success-text',
                   },
                   {
                     key: 'pending',
                     label: 'まだ待ち中',
-                    active: 'bg-[#FAEEDA] border-[#F0C87A] text-[#633806]',
+                    active: 'bg-warn-bg border-warn-border text-warn-text',
                   },
                   {
                     key: 'no',
                     label: '既読スルー',
-                    active: 'bg-[#FCEBEB] border-[#F0A0A0] text-[#A32D2D]',
+                    active: 'bg-danger-bg border-danger-border text-danger-text',
                   },
                 ] as const
               ).map(({ key, label, active }) => (
@@ -443,7 +443,10 @@ export default function ReplyResultPage() {
               ))}
             </div>
             <button
-              onClick={() => setShowModal(false)}
+              onClick={() => {
+                setShowModal(false)
+                navigate('/home')
+              }}
               className="w-full cursor-pointer rounded-md border-none bg-transparent py-[10px] text-xs text-ink-tertiary hover:text-ink-secondary"
             >
               あとで回答する
