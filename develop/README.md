@@ -10,6 +10,7 @@
 | ルーティング | React Router v6 |
 | バックエンド / DB | Supabase (PostgreSQL + Edge Functions) |
 | ホスティング | Vercel |
+| LLM | Google Gemini 2.5 Flash Lite |
 
 ## 開発環境のセットアップ
 
