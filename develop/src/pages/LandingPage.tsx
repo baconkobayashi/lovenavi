@@ -93,21 +93,6 @@ export default function LandingPage() {
               {showGuide ? '閉じる ▲' : '使い方を見る ▼'}
             </button>
           </div>
-          <div className="border-b border-black/10 px-5 py-4">
-            <div className="flex items-center gap-1">
-              {['A', 'B', 'C', 'D'].map((l) => (
-                <span
-                  key={l}
-                  className="-ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full border-[1.5px] border-white bg-surface text-[10px] text-ink-secondary first:ml-0"
-                >
-                  {l}
-                </span>
-              ))}
-              <span className="ml-1 text-xs text-ink-secondary">
-                すでに <strong>〇〇人</strong> が利用中
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* 機能紹介〜最終CTA（使い方を見るで表示） */}
