@@ -2,18 +2,9 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { supabase } from '../lib/supabase'
+import { type Tone, type Job, MY_TONES, JOBS } from '../lib/constants'
 
 type ResultTag = 'yes' | 'no' | 'pending'
-type Tone = 'aggressive' | 'reserved' | 'humorous' | 'sincere'
-type Job = '会社員' | 'フリーランス' | '公務員' | '経営者・自営業' | 'その他'
-
-const TONES: { key: Tone; label: string; sub: string }[] = [
-  { key: 'aggressive', label: '積極的', sub: 'グイグイいくタイプ' },
-  { key: 'reserved', label: '控えめ', sub: 'ゆっくり距離を縮める' },
-  { key: 'humorous', label: 'ユーモア系', sub: '笑いを取りに行く' },
-  { key: 'sincere', label: '誠実系', sub: '真面目・丁寧な印象' },
-]
-const JOBS: Job[] = ['会社員', 'フリーランス', '公務員', '経営者・自営業', 'その他']
 
 interface HistoryItem {
   type: 'first' | 'reply'
@@ -169,16 +160,24 @@ export default function MyPage() {
 
   async function saveProfile() {
     setSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setSaving(false); return }
-    await supabase.from('profiles').upsert({
-      user_id: user.id,
-      my_age: editAge,
-      my_job: editJob,
-      my_hobbies: editHobbies,
-      tone: editTone,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' })
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      setSaving(false)
+      return
+    }
+    await supabase.from('profiles').upsert(
+      {
+        user_id: user.id,
+        my_age: editAge,
+        my_job: editJob,
+        my_hobbies: editHobbies,
+        tone: editTone,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' },
+    )
     setProfile({ my_age: editAge, my_job: editJob, my_hobbies: editHobbies, tone: editTone })
     setSaving(false)
     setShowProfileSheet(false)
@@ -191,7 +190,10 @@ export default function MyPage() {
           {/* ナビ */}
           <div className="flex items-center justify-between border-b border-black/10 px-4 py-[14px]">
             <span className="text-[15px] font-medium">マイページ</span>
-            <button onClick={openProfileSheet} className="cursor-pointer rounded-md border border-brand-border bg-transparent px-[10px] py-1 text-xs text-brand">
+            <button
+              onClick={openProfileSheet}
+              className="cursor-pointer rounded-md border border-brand-border bg-transparent px-[10px] py-1 text-xs text-brand"
+            >
               プロフィール編集
             </button>
           </div>
@@ -281,13 +283,17 @@ export default function MyPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="mb-[3px] flex items-center">
-                        <span className={`text-[11px] font-medium ${type === 'first' ? 'text-brand' : 'text-[#0F6E56]'}`}>
+                        <span
+                          className={`text-[11px] font-medium ${type === 'first' ? 'text-brand' : 'text-[#0F6E56]'}`}
+                        >
                           {type === 'first' ? '初回アプローチ' : '返信'}
                         </span>
                         {nickname && (
                           <>
                             <span className="mx-1 text-[10px] text-ink-tertiary">·</span>
-                            <span className="text-[11px] font-medium text-ink-secondary">{nickname}</span>
+                            <span className="text-[11px] font-medium text-ink-secondary">
+                              {nickname}
+                            </span>
                           </>
                         )}
                         <span className="ml-auto text-[11px] text-ink-tertiary">{date}</span>
@@ -295,7 +301,9 @@ export default function MyPage() {
                       <p className="mb-1 text-xs leading-[1.5] text-ink">{text}</p>
                       <div className="flex items-center gap-2">
                         {style ? (
-                          <span className={`inline-block rounded-full px-2 py-[2px] text-[10px] ${style.bg} ${style.text}`}>
+                          <span
+                            className={`inline-block rounded-full px-2 py-[2px] text-[10px] ${style.bg} ${style.text}`}
+                          >
                             {style.label}
                           </span>
                         ) : (
@@ -346,15 +354,29 @@ export default function MyPage() {
 
       {/* プロフィール編集ボトムシート */}
       {showProfileSheet && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowProfileSheet(false) }}>
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowProfileSheet(false)
+          }}
+        >
           <div className="max-h-[90vh] w-full max-w-[400px] overflow-y-auto rounded-[16px_16px_0_0] bg-white">
             <div className="mx-auto mt-3 h-1 w-9 rounded-full bg-black/20" />
             <div className="sticky top-0 flex items-center justify-between border-b border-black/10 bg-white px-4 py-4">
               <span className="text-[15px] font-medium">あなたの情報・キャラ設定</span>
-              <button onClick={() => setShowProfileSheet(false)}
-                className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent hover:bg-surface">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1a1a18" strokeWidth="1.5" strokeLinecap="round">
+              <button
+                onClick={() => setShowProfileSheet(false)}
+                className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent hover:bg-surface"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="#1a1a18"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                >
                   <path d="M1 1l10 10M11 1L1 11" />
                 </svg>
               </button>
@@ -364,8 +386,15 @@ export default function MyPage() {
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-ink">年齢</label>
                 <div className="flex items-center gap-[10px]">
-                  <input type="range" min={18} max={50} value={editAge} step={1}
-                    onChange={(e) => setEditAge(Number(e.target.value))} className="flex-1" />
+                  <input
+                    type="range"
+                    min={18}
+                    max={50}
+                    value={editAge}
+                    step={1}
+                    onChange={(e) => setEditAge(Number(e.target.value))}
+                    className="flex-1"
+                  />
                   <span className="min-w-[28px] text-right text-[13px] font-medium">{editAge}</span>
                   <span className="text-xs text-ink-secondary">歳</span>
                 </div>
@@ -373,31 +402,55 @@ export default function MyPage() {
               {/* 職業 */}
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-ink">職業</label>
-                <select value={editJob} onChange={(e) => setEditJob(e.target.value as Job)} className="w-full">
-                  {JOBS.map((j) => <option key={j}>{j}</option>)}
+                <select
+                  value={editJob}
+                  onChange={(e) => setEditJob(e.target.value as Job)}
+                  className="w-full"
+                >
+                  {JOBS.map((j) => (
+                    <option key={j}>{j}</option>
+                  ))}
                 </select>
               </div>
               {/* 趣味 */}
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-ink">趣味・好きなこと</label>
-                <textarea rows={2} value={editHobbies} onChange={(e) => setEditHobbies(e.target.value)}
-                  placeholder="例：サッカー、映画、料理" />
+                <label className="mb-1.5 block text-xs font-medium text-ink">
+                  趣味・好きなこと
+                </label>
+                <textarea
+                  rows={2}
+                  value={editHobbies}
+                  onChange={(e) => setEditHobbies(e.target.value)}
+                  placeholder="例：サッカー、映画、料理"
+                />
               </div>
               {/* キャラ設定 */}
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-ink">キャラ設定（トーン）</label>
+                <label className="mb-1.5 block text-xs font-medium text-ink">
+                  キャラ設定（トーン）
+                </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {TONES.map(({ key, label, sub }) => (
-                    <button key={key} onClick={() => setEditTone(key)}
-                      className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${editTone === key ? 'border-brand-border bg-brand-light' : 'border-black/10 hover:bg-surface'}`}>
-                      <p className={`mb-0.5 text-xs font-medium ${editTone === key ? 'text-brand-dark' : 'text-ink'}`}>{label}</p>
+                  {MY_TONES.map(({ key, label, sub }) => (
+                    <button
+                      key={key}
+                      onClick={() => setEditTone(key)}
+                      className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${editTone === key ? 'border-brand-border bg-brand-light' : 'border-black/10 hover:bg-surface'}`}
+                    >
+                      <p
+                        className={`mb-0.5 text-xs font-medium ${editTone === key ? 'text-brand-dark' : 'text-ink'}`}
+                      >
+                        {label}
+                      </p>
                       <span className="text-[11px] text-ink-secondary">{sub}</span>
                     </button>
                   ))}
                 </div>
               </div>
-              <button onClick={saveProfile} disabled={saving}
-                className="w-full cursor-pointer rounded-md border-none bg-brand py-3 text-sm font-medium text-brand-light transition-colors hover:bg-brand-dark disabled:opacity-50">
+              <button
+                onClick={saveProfile}
+                disabled={saving}
+                className="w-full cursor-pointer rounded-md border-none bg-brand py-3 text-sm font-medium text-brand-light transition-colors hover:bg-brand-dark disabled:opacity-50"
+              >
                 {saving ? '保存中...' : '保存する'}
               </button>
             </div>

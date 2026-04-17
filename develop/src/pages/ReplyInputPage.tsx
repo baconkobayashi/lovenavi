@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import BottomNav from '../components/BottomNav'
+import { AREAS, RELATIONS, TARGET_TONES, type TargetTone } from '../lib/constants'
 
 type Count = '初回' | '2〜5回' | '6〜10回' | '11回以上'
 type Purpose = '会話を続ける' | 'デートに誘う' | 'LINE交換' | '関係を温める'
-type Tone = 'テンション高め' | '普通' | '素っ気ない' | 'わからない'
-type Relation = 'マッチング直後' | '数回やり取り済み' | '会ったことある' | '付き合い中'
+type RelationLabel = 'マッチング直後' | '数回やり取り済み' | '会ったことある' | '付き合い中'
 
 const COUNTS: Count[] = ['初回', '2〜5回', '6〜10回', '11回以上']
 const PURPOSES: { label: Purpose; sub: string }[] = [
@@ -14,14 +14,6 @@ const PURPOSES: { label: Purpose; sub: string }[] = [
   { label: 'デートに誘う', sub: '会う約束をしたい' },
   { label: 'LINE交換', sub: 'アプリ外に移行したい' },
   { label: '関係を温める', sub: 'もっと距離を縮めたい' },
-]
-const TONES: Tone[] = ['テンション高め', '普通', '素っ気ない', 'わからない']
-const AREAS = ['東京', '神奈川', '大阪', '名古屋', 'その他']
-const RELATIONS: { key: string; label: Relation; sub: string }[] = [
-  { key: 'matching', label: 'マッチング直後', sub: 'まだ会話していない' },
-  { key: 'chatted', label: '数回やり取り済み', sub: '少し話したことある' },
-  { key: 'met', label: '会ったことある', sub: 'オフラインで会った' },
-  { key: 'dating', label: '付き合い中', sub: '交際中のやり取り' },
 ]
 const AVATAR_COLORS = [
   { bg: '#EEEDFE', text: '#534AB7' },
@@ -111,7 +103,7 @@ export default function ReplyInputPage() {
   const [latestMessage, setLatestMessage] = useState('')
   const [count, setCount] = useState<Count | null>(null)
   const [purpose, setPurpose] = useState<Purpose | null>(null)
-  const [tone, setTone] = useState<Tone | null>(null)
+  const [tone, setTone] = useState<TargetTone | null>(null)
   const [generating, setGenerating] = useState(false)
   const [genError, setGenError] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -122,7 +114,7 @@ export default function ReplyInputPage() {
 
   // モーダル内フォーム
   const [modalNickname, setModalNickname] = useState('')
-  const [modalRelation, setModalRelation] = useState<Relation>('マッチング直後')
+  const [modalRelation, setModalRelation] = useState<RelationLabel>('マッチング直後')
   const [modalAge, setModalAge] = useState(25)
   const [modalArea, setModalArea] = useState('東京')
   const [modalHobbies, setModalHobbies] = useState('')
@@ -193,7 +185,7 @@ export default function ReplyInputPage() {
 
   function openEditModal(target: Target) {
     setModalNickname(target.nickname)
-    setModalRelation((getRelationLabel(target.relation) as Relation) || 'マッチング直後')
+    setModalRelation((getRelationLabel(target.relation) as RelationLabel) || 'マッチング直後')
     setModalAge(target.age ?? 25)
     setModalArea(target.area ?? '東京')
     setModalHobbies(target.hobbies ?? '')
@@ -641,7 +633,7 @@ export default function ReplyInputPage() {
                 相手のトーン <Badge required={false} />
               </p>
               <div className="flex flex-wrap gap-2">
-                {TONES.map((t) => (
+                {TARGET_TONES.map((t) => (
                   <button
                     key={t}
                     onClick={() => setTone(t)}
@@ -858,7 +850,7 @@ export default function ReplyInputPage() {
                   {RELATIONS.map(({ label, sub }) => (
                     <button
                       key={label}
-                      onClick={() => setModalRelation(label)}
+                      onClick={() => setModalRelation(label as RelationLabel)}
                       className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${modalRelation === label ? 'border-brand-border bg-brand-light' : 'border-black/10 hover:bg-surface'}`}
                     >
                       <p
