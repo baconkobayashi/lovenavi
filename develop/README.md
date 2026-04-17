@@ -1,5 +1,16 @@
 # lovenavigation
 
+## 技術スタック
+
+| カテゴリ | 技術 |
+|---|---|
+| フロントエンド | React 18 + TypeScript |
+| ビルドツール | Vite |
+| スタイリング | Tailwind CSS |
+| ルーティング | React Router v6 |
+| バックエンド / DB | Supabase (PostgreSQL + Edge Functions) |
+| ホスティング | Vercel |
+
 ## 開発環境のセットアップ
 
 ```bash
