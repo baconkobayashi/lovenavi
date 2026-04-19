@@ -12,6 +12,10 @@
 | ホスティング | Vercel |
 | LLM | Google Gemini 2.5 Flash Lite |
 
+## LLM利用額確認
+
+https://aistudio.google.com/spend
+
 ## 開発環境のセットアップ
 
 ```bash
