@@ -12,6 +12,14 @@
 | ホスティング | Vercel |
 | LLM | Google Gemini 2.5 Flash Lite |
 
+## ホスティング（テスト）
+
+https://becon-lovenavigation.vercel.app/
+
+## チェックシート
+
+https://docs.google.com/spreadsheets/d/1zFfAexeP53c7BCgWlUGg5msAE6H2lQrG4H5hJPNprc8/edit?usp=sharing
+
 ## LLM利用額確認
 
 https://aistudio.google.com/spend
