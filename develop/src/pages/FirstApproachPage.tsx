@@ -72,6 +72,8 @@ function Badge({ label, required }: { label: string; required: boolean }) {
   return <span className="text-[10px] text-ink-tertiary">{label}</span>
 }
 
+const DRAFT_KEY = 'first-approach-draft'
+
 export default function FirstApproachPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
@@ -93,6 +95,22 @@ export default function FirstApproachPage() {
   const [tone, setTone] = useState<Tone>('aggressive')
 
   useEffect(() => {
+    const saved = sessionStorage.getItem(DRAFT_KEY)
+    if (saved) {
+      const d = JSON.parse(saved)
+      setStep(d.step ?? 1)
+      setNickname(d.nickname ?? '')
+      setRelation(d.relation ?? 'matching')
+      setAge(d.age ?? 25)
+      setArea(d.area ?? '東京')
+      setHobbies(d.hobbies ?? '')
+      setProfileText(d.profileText ?? '')
+      setMyAge(d.myAge ?? 28)
+      setMyJob(d.myJob ?? '会社員')
+      setMyHobbies(d.myHobbies ?? '')
+      setTone(d.tone ?? 'aggressive')
+      return
+    }
     async function init() {
       const {
         data: { user },
@@ -188,287 +206,318 @@ export default function FirstApproachPage() {
     }))
 
     setSaving(false)
+    sessionStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify({
+        step: 2,
+        nickname,
+        relation,
+        age,
+        area,
+        hobbies,
+        profileText,
+        myAge,
+        myJob,
+        myHobbies,
+        tone,
+      }),
+    )
     navigate('/result', { state: { patterns, targetId: target.id } })
   }
 
   return (
-    <div className="flex min-h-screen justify-center bg-page px-4 py-8 pb-[64px]">
-      <div className="w-full max-w-[400px]">
-        {/* ステップ1 */}
-        {step === 1 && (
-          <div className="frame mb-4">
-            <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
-              <button
-                onClick={() => navigate('/home')}
-                className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent"
-              >
-                <BackIcon />
-              </button>
-              <span className="flex-1 text-[15px] font-medium">初回アプローチを作る</span>
-              <span className="text-xs text-ink-tertiary">1 / 2</span>
-              <button
-                onClick={() => navigate('/home')}
-                className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary"
-              >
-                <HomeIcon />
-                ホーム
-              </button>
-            </div>
-
-            <div className="h-[3px] bg-surface">
-              <div className="h-full rounded-r-sm bg-brand" style={{ width: '50%' }} />
-            </div>
-
-            <div className="p-4">
-              <p className="mb-3 border-b border-black/10 pb-2 text-[13px] font-medium text-ink-secondary">
-                相手のプロフィール情報
-              </p>
-
-              {/* ニックネーム */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  ニックネーム <Badge label="必須" required />
-                </p>
-                <input
-                  type="text"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  placeholder="例：カフェさん、みかちゃん"
-                  className="w-full"
-                />
-                <p className="mt-1 text-[11px] text-ink-tertiary">相手を識別するための呼び名です</p>
+    <>
+      <div className="flex justify-center bg-page px-4 py-8 pb-6">
+        <div className="w-full max-w-[400px]">
+          {/* ステップ1 */}
+          {step === 1 && (
+            <div className="frame mb-4">
+              <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
+                <button
+                  onClick={() => {
+                    sessionStorage.removeItem(DRAFT_KEY)
+                    navigate('/home')
+                  }}
+                  className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent"
+                >
+                  <BackIcon />
+                </button>
+                <span className="flex-1 text-[15px] font-medium">初回アプローチを作る</span>
+                <span className="text-xs text-ink-tertiary">1 / 2</span>
+                <button
+                  onClick={() => {
+                    sessionStorage.removeItem(DRAFT_KEY)
+                    navigate('/home')
+                  }}
+                  className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary"
+                >
+                  <HomeIcon />
+                  ホーム
+                </button>
               </div>
 
-              {/* 関係値 */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  関係値 <Badge label="必須" required />
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {RELATIONS.map(({ key, label, sub }) => (
-                    <button
-                      key={key}
-                      onClick={() => setRelation(key)}
-                      className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${relation === key ? 'border-brand-border bg-brand-light' : 'border-black/10'}`}
-                    >
-                      <p
-                        className={`mb-0.5 text-xs font-medium ${relation === key ? 'text-brand-dark' : 'text-ink'}`}
-                      >
-                        {label}
-                      </p>
-                      <span className="text-[11px] text-ink-secondary">{sub}</span>
-                    </button>
-                  ))}
-                </div>
+              <div className="h-[3px] bg-surface">
+                <div className="h-full rounded-r-sm bg-brand" style={{ width: '50%' }} />
               </div>
 
-              {/* 年齢 */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  年齢 <Badge label="必須" required />
+              <div className="p-4">
+                <p className="mb-3 border-b border-black/10 pb-2 text-[13px] font-medium text-ink-secondary">
+                  相手のプロフィール情報
                 </p>
-                <div className="flex items-center gap-[10px]">
+
+                {/* ニックネーム */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    ニックネーム <Badge label="必須" required />
+                  </p>
                   <input
-                    type="range"
-                    min={18}
-                    max={45}
-                    value={age}
-                    step={1}
-                    onChange={(e) => setAge(Number(e.target.value))}
-                    className="flex-1"
+                    type="text"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    placeholder="例：カフェさん、みかちゃん"
+                    className="w-full"
                   />
-                  <span className="min-w-[28px] text-right text-[13px] font-medium">{age}</span>
-                  <span className="text-xs text-ink-secondary">歳</span>
+                  <p className="mt-1 text-[11px] text-ink-tertiary">
+                    相手を識別するための呼び名です
+                  </p>
                 </div>
-              </div>
 
-              {/* 居住エリア */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  居住エリア <Badge label="任意" required={false} />
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {AREAS.map((a) => (
-                    <button
-                      key={a}
-                      onClick={() => setArea(a)}
-                      className={`cursor-pointer rounded-full border px-[14px] py-1.5 text-xs transition-all ${area === a ? 'border-brand-border bg-brand-light font-medium text-brand-dark' : 'border-black/20 bg-transparent text-ink'}`}
-                    >
-                      {a}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 趣味 */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  趣味・好きなこと <Badge label="任意" required={false} />
-                </p>
-                <textarea
-                  rows={3}
-                  value={hobbies}
-                  onChange={(e) => setHobbies(e.target.value)}
-                  placeholder={
-                    '例：カフェ巡り、映画鑑賞、ヨガ\nプロフィール文をそのままコピペでもOK'
-                  }
-                />
-                <p className="mt-1 text-[11px] text-ink-tertiary">入れるほど精度が上がります</p>
-              </div>
-
-              {/* プロフィール文 */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  プロフィール文（あれば） <Badge label="任意" required={false} />
-                </p>
-                <textarea
-                  rows={3}
-                  value={profileText}
-                  onChange={(e) => setProfileText(e.target.value)}
-                  placeholder="例：週末はよくカフェでのんびりしています。旅行も好きで去年は京都に行きました。"
-                />
-              </div>
-
-              <button
-                onClick={() => {
-                  setStep(2)
-                  window.scrollTo(0, 0)
-                }}
-                disabled={!nickname.trim()}
-                className="w-full cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light disabled:opacity-50"
-              >
-                次へ　→
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ステップ2 */}
-        {step === 2 && (
-          <div className="frame">
-            <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
-              <button
-                onClick={() => setStep(1)}
-                className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent"
-              >
-                <BackIcon />
-              </button>
-              <span className="flex-1 text-[15px] font-medium">初回アプローチを作る</span>
-              <span className="text-xs text-ink-tertiary">2 / 2</span>
-              <button
-                onClick={() => navigate('/home')}
-                className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary"
-              >
-                <HomeIcon />
-                ホーム
-              </button>
-            </div>
-
-            <div className="h-[3px] bg-surface">
-              <div className="h-full w-full rounded-r-sm bg-brand" />
-            </div>
-
-            <div className="p-4">
-              <p className="mb-3 border-b border-black/10 pb-2 text-[13px] font-medium text-ink-secondary">
-                あなたの情報・キャラ設定
-              </p>
-
-              <div className="mb-4 flex items-start gap-2 rounded-md bg-brand-light p-[10px_12px]">
-                <InfoIcon />
-                <span className="text-[11px] leading-[1.5] text-brand-dark">
-                  入力した情報はマイページに保存されます。次回以降は自動で入力されます。
-                </span>
-              </div>
-
-              {/* 年齢 */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  年齢 <Badge label="必須" required />
-                </p>
-                <div className="flex items-center gap-[10px]">
-                  <input
-                    type="range"
-                    min={18}
-                    max={50}
-                    value={myAge}
-                    step={1}
-                    onChange={(e) => setMyAge(Number(e.target.value))}
-                    className="flex-1"
-                  />
-                  <span className="min-w-[28px] text-right text-[13px] font-medium">{myAge}</span>
-                  <span className="text-xs text-ink-secondary">歳</span>
-                </div>
-              </div>
-
-              {/* 職業 */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  職業 <Badge label="任意" required={false} />
-                </p>
-                <select value={myJob} onChange={(e) => setMyJob(e.target.value as Job)}>
-                  {JOBS.map((j) => (
-                    <option key={j}>{j}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* 趣味 */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  趣味・好きなこと <Badge label="任意" required={false} />
-                </p>
-                <textarea
-                  rows={2}
-                  value={myHobbies}
-                  onChange={(e) => setMyHobbies(e.target.value)}
-                  placeholder="例：サッカー、映画、料理"
-                />
-              </div>
-
-              {/* キャラ設定 */}
-              <div className="mb-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  キャラ設定（トーン） <Badge label="必須" required />
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {MY_TONES.map(({ key, label, sub }) => (
-                    <button
-                      key={key}
-                      onClick={() => setTone(key)}
-                      className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${tone === key ? 'border-brand-border bg-brand-light' : 'border-black/10'}`}
-                    >
-                      <p
-                        className={`mb-0.5 text-xs font-medium ${tone === key ? 'text-brand-dark' : 'text-ink'}`}
+                {/* 関係値 */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    関係値 <Badge label="必須" required />
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {RELATIONS.map(({ key, label, sub }) => (
+                      <button
+                        key={key}
+                        onClick={() => setRelation(key)}
+                        className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${relation === key ? 'border-brand-border bg-brand-light' : 'border-black/10'}`}
                       >
-                        {label}
-                      </p>
-                      <span className="text-[11px] text-ink-secondary">{sub}</span>
-                    </button>
-                  ))}
+                        <p
+                          className={`mb-0.5 text-xs font-medium ${relation === key ? 'text-brand-dark' : 'text-ink'}`}
+                        >
+                          {label}
+                        </p>
+                        <span className="text-[11px] text-ink-secondary">{sub}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {genError && <p className="mb-3 text-center text-xs text-danger-text">{genError}</p>}
-              <div className="mt-2 flex gap-2">
+                {/* 年齢 */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    年齢 <Badge label="必須" required />
+                  </p>
+                  <div className="flex items-center gap-[10px]">
+                    <input
+                      type="range"
+                      min={18}
+                      max={45}
+                      value={age}
+                      step={1}
+                      onChange={(e) => setAge(Number(e.target.value))}
+                      className="flex-1"
+                    />
+                    <span className="min-w-[28px] text-right text-[13px] font-medium">{age}</span>
+                    <span className="text-xs text-ink-secondary">歳</span>
+                  </div>
+                </div>
+
+                {/* 居住エリア */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    居住エリア <Badge label="任意" required={false} />
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {AREAS.map((a) => (
+                      <button
+                        key={a}
+                        onClick={() => setArea(a)}
+                        className={`cursor-pointer rounded-full border px-[14px] py-1.5 text-xs transition-all ${area === a ? 'border-brand-border bg-brand-light font-medium text-brand-dark' : 'border-black/20 bg-transparent text-ink'}`}
+                      >
+                        {a}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 趣味 */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    趣味・好きなこと <Badge label="任意" required={false} />
+                  </p>
+                  <textarea
+                    rows={3}
+                    value={hobbies}
+                    onChange={(e) => setHobbies(e.target.value)}
+                    placeholder={
+                      '例：カフェ巡り、映画鑑賞、ヨガ\nプロフィール文をそのままコピペでもOK'
+                    }
+                  />
+                  <p className="mt-1 text-[11px] text-ink-tertiary">入れるほど精度が上がります</p>
+                </div>
+
+                {/* プロフィール文 */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    プロフィール文（あれば） <Badge label="任意" required={false} />
+                  </p>
+                  <textarea
+                    rows={3}
+                    value={profileText}
+                    onChange={(e) => setProfileText(e.target.value)}
+                    placeholder="例：週末はよくカフェでのんびりしています。旅行も好きで去年は京都に行きました。"
+                  />
+                </div>
+
+                <button
+                  onClick={() => {
+                    setStep(2)
+                    window.scrollTo(0, 0)
+                  }}
+                  disabled={!nickname.trim()}
+                  className="w-full cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light disabled:opacity-50"
+                >
+                  次へ　→
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ステップ2 */}
+          {step === 2 && (
+            <div className="frame">
+              <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
                 <button
                   onClick={() => setStep(1)}
-                  className="cursor-pointer whitespace-nowrap rounded-md border border-black/20 bg-transparent px-4 py-[13px] text-sm text-ink-secondary"
+                  className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent"
                 >
-                  ← 戻る
+                  <BackIcon />
                 </button>
+                <span className="flex-1 text-[15px] font-medium">初回アプローチを作る</span>
+                <span className="text-xs text-ink-tertiary">2 / 2</span>
                 <button
-                  onClick={handleGenerate}
-                  disabled={saving}
-                  className="flex-1 cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light disabled:opacity-50"
+                  onClick={() => {
+                    sessionStorage.removeItem(DRAFT_KEY)
+                    navigate('/home')
+                  }}
+                  className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary"
                 >
-                  {saving ? '生成中...' : 'メッセージを生成する'}
+                  <HomeIcon />
+                  ホーム
                 </button>
               </div>
+
+              <div className="h-[3px] bg-surface">
+                <div className="h-full w-full rounded-r-sm bg-brand" />
+              </div>
+
+              <div className="p-4">
+                <p className="mb-3 border-b border-black/10 pb-2 text-[13px] font-medium text-ink-secondary">
+                  あなたの情報・キャラ設定
+                </p>
+
+                <div className="mb-4 flex items-start gap-2 rounded-md bg-brand-light p-[10px_12px]">
+                  <InfoIcon />
+                  <span className="text-[11px] leading-[1.5] text-brand-dark">
+                    入力した情報はマイページに保存されます。次回以降は自動で入力されます。
+                  </span>
+                </div>
+
+                {/* 年齢 */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    年齢 <Badge label="必須" required />
+                  </p>
+                  <div className="flex items-center gap-[10px]">
+                    <input
+                      type="range"
+                      min={18}
+                      max={50}
+                      value={myAge}
+                      step={1}
+                      onChange={(e) => setMyAge(Number(e.target.value))}
+                      className="flex-1"
+                    />
+                    <span className="min-w-[28px] text-right text-[13px] font-medium">{myAge}</span>
+                    <span className="text-xs text-ink-secondary">歳</span>
+                  </div>
+                </div>
+
+                {/* 職業 */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    職業 <Badge label="任意" required={false} />
+                  </p>
+                  <select value={myJob} onChange={(e) => setMyJob(e.target.value as Job)}>
+                    {JOBS.map((j) => (
+                      <option key={j}>{j}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 趣味 */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    趣味・好きなこと <Badge label="任意" required={false} />
+                  </p>
+                  <textarea
+                    rows={2}
+                    value={myHobbies}
+                    onChange={(e) => setMyHobbies(e.target.value)}
+                    placeholder="例：サッカー、映画、料理"
+                  />
+                </div>
+
+                {/* キャラ設定 */}
+                <div className="mb-4">
+                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
+                    キャラ設定（トーン） <Badge label="必須" required />
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {MY_TONES.map(({ key, label, sub }) => (
+                      <button
+                        key={key}
+                        onClick={() => setTone(key)}
+                        className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${tone === key ? 'border-brand-border bg-brand-light' : 'border-black/10'}`}
+                      >
+                        <p
+                          className={`mb-0.5 text-xs font-medium ${tone === key ? 'text-brand-dark' : 'text-ink'}`}
+                        >
+                          {label}
+                        </p>
+                        <span className="text-[11px] text-ink-secondary">{sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {genError && (
+                  <p className="mb-3 text-center text-xs text-danger-text">{genError}</p>
+                )}
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={() => setStep(1)}
+                    className="cursor-pointer whitespace-nowrap rounded-md border border-black/20 bg-transparent px-4 py-[13px] text-sm text-ink-secondary"
+                  >
+                    ← 戻る
+                  </button>
+                  <button
+                    onClick={handleGenerate}
+                    disabled={saving}
+                    className="flex-1 cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light disabled:opacity-50"
+                  >
+                    {saving ? '生成中...' : 'メッセージを生成する'}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <BottomNav active="home" />
-    </div>
+    </>
   )
 }

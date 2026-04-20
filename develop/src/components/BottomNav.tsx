@@ -69,7 +69,7 @@ export default function BottomNav({ active }: Props) {
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
+    <div className="sticky bottom-0 z-40 flex justify-center">
       <div className="w-full max-w-[400px] border-t border-black/10 bg-white">
         <div className="flex">
           {items.map(({ key, label, icon, path }) => {

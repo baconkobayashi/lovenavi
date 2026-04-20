@@ -54,12 +54,6 @@ export default function LandingPage() {
               >
                 ログイン
               </button>
-              <button
-                onClick={signInWithGoogle}
-                className="cursor-pointer rounded-md border border-brand bg-brand px-[14px] py-[5px] text-xs text-brand-light"
-              >
-                無料で始める
-              </button>
             </div>
           </div>
         </div>

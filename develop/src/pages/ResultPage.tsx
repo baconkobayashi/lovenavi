@@ -160,147 +160,149 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="flex min-h-screen justify-center bg-page px-4 py-8 pb-[64px]">
-      <div className="w-full max-w-[400px]">
-        <div className="frame mb-4">
-          <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                fill="none"
-                stroke="#1a1a18"
-                strokeWidth="1.5"
-                strokeLinecap="round"
+    <>
+      <div className="flex justify-center bg-page px-4 py-8 pb-6">
+        <div className="w-full max-w-[400px]">
+          <div className="frame mb-4">
+            <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent"
               >
-                <path d="M9 2L4 7l5 5" />
-              </svg>
-            </button>
-            <span className="flex-1 text-[15px] font-medium">生成結果</span>
-            <button
-              onClick={() => navigate('/home')}
-              className="flex cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary"
-            >
-              <HomeIcon />
-              ホーム
-            </button>
-          </div>
-
-          <div className="p-4">
-            {loading && (
-              <div className="flex flex-col items-center py-12">
-                <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-                <p className="text-sm text-ink-secondary">メッセージを生成中...</p>
-              </div>
-            )}
-
-            {!loading && (
-              <>
-                <p className="mb-[10px] text-xs font-medium text-ink-secondary">
-                  3つの候補から選んでください
-                </p>
-
-                {patterns.map(({ id, label, tone, message }) => (
-                  <div
-                    key={id}
-                    onClick={() => setSelected(id)}
-                    className={`mb-[10px] cursor-pointer rounded-lg border p-[14px] transition-all ${selected === id ? 'border-2 border-brand-border bg-brand-light' : 'border border-black/10 bg-white hover:border-black/25'}`}
-                  >
-                    <div className="mb-2 flex items-center justify-between">
-                      <span
-                        className={`rounded-full px-[10px] py-[3px] text-[11px] font-medium ${selected === id ? 'bg-brand-border text-brand-darker' : 'bg-surface text-ink-secondary'}`}
-                      >
-                        {label}
-                      </span>
-                      <span className="rounded-full border border-black/10 px-2 py-[2px] text-[10px] text-ink-tertiary">
-                        {tone}
-                      </span>
-                    </div>
-                    <p
-                      className={`mb-3 text-[13px] leading-[1.7] ${selected === id ? 'text-brand-darker' : 'text-ink'}`}
-                    >
-                      {message}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleCopy(id)
-                        }}
-                        className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border py-2 text-xs transition-all ${copied === id ? 'border-success-border bg-success-bg text-success-text' : 'border-black/20 bg-transparent text-ink hover:bg-surface'}`}
-                      >
-                        {copied === id ? <CheckIcon /> : <CopyIcon />}
-                        {copied === id ? 'コピー済み' : 'コピー'}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleUsed(id)
-                        }}
-                        className={`flex-1 cursor-pointer rounded-md border-none py-2 text-xs font-medium transition-all ${used === id ? 'border border-success-border bg-success-bg text-success-text' : 'bg-brand text-brand-light hover:bg-brand-dark'}`}
-                      >
-                        {used === id ? '使った' : 'これを使う'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-          <div className="w-full max-w-[400px] rounded-[16px_16px_0_0] bg-white px-4 pb-8 pt-5">
-            <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-black/20" />
-            <p className="mb-1 text-center text-[15px] font-medium">送って、どうでしたか？</p>
-            <p className="mb-4 text-center text-xs text-ink-secondary">
-              結果を教えてもらえるとAIが賢くなります
-            </p>
-            <div className="mb-[10px] flex gap-2">
-              {(
-                [
-                  {
-                    key: 'yes',
-                    label: '返信きた',
-                    active: 'bg-[#EAF3DE] border-[#B6D98A] text-[#3B6D11]',
-                  },
-                  {
-                    key: 'pending',
-                    label: 'まだ待ち中',
-                    active: 'bg-[#FAEEDA] border-[#F0C87A] text-[#633806]',
-                  },
-                  {
-                    key: 'no',
-                    label: '既読スルー',
-                    active: 'bg-[#FCEBEB] border-[#F0A0A0] text-[#A32D2D]',
-                  },
-                ] as const
-              ).map(({ key, label, active }) => (
-                <button
-                  key={key}
-                  onClick={() => handleFeedback(key)}
-                  className={`flex-1 cursor-pointer rounded-md border px-1.5 py-3 text-center text-[13px] font-medium transition-all ${feedback === key ? active : 'border-black/20 bg-transparent text-ink hover:bg-surface'}`}
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="#1a1a18"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
                 >
-                  {label}
-                </button>
-              ))}
+                  <path d="M9 2L4 7l5 5" />
+                </svg>
+              </button>
+              <span className="flex-1 text-[15px] font-medium">生成結果</span>
+              <button
+                onClick={() => navigate('/home')}
+                className="flex cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary"
+              >
+                <HomeIcon />
+                ホーム
+              </button>
             </div>
-            <button
-              onClick={() => setShowModal(false)}
-              className="w-full cursor-pointer rounded-md border-none bg-transparent py-[10px] text-xs text-ink-tertiary hover:text-ink-secondary"
-            >
-              あとで回答する
-            </button>
+
+            <div className="p-4">
+              {loading && (
+                <div className="flex flex-col items-center py-12">
+                  <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+                  <p className="text-sm text-ink-secondary">メッセージを生成中...</p>
+                </div>
+              )}
+
+              {!loading && (
+                <>
+                  <p className="mb-[10px] text-xs font-medium text-ink-secondary">
+                    3つの候補から選んでください
+                  </p>
+
+                  {patterns.map(({ id, label, tone, message }) => (
+                    <div
+                      key={id}
+                      onClick={() => setSelected(id)}
+                      className={`mb-[10px] cursor-pointer rounded-lg border p-[14px] transition-all ${selected === id ? 'border-2 border-brand-border bg-brand-light' : 'border border-black/10 bg-white hover:border-black/25'}`}
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <span
+                          className={`rounded-full px-[10px] py-[3px] text-[11px] font-medium ${selected === id ? 'bg-brand-border text-brand-darker' : 'bg-surface text-ink-secondary'}`}
+                        >
+                          {label}
+                        </span>
+                        <span className="rounded-full border border-black/10 px-2 py-[2px] text-[10px] text-ink-tertiary">
+                          {tone}
+                        </span>
+                      </div>
+                      <p
+                        className={`mb-3 text-[13px] leading-[1.7] ${selected === id ? 'text-brand-darker' : 'text-ink'}`}
+                      >
+                        {message}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleCopy(id)
+                          }}
+                          className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border py-2 text-xs transition-all ${copied === id ? 'border-success-border bg-success-bg text-success-text' : 'border-black/20 bg-transparent text-ink hover:bg-surface'}`}
+                        >
+                          {copied === id ? <CheckIcon /> : <CopyIcon />}
+                          {copied === id ? 'コピー済み' : 'コピー'}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleUsed(id)
+                          }}
+                          className={`flex-1 cursor-pointer rounded-md border-none py-2 text-xs font-medium transition-all ${used === id ? 'border border-success-border bg-success-bg text-success-text' : 'bg-brand text-brand-light hover:bg-brand-dark'}`}
+                        >
+                          {used === id ? '使った' : 'これを使う'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
           </div>
         </div>
-      )}
+
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
+            <div className="w-full max-w-[400px] rounded-[16px_16px_0_0] bg-white px-4 pb-8 pt-5">
+              <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-black/20" />
+              <p className="mb-1 text-center text-[15px] font-medium">送って、どうでしたか？</p>
+              <p className="mb-4 text-center text-xs text-ink-secondary">
+                結果を教えてもらえるとAIが賢くなります
+              </p>
+              <div className="mb-[10px] flex gap-2">
+                {(
+                  [
+                    {
+                      key: 'yes',
+                      label: '返信きた',
+                      active: 'bg-[#EAF3DE] border-[#B6D98A] text-[#3B6D11]',
+                    },
+                    {
+                      key: 'pending',
+                      label: 'まだ待ち中',
+                      active: 'bg-[#FAEEDA] border-[#F0C87A] text-[#633806]',
+                    },
+                    {
+                      key: 'no',
+                      label: '既読スルー',
+                      active: 'bg-[#FCEBEB] border-[#F0A0A0] text-[#A32D2D]',
+                    },
+                  ] as const
+                ).map(({ key, label, active }) => (
+                  <button
+                    key={key}
+                    onClick={() => handleFeedback(key)}
+                    className={`flex-1 cursor-pointer rounded-md border px-1.5 py-3 text-center text-[13px] font-medium transition-all ${feedback === key ? active : 'border-black/20 bg-transparent text-ink hover:bg-surface'}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-full cursor-pointer rounded-md border-none bg-transparent py-[10px] text-xs text-ink-tertiary hover:text-ink-secondary"
+              >
+                あとで回答する
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
       <BottomNav active="home" />
-    </div>
+    </>
   )
 }
