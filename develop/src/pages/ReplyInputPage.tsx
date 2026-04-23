@@ -8,6 +8,8 @@ type Count = '初回' | '2〜5回' | '6〜10回' | '11回以上'
 type Purpose = '会話を続ける' | 'デートに誘う' | 'LINE交換' | '関係を温める'
 type RelationLabel = 'マッチング直後' | '数回やり取り済み' | '会ったことある' | '付き合い中'
 
+const DRAFT_KEY = 'reply-draft'
+
 const COUNTS: Count[] = ['初回', '2〜5回', '6〜10回', '11回以上']
 const PURPOSES: { label: Purpose; sub: string }[] = [
   { label: '会話を続ける', sub: '仲良くなりたい' },
@@ -145,8 +147,21 @@ export default function ReplyInputPage() {
         setTargets(loaded)
         const preselectedId = location.state?.targetId
         if (preselectedId) {
+          sessionStorage.removeItem(DRAFT_KEY)
           const found = loaded.find((t) => t.id === preselectedId)
           if (found) setSelectedTarget(found)
+        } else {
+          const saved = sessionStorage.getItem(DRAFT_KEY)
+          if (saved) {
+            const d = JSON.parse(saved)
+            if (d.count) setCount(d.count)
+            if (d.purpose) setPurpose(d.purpose)
+            if (d.tone) setTone(d.tone)
+            if (d.targetId) {
+              const found = loaded.find((t) => t.id === d.targetId)
+              if (found) setSelectedTarget(found)
+            }
+          }
         }
       }
     }
@@ -314,6 +329,10 @@ export default function ReplyInputPage() {
     }))
 
     setGenerating(false)
+    sessionStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify({ targetId: selectedTarget.id, count, purpose, tone }),
+    )
     navigate('/reply-result', {
       state: {
         patterns,
@@ -347,7 +366,10 @@ export default function ReplyInputPage() {
             {/* ナビ */}
             <div className="flex items-center gap-[10px] border-b border-black/10 px-4 py-[14px]">
               <button
-                onClick={() => navigate('/home')}
+                onClick={() => {
+                  sessionStorage.removeItem(DRAFT_KEY)
+                  navigate('/home')
+                }}
                 className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-transparent hover:bg-surface"
               >
                 <svg
@@ -364,7 +386,10 @@ export default function ReplyInputPage() {
               </button>
               <span className="flex-1 text-[15px] font-medium">返信メッセージを作る</span>
               <button
-                onClick={() => navigate('/home')}
+                onClick={() => {
+                  sessionStorage.removeItem(DRAFT_KEY)
+                  navigate('/home')
+                }}
                 className="flex cursor-pointer items-center gap-1 rounded-md border border-black/10 bg-transparent px-2 py-1 text-xs text-ink-tertiary hover:bg-surface"
               >
                 <svg
@@ -480,7 +505,7 @@ export default function ReplyInputPage() {
               {/* 相手の最新メッセージ */}
               <div className="mb-[18px]">
                 <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                  相手の最新メッセージ <Badge required />
+                  相手の最新メッセージ <Badge required={false} />
                 </p>
                 <textarea
                   rows={3}
@@ -649,13 +674,7 @@ export default function ReplyInputPage() {
               {genError && <p className="mb-3 text-center text-xs text-danger-text">{genError}</p>}
               <button
                 onClick={handleGenerate}
-                disabled={
-                  generating ||
-                  !selectedTarget ||
-                  !conversation.some((c) => c.sender === 'them') ||
-                  count === null ||
-                  purpose === null
-                }
+                disabled={generating || !selectedTarget || count === null || purpose === null}
                 className="w-full cursor-pointer rounded-md border-none bg-brand py-[13px] text-sm font-medium text-brand-light transition-colors hover:bg-brand-dark disabled:opacity-40"
               >
                 {generating ? '生成中...' : '返信を生成する'}
