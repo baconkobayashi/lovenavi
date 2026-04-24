@@ -84,15 +84,15 @@ export default function FirstApproachPage() {
   const [nickname, setNickname] = useState('')
   const [relation, setRelation] = useState<Relation>('matching')
   const [age, setAge] = useState(25)
-  const [area, setArea] = useState<Area>('東京')
+  const [area, setArea] = useState<Area | null>(null)
   const [hobbies, setHobbies] = useState('')
   const [profileText, setProfileText] = useState('')
 
   // 自分の情報
   const [myAge, setMyAge] = useState(28)
-  const [myJob, setMyJob] = useState<Job>('会社員')
+  const [myJob, setMyJob] = useState<Job | null>(null)
   const [myHobbies, setMyHobbies] = useState('')
-  const [tone, setTone] = useState<Tone>('aggressive')
+  const [tone, setTone] = useState<Tone | null>(null)
 
   useEffect(() => {
     const saved = sessionStorage.getItem(DRAFT_KEY)
@@ -102,13 +102,13 @@ export default function FirstApproachPage() {
       setNickname(d.nickname ?? '')
       setRelation(d.relation ?? 'matching')
       setAge(d.age ?? 25)
-      setArea(d.area ?? '東京')
+      setArea(d.area ?? null)
       setHobbies(d.hobbies ?? '')
       setProfileText(d.profileText ?? '')
       setMyAge(d.myAge ?? 28)
-      setMyJob(d.myJob ?? '会社員')
+      setMyJob(d.myJob ?? null)
       setMyHobbies(d.myHobbies ?? '')
-      setTone(d.tone ?? 'aggressive')
+      setTone(d.tone ?? null)
       return
     }
     async function init() {
@@ -469,7 +469,11 @@ export default function FirstApproachPage() {
                   <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
                     職業 <Badge label="任意" required={false} />
                   </p>
-                  <select value={myJob} onChange={(e) => setMyJob(e.target.value as Job)}>
+                  <select
+                    value={myJob ?? ''}
+                    onChange={(e) => setMyJob((e.target.value as Job) || null)}
+                  >
+                    <option value="">選択してください</option>
                     {JOBS.map((j) => (
                       <option key={j}>{j}</option>
                     ))}

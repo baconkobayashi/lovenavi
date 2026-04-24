@@ -24,7 +24,10 @@ export default function HomePage() {
             <div className="flex flex-col gap-3 p-4">
               {/* 初回アプローチ */}
               <button
-                onClick={() => navigate('/first-approach')}
+                onClick={() => {
+                  sessionStorage.removeItem('first-approach-draft')
+                  navigate('/first-approach')
+                }}
                 className="w-full cursor-pointer rounded-lg border-2 border-brand-border bg-white p-5 text-left transition-colors hover:bg-surface"
               >
                 <span className="mb-3 inline-block rounded-full bg-brand-light px-[10px] py-[3px] text-[11px] font-medium text-brand-dark">
@@ -63,7 +66,10 @@ export default function HomePage() {
 
               {/* 返信メッセージ */}
               <button
-                onClick={() => navigate('/reply')}
+                onClick={() => {
+                  sessionStorage.removeItem('reply-draft')
+                  navigate('/reply')
+                }}
                 className="w-full cursor-pointer rounded-lg border border-black/10 bg-white p-5 text-left transition-colors hover:bg-surface"
               >
                 <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-md bg-brand-light">
