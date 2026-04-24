@@ -61,6 +61,9 @@ function HomeIcon() {
 export default function ResultPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const targetId: string | null = location.state?.targetId ?? null
+  const initMessageId: string | null = location.state?.messageId ?? null
+
   const [patterns, setPatterns] = useState<Pattern[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(1)
@@ -68,9 +71,7 @@ export default function ResultPage() {
   const [used, setUsed] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [feedback, setFeedback] = useState<'yes' | 'no' | 'pending' | null>(null)
-  const [messageId, setMessageId] = useState<string | null>(null)
-
-  const targetId: string | null = location.state?.targetId ?? null
+  const [messageId, setMessageId] = useState<string | null>(initMessageId)
 
   useEffect(() => {
     const statePatterns = location.state?.patterns
@@ -98,11 +99,11 @@ export default function ResultPage() {
     const usedPattern = ['a', 'b', 'c'][id - 1]
     const usedMessage = patterns.find((p) => p.id === id)?.message ?? null
 
-    if (!messageId) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (user) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (user) {
+      if (!messageId) {
         const { data: inserted } = await supabase
           .from('messages')
           .insert({
@@ -133,18 +134,29 @@ export default function ResultPage() {
             })
           }
         }
-      }
-    } else {
-      await supabase
-        .from('messages')
-        .update({ used_pattern: usedPattern, used_message: usedMessage })
-        .eq('id', messageId)
-      if (targetId) {
+      } else {
         await supabase
-          .from('conversation_turns')
-          .update({ raw_text: usedMessage })
-          .eq('message_id', messageId)
-          .eq('sender', 'me')
+          .from('messages')
+          .update({ used_pattern: usedPattern, used_message: usedMessage })
+          .eq('id', messageId)
+
+        if (targetId) {
+          if (used === null) {
+            await supabase.from('conversation_turns').insert({
+              user_id: user.id,
+              target_id: targetId,
+              message_id: messageId,
+              sender: 'me',
+              raw_text: usedMessage,
+            })
+          } else {
+            await supabase
+              .from('conversation_turns')
+              .update({ raw_text: usedMessage })
+              .eq('message_id', messageId)
+              .eq('sender', 'me')
+          }
+        }
       }
     }
 

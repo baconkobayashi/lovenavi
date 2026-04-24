@@ -205,6 +205,24 @@ export default function FirstApproachPage() {
       message: p.message,
     }))
 
+    let messageId: string | null = null
+    const { data: insertedMsg } = await supabase
+      .from('messages')
+      .insert({
+        user_id: session.user.id,
+        target_id: target.id,
+        type: 'first_approach',
+        pattern_a: patterns[0]?.message ?? null,
+        pattern_b: patterns[1]?.message ?? null,
+        pattern_c: patterns[2]?.message ?? null,
+        tone_a: patterns[0]?.tone ?? null,
+        tone_b: patterns[1]?.tone ?? null,
+        tone_c: patterns[2]?.tone ?? null,
+      })
+      .select('id')
+      .single()
+    if (insertedMsg) messageId = insertedMsg.id
+
     setSaving(false)
     sessionStorage.setItem(
       DRAFT_KEY,
@@ -222,7 +240,7 @@ export default function FirstApproachPage() {
         tone,
       }),
     )
-    navigate('/result', { state: { patterns, targetId: target.id } })
+    navigate('/result', { state: { patterns, targetId: target.id, messageId } })
   }
 
   return (

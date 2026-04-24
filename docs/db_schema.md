@@ -95,14 +95,12 @@ AIが生成したメッセージ（自分のターン）。1ターゲットに�
 | message_id  | uuid                     | YES         | null              |
 | sender      | text                     | NO          | null              |
 | raw_text    | text                     | YES         | null              |
-| feedback    | text                     | YES         | null              |
 | created_at  | timestamp with time zone | NO          | now()             |
 
 - `target_id`: 紐づく相手（targets.id）
 - `message_id`: `sender='me'` のとき、対応する messages.id
 - `sender`: 送信者（`me` = 自分 / `target` = 相手）
 - `raw_text`: 相手のメッセージ本文（`sender='target'` のときのみ使用）
-- `feedback`: 自分のターンに対する返信結果（`yes` / `no` / `pending`）。`sender='me'` のときのみ設定。
 
 ### やりとりのイメージ
 

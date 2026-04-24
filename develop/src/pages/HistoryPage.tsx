@@ -232,22 +232,32 @@ export default function HistoryPage() {
                                   }
                                 : null,
                             ].filter(Boolean)
-                            navigate('/reply-result', {
-                              state: {
-                                patterns,
-                                messageId: msg.id,
-                                targetId: msg.target_id,
-                                latestMessage: '',
-                                count: '',
-                                purpose: '',
-                                tone: '',
-                                conversationHistory: [],
-                                targetRelation: '',
-                                targetAge: null,
-                                targetArea: '',
-                                targetHobbies: '',
-                              },
-                            })
+                            if (isFirst) {
+                              navigate('/result', {
+                                state: {
+                                  patterns,
+                                  messageId: msg.id,
+                                  targetId: msg.target_id,
+                                },
+                              })
+                            } else {
+                              navigate('/reply-result', {
+                                state: {
+                                  patterns,
+                                  messageId: msg.id,
+                                  targetId: msg.target_id,
+                                  latestMessage: '',
+                                  count: '',
+                                  purpose: '',
+                                  tone: '',
+                                  conversationHistory: [],
+                                  targetRelation: '',
+                                  targetAge: null,
+                                  targetArea: '',
+                                  targetHobbies: '',
+                                },
+                              })
+                            }
                           } else if (msg.target_id) {
                             navigate('/reply', { state: { targetId: msg.target_id } })
                           }
