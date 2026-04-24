@@ -20,6 +20,10 @@ https://becon-lovenavigation.vercel.app/
 
 https://docs.google.com/spreadsheets/d/1zFfAexeP53c7BCgWlUGg5msAE6H2lQrG4H5hJPNprc8/edit?usp=sharing
 
+## LLMプロンプト仕様
+
+[docs/prompts.md](../docs/prompts.md)
+
 ## LLM利用額確認
 
 https://aistudio.google.com/spend

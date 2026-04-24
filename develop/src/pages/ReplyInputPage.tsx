@@ -333,6 +333,7 @@ export default function ReplyInputPage() {
         conversationHistory: conversation.map((c) => ({
           sender: c.sender === 'them' ? 'target' : 'me',
           text: c.text,
+          feedback: c.feedback ?? null,
         })),
         latestMessage: latestThemMessage?.text ?? '',
         count,
@@ -392,6 +393,7 @@ export default function ReplyInputPage() {
         conversationHistory: conversation.map((c) => ({
           sender: c.sender === 'them' ? 'target' : 'me',
           text: c.text,
+          feedback: c.feedback ?? null,
         })),
         targetRelation: selectedTarget.relation,
         targetAge: selectedTarget.age,

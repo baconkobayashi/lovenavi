@@ -46,8 +46,16 @@ serve(async (req) => {
       targetHobbies,
     } = await req.json()
 
-    const historyText = (conversationHistory as { sender: string; text: string }[])
-      .map((c) => `${c.sender === 'me' ? '自分' : '相手'}: ${c.text}`)
+    const feedbackLabel: Record<string, string> = {
+      yes: '✓返信あり',
+      no: '✗既読スルー',
+      pending: '△待ち中',
+    }
+    const historyText = (conversationHistory as { sender: string; text: string; feedback?: string | null }[])
+      .map((c) => {
+        const label = c.sender === 'me' && c.feedback ? ` [${feedbackLabel[c.feedback] ?? ''}]` : ''
+        return `${c.sender === 'me' ? '自分' : '相手'}: ${c.text}${label}`
+      })
       .join('\n')
 
     const prompt = `
