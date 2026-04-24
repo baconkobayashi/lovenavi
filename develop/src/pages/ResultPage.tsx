@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import BottomNav from '../components/BottomNav'
+import { MY_TONES, type Tone } from '../lib/constants'
 
 interface Pattern {
   id: number
@@ -63,6 +64,15 @@ export default function ResultPage() {
   const location = useLocation()
   const targetId: string | null = location.state?.targetId ?? null
   const initMessageId: string | null = location.state?.messageId ?? null
+  const targetRelation = location.state?.targetRelation ?? null
+  const targetAge = location.state?.targetAge ?? null
+  const targetArea = location.state?.targetArea ?? null
+  const targetHobbies = location.state?.targetHobbies ?? null
+  const targetProfileText = location.state?.targetProfileText ?? null
+  const myAge = location.state?.myAge ?? null
+  const myJob = location.state?.myJob ?? null
+  const myHobbies = location.state?.myHobbies ?? null
+  const initMyTone: Tone | null = location.state?.myTone ?? null
 
   const [patterns, setPatterns] = useState<Pattern[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,6 +82,9 @@ export default function ResultPage() {
   const [showModal, setShowModal] = useState(false)
   const [feedback, setFeedback] = useState<'yes' | 'no' | 'pending' | null>(null)
   const [messageId, setMessageId] = useState<string | null>(initMessageId)
+  const [showRegen, setShowRegen] = useState(false)
+  const [regenTone, setRegenTone] = useState<Tone | null>(initMyTone)
+  const [regenerating, setRegenerating] = useState(false)
 
   useEffect(() => {
     const statePatterns = location.state?.patterns
@@ -161,6 +174,63 @@ export default function ResultPage() {
     }
 
     setTimeout(() => setShowModal(true), 400)
+  }
+
+  async function handleRegen() {
+    setRegenerating(true)
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) {
+      setRegenerating(false)
+      return
+    }
+
+    const { data, error } = await supabase.functions.invoke('generate-message', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      body: {
+        targetRelation,
+        targetAge,
+        targetArea,
+        targetHobbies,
+        targetProfileText,
+        myAge,
+        myJob,
+        myHobbies,
+        tone: regenTone,
+      },
+    })
+
+    if (!error && data?.patterns) {
+      const newPatterns = (data.patterns as { tone: string; message: string }[]).map((p, i) => ({
+        id: i + 1,
+        label: `パターン ${'ABC'[i]}`,
+        tone: p.tone,
+        message: p.message,
+      }))
+      setPatterns(newPatterns)
+      setSelected(1)
+      setUsed(null)
+
+      const { data: inserted } = await supabase
+        .from('messages')
+        .insert({
+          user_id: session.user.id,
+          target_id: targetId,
+          type: 'first_approach',
+          pattern_a: newPatterns[0]?.message ?? null,
+          pattern_b: newPatterns[1]?.message ?? null,
+          pattern_c: newPatterns[2]?.message ?? null,
+          tone_a: newPatterns[0]?.tone ?? null,
+          tone_b: newPatterns[1]?.tone ?? null,
+          tone_c: newPatterns[2]?.tone ?? null,
+        })
+        .select('id')
+        .single()
+      if (inserted) setMessageId(inserted.id)
+    }
+    setRegenerating(false)
+    setShowRegen(false)
   }
 
   async function handleFeedback(type: 'yes' | 'no' | 'pending') {
@@ -261,6 +331,54 @@ export default function ResultPage() {
                       </div>
                     </div>
                   ))}
+                </>
+              )}
+
+              {/* 再生成エリア */}
+              {!loading && patterns.length > 0 && (
+                <>
+                  <button
+                    onClick={() => setShowRegen(!showRegen)}
+                    className="mt-1 w-full cursor-pointer rounded-md border border-black/20 bg-transparent py-[11px] text-[13px] text-ink-secondary hover:bg-surface"
+                  >
+                    条件を変えてもう一度生成する ↓
+                  </button>
+
+                  {showRegen && (
+                    <div className="mt-3 overflow-hidden rounded-lg border border-black/10">
+                      <div className="border-b border-black/10 bg-surface px-[14px] py-3 text-xs font-medium text-ink-secondary">
+                        条件を編集して再生成
+                      </div>
+                      <div className="flex flex-col gap-3 p-[14px]">
+                        <div>
+                          <label className="mb-1.5 block text-xs font-medium text-ink">
+                            キャラ設定
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {MY_TONES.map(({ key, label, sub }) => (
+                              <button
+                                key={key}
+                                onClick={() => setRegenTone(key)}
+                                className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${regenTone === key ? 'border-brand-border bg-brand-light' : 'border-black/10 hover:bg-surface'}`}
+                              >
+                                <p className={`mb-0.5 text-xs font-medium ${regenTone === key ? 'text-brand-dark' : 'text-ink'}`}>
+                                  {label}
+                                </p>
+                                <span className="text-[11px] text-ink-secondary">{sub}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleRegen}
+                          disabled={regenerating}
+                          className="w-full cursor-pointer rounded-md border-none bg-brand py-[11px] text-[13px] font-medium text-brand-light disabled:opacity-50"
+                        >
+                          {regenerating ? '生成中...' : 'この条件で再生成する'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>

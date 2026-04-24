@@ -247,7 +247,22 @@ export default function FirstApproachPage() {
         tone,
       }),
     )
-    navigate('/result', { state: { patterns, targetId: target.id, messageId } })
+    navigate('/result', {
+      state: {
+        patterns,
+        targetId: target.id,
+        messageId,
+        targetRelation: relation,
+        targetAge: age,
+        targetArea: area,
+        targetHobbies: hobbies,
+        targetProfileText: profileText,
+        myAge,
+        myJob,
+        myHobbies,
+        myTone: tone,
+      },
+    })
   }
 
   return (
