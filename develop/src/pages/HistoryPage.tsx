@@ -4,16 +4,23 @@ import BottomNav from '../components/BottomNav'
 import { supabase } from '../lib/supabase'
 
 type FeedbackType = 'yes' | 'no' | 'pending' | null
-type FilterType = 'all' | 'first' | 'reply' | 'unanswered'
+type FilterType = 'all' | 'first' | 'reply' | 'unanswered' | 'unselected'
 
 interface MessageRow {
   id: string
   type: 'first_approach' | 'reply'
   used_message: string | null
+  used_pattern: string | null
   feedback: FeedbackType
   created_at: string
   target_id: string | null
   targets: { nickname: string } | null
+  pattern_a: string | null
+  pattern_b: string | null
+  pattern_c: string | null
+  tone_a: string | null
+  tone_b: string | null
+  tone_c: string | null
 }
 
 function getDateLabel(dateStr: string): string {
@@ -35,26 +42,26 @@ function formatTime(dateStr: string): string {
   return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
 }
 
-const IconFirst = () => (
+const IconFirst = ({ gray = false }: { gray?: boolean }) => (
   <svg
     width="16"
     height="16"
     viewBox="0 0 16 16"
     fill="none"
-    stroke="#534AB7"
+    stroke={gray ? '#888780' : '#534AB7'}
     strokeWidth="1.5"
     strokeLinecap="round"
   >
     <path d="M2 8C2 4.7 4.7 2 8 2s6 2.7 6 6-2.7 6-6 6H2.5L2 14V8z" />
   </svg>
 )
-const IconReply = () => (
+const IconReply = ({ gray = false }: { gray?: boolean }) => (
   <svg
     width="16"
     height="16"
     viewBox="0 0 16 16"
     fill="none"
-    stroke="#0F6E56"
+    stroke={gray ? '#888780' : '#0F6E56'}
     strokeWidth="1.5"
     strokeLinecap="round"
   >
@@ -77,9 +84,10 @@ export default function HistoryPage() {
       if (!user) return
       const { data } = await supabase
         .from('messages')
-        .select('id, type, used_message, feedback, created_at, target_id, targets(nickname)')
+        .select(
+          'id, type, used_message, used_pattern, feedback, created_at, target_id, targets(nickname), pattern_a, pattern_b, pattern_c, tone_a, tone_b, tone_c',
+        )
         .eq('user_id', user.id)
-        .not('used_message', 'is', null)
         .order('created_at', { ascending: false })
       if (data)
         setMessages(
@@ -99,9 +107,10 @@ export default function HistoryPage() {
   }
 
   const filtered = messages.filter((m) => {
-    if (filter === 'first') return m.type === 'first_approach'
-    if (filter === 'reply') return m.type === 'reply'
-    if (filter === 'unanswered') return m.feedback === null
+    if (filter === 'first') return m.type === 'first_approach' && m.used_message !== null
+    if (filter === 'reply') return m.type === 'reply' && m.used_message !== null
+    if (filter === 'unanswered') return m.feedback === null && m.used_message !== null
+    if (filter === 'unselected') return m.used_message === null
     return true
   })
 
@@ -118,6 +127,7 @@ export default function HistoryPage() {
     { key: 'first', label: '初回アプローチ' },
     { key: 'reply', label: 'メール返信' },
     { key: 'unanswered', label: '未回答のみ' },
+    { key: 'unselected', label: '未選択のみ' },
   ]
 
   return (
@@ -162,7 +172,7 @@ export default function HistoryPage() {
             </div>
 
             {/* 凡例 */}
-            <div className="flex gap-3.5 border-b border-black/10 bg-surface px-4 py-[9px]">
+            <div className="flex flex-wrap gap-3.5 border-b border-black/10 bg-surface px-4 py-[9px]">
               <div className="flex items-center gap-1.5">
                 <div className="h-[7px] w-[7px] shrink-0 rounded-full bg-[#639922]" />
                 <span className="text-[11px] text-ink-secondary">フィードバック回答済み</span>
@@ -170,6 +180,10 @@ export default function HistoryPage() {
               <div className="flex items-center gap-1.5">
                 <div className="h-[7px] w-[7px] shrink-0 rounded-full bg-[#EF9F27]" />
                 <span className="text-[11px] text-ink-secondary">未回答</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="h-[7px] w-[7px] shrink-0 rounded-full bg-[#888780]" />
+                <span className="text-[11px] text-ink-secondary">生成済み・未選択</span>
               </div>
             </div>
 
@@ -185,20 +199,69 @@ export default function HistoryPage() {
                   </p>
                   {items.map((msg) => {
                     const isFirst = msg.type === 'first_approach'
+                    const isUnselected = msg.used_message === null
                     const answered = msg.feedback !== null
                     return (
                       <div
                         key={msg.id}
-                        onClick={() =>
-                          msg.target_id &&
-                          navigate('/reply', { state: { targetId: msg.target_id } })
-                        }
-                        className={`flex gap-3 border-b border-black/10 py-3 last:border-none ${msg.target_id ? 'cursor-pointer transition-colors hover:bg-surface' : ''}`}
+                        onClick={() => {
+                          if (isUnselected) {
+                            const patterns = [
+                              msg.pattern_a
+                                ? {
+                                    id: 1,
+                                    label: 'パターン A',
+                                    tone: msg.tone_a ?? '',
+                                    message: msg.pattern_a,
+                                  }
+                                : null,
+                              msg.pattern_b
+                                ? {
+                                    id: 2,
+                                    label: 'パターン B',
+                                    tone: msg.tone_b ?? '',
+                                    message: msg.pattern_b,
+                                  }
+                                : null,
+                              msg.pattern_c
+                                ? {
+                                    id: 3,
+                                    label: 'パターン C',
+                                    tone: msg.tone_c ?? '',
+                                    message: msg.pattern_c,
+                                  }
+                                : null,
+                            ].filter(Boolean)
+                            navigate('/reply-result', {
+                              state: {
+                                patterns,
+                                messageId: msg.id,
+                                targetId: msg.target_id,
+                                latestMessage: '',
+                                count: '',
+                                purpose: '',
+                                tone: '',
+                                conversationHistory: [],
+                                targetRelation: '',
+                                targetAge: null,
+                                targetArea: '',
+                                targetHobbies: '',
+                              },
+                            })
+                          } else if (msg.target_id) {
+                            navigate('/reply', { state: { targetId: msg.target_id } })
+                          }
+                        }}
+                        className={`flex cursor-pointer gap-3 border-b border-black/10 py-3 transition-colors last:border-none hover:bg-surface ${isUnselected ? 'opacity-[0.72]' : ''}`}
                       >
                         <div
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isFirst ? 'bg-[#EEEDFE]' : 'bg-[#E1F5EE]'}`}
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isUnselected ? (isFirst ? 'bg-[#F1EFE8]' : 'bg-[#F0F8F5]') : isFirst ? 'bg-[#EEEDFE]' : 'bg-[#E1F5EE]'}`}
                         >
-                          {isFirst ? <IconFirst /> : <IconReply />}
+                          {isFirst ? (
+                            <IconFirst gray={isUnselected} />
+                          ) : (
+                            <IconReply gray={isUnselected} />
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="mb-[3px] flex items-center">
@@ -220,44 +283,60 @@ export default function HistoryPage() {
                             </span>
                           </div>
                           <p className="mb-1.5 max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-ink">
-                            {msg.used_message}
+                            {isUnselected ? '3パターンが生成されました' : msg.used_message}
                           </p>
                           <div className="flex items-center gap-1.5">
-                            {msg.feedback === 'yes' && (
-                              <span className="rounded-full bg-[#EAF3DE] px-2 py-[2px] text-[10px] font-medium text-[#3B6D11]">
-                                返信きた
-                              </span>
-                            )}
-                            {msg.feedback === 'no' && (
-                              <span className="rounded-full bg-[#FCEBEB] px-2 py-[2px] text-[10px] font-medium text-[#A32D2D]">
-                                既読スルー
-                              </span>
-                            )}
-                            {msg.feedback === 'pending' && (
-                              <span className="rounded-full bg-[#FAEEDA] px-2 py-[2px] text-[10px] font-medium text-[#633806]">
-                                まだ待ち中
-                              </span>
-                            )}
-                            <div className="flex items-center gap-1">
-                              <div
-                                className={`h-1.5 w-1.5 shrink-0 rounded-full ${answered ? 'bg-[#639922]' : 'bg-[#EF9F27]'}`}
-                              />
-                              <span
-                                className={`text-[10px] ${answered ? 'text-[#3B6D11]' : 'text-[#633806]'}`}
-                              >
-                                {answered ? '回答済み' : '未回答'}
-                              </span>
-                            </div>
-                            {!answered && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setEditingId(msg.id)
-                                }}
-                                className="ml-auto cursor-pointer rounded-full border border-[#AFA9EC] bg-transparent px-2 py-[2px] text-[10px] text-[#534AB7] transition-colors hover:bg-[#EEEDFE]"
-                              >
-                                結果を入力する
-                              </button>
+                            {isUnselected ? (
+                              <>
+                                <span className="rounded-full border border-black/20 bg-surface px-2 py-[2px] text-[10px] font-medium text-ink-tertiary">
+                                  生成済み・未選択
+                                </span>
+                                <button
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="ml-auto cursor-pointer whitespace-nowrap rounded-full border border-black/20 bg-transparent px-2 py-[2px] text-[10px] text-ink-secondary transition-colors hover:bg-surface hover:text-ink"
+                                >
+                                  結果に戻る →
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                {msg.feedback === 'yes' && (
+                                  <span className="rounded-full bg-[#EAF3DE] px-2 py-[2px] text-[10px] font-medium text-[#3B6D11]">
+                                    返信きた
+                                  </span>
+                                )}
+                                {msg.feedback === 'no' && (
+                                  <span className="rounded-full bg-[#FCEBEB] px-2 py-[2px] text-[10px] font-medium text-[#A32D2D]">
+                                    既読スルー
+                                  </span>
+                                )}
+                                {msg.feedback === 'pending' && (
+                                  <span className="rounded-full bg-[#FAEEDA] px-2 py-[2px] text-[10px] font-medium text-[#633806]">
+                                    まだ待ち中
+                                  </span>
+                                )}
+                                <div className="flex items-center gap-1">
+                                  <div
+                                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${answered ? 'bg-[#639922]' : 'bg-[#EF9F27]'}`}
+                                  />
+                                  <span
+                                    className={`text-[10px] ${answered ? 'text-[#3B6D11]' : 'text-[#633806]'}`}
+                                  >
+                                    {answered ? '回答済み' : '未回答'}
+                                  </span>
+                                </div>
+                                {!answered && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setEditingId(msg.id)
+                                    }}
+                                    className="ml-auto cursor-pointer rounded-full border border-[#AFA9EC] bg-transparent px-2 py-[2px] text-[10px] text-[#534AB7] transition-colors hover:bg-[#EEEDFE]"
+                                  >
+                                    結果を入力する
+                                  </button>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>

@@ -328,6 +328,24 @@ export default function ReplyInputPage() {
       message: p.message,
     }))
 
+    let messageId: string | null = null
+    const { data: inserted } = await supabase
+      .from('messages')
+      .insert({
+        user_id: session.user.id,
+        target_id: selectedTarget.id,
+        type: 'reply',
+        pattern_a: patterns[0]?.message ?? null,
+        pattern_b: patterns[1]?.message ?? null,
+        pattern_c: patterns[2]?.message ?? null,
+        tone_a: patterns[0]?.tone ?? null,
+        tone_b: patterns[1]?.tone ?? null,
+        tone_c: patterns[2]?.tone ?? null,
+      })
+      .select('id')
+      .single()
+    if (inserted) messageId = inserted.id
+
     setGenerating(false)
     sessionStorage.setItem(
       DRAFT_KEY,
@@ -336,6 +354,7 @@ export default function ReplyInputPage() {
     navigate('/reply-result', {
       state: {
         patterns,
+        messageId,
         latestMessage: latestThemMessage?.text ?? '',
         count,
         purpose,

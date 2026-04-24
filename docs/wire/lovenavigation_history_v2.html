@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>履歴 — lovenavigation</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    background: #f5f4f0;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px;
+    min-height: 100vh;
+    color: #1a1a18;
+  }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f1efe8;
+    --text: #1a1a18;
+    --text2: #5f5e5a;
+    --text3: #888780;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --r: 8px;
+    --rl: 12px;
+  }
+
+  button { font-family: inherit; cursor: pointer; }
+
+  .wrap { width: 400px; font-size: 14px; }
+  .frame {
+    border: 0.5px solid var(--border);
+    border-radius: var(--rl);
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  /* Nav */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .nav-title { font-size: 15px; font-weight: 500; }
+  .home-btn {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--text3);
+    padding: 4px 8px;
+    border-radius: var(--r);
+    border: 0.5px solid var(--border);
+    background: transparent;
+  }
+  .home-btn:hover { background: var(--bg2); }
+
+  /* Filter chips */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .chip {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--text);
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .chip:hover { background: var(--bg2); }
+  .chip.sel { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; font-weight: 500; }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 14px;
+    padding: 9px 16px;
+    background: var(--bg2);
+    border-bottom: 0.5px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .legend-dot.answered { background: #639922; }
+  .legend-dot.unanswered { background: #EF9F27; }
+  .legend-dot.unselected { background: #888780; }
+
+  /* List */
+  .list { padding: 0 16px; }
+  .date-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+    padding: 12px 0 6px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* History item */
+  .item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .item:last-child { border-bottom: none; }
+
+  .icon {
+    width: 36px; height: 36px;
+    border-radius: var(--r);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon.first { background: #EEEDFE; }
+  .icon.reply { background: #E1F5EE; }
+
+  .content { flex: 1; min-width: 0; }
+
+  .top-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 3px;
+  }
+  .top-row .time { margin-left: auto; }
+  .type { font-size: 11px; font-weight: 500; }
+  .type.first { color: #534AB7; }
+  .type.reply { color: #0F6E56; }
+  .partner-name { font-size: 11px; font-weight: 500; color: var(--text2); }
+  .partner-sep { font-size: 10px; color: var(--text3); margin: 0 1px; }
+  .time { font-size: 11px; color: var(--text3); }
+
+  .msg {
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+    margin: 0 0 6px;
+  }
+
+  .bottom-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Result badge */
+  .result-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+  }
+  .result-badge.yes { background: #EAF3DE; color: #3B6D11; }
+  .result-badge.no { background: #FCEBEB; color: #A32D2D; }
+  .result-badge.pending { background: #FAEEDA; color: #633806; }
+  .result-badge.unselected { background: var(--bg2); color: var(--text3); border: 0.5px solid var(--border2); }
+
+  /* 未選択アイテムの薄いスタイル */
+  .item.unselected-item { opacity: 0.72; }
+  .item.unselected-item .icon.first { background: #F1EFE8; }
+  .item.unselected-item .icon.reply { background: #F0F8F5; }
+
+  /* 結果に戻るボタン */
+  .resume-btn {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    margin-left: auto;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .resume-btn:hover { background: var(--bg2); color: var(--text); }
+
+  /* FB status */
+  .fb-status { display: flex; align-items: center; gap: 4px; }
+  .fb-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .fb-dot.answered { background: #639922; }
+  .fb-dot.unanswered { background: #EF9F27; }
+  .fb-label { font-size: 10px; }
+  .fb-label.answered { color: #3B6D11; }
+  .fb-label.unanswered { color: #633806; }
+
+  /* Input button */
+  .fb-btn {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    border: 0.5px solid #AFA9EC;
+    background: transparent;
+    color: #534AB7;
+    margin-left: auto;
+    transition: background 0.15s;
+  }
+  .fb-btn:hover { background: #EEEDFE; }
+
+  /* Bottom nav */
+  .bnav { display: flex; border-top: 0.5px solid var(--border); }
+  .bnav-item {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 10px 0; gap: 3px;
+    cursor: pointer;
+  }
+  .bnav-lbl { font-size: 10px; color: var(--text3); }
+  .bnav-lbl.active { color: #534AB7; }
+  .bnav-dot { width: 4px; height: 4px; border-radius: 50%; }
+  .bnav-dot.active { background: #534AB7; }
+
+  /* Filter interaction */
+  .chip { cursor: pointer; }
+  .item { transition: background 0.1s; }
+  .item.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="frame">
+
+    <div class="nav">
+      <span class="nav-title">履歴</span>
+      <button class="home-btn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z"/>
+        </svg>
+        ホーム
+      </button>
+    </div>
+
+    <div class="filter-row">
+      <button class="chip sel" onclick="filter('all', this)">すべて</button>
+      <button class="chip" onclick="filter('first', this)">初回アプローチ</button>
+      <button class="chip" onclick="filter('reply', this)">メール返信</button>
+      <button class="chip" onclick="filter('unanswered', this)">未回答のみ</button>
+      <button class="chip" onclick="filter('unselected', this)">未選択のみ</button>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot answered"></div>
+        フィードバック回答済み
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot unanswered"></div>
+        未回答
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot unselected"></div>
+        生成済み・未選択
+      </div>
+    </div>
+
+    <div class="list" id="list">
+
+      <div class="date-label" data-group="today">今日</div>
+
+      <div class="item unselected-item" data-type="first" data-fb="unselected">
+        <div class="icon first">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round">
+            <path d="M2 8C2 4.7 4.7 2 8 2s6 2.7 6 6-2.7 6-6 6H2.5L2 14V8z"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="top-row">
+            <span class="type first">初回アプローチ</span>
+            <span class="partner-sep">·</span>
+            <span class="partner-name">相手E</span>
+            <span class="time">16:45</span>
+          </div>
+          <p class="msg">3パターンが生成されました</p>
+          <div class="bottom-row">
+            <span class="result-badge unselected">生成済み・未選択</span>
+            <button class="resume-btn">結果に戻る →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="item unselected-item" data-type="reply" data-fb="unselected">
+        <div class="icon reply">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round">
+            <rect x="2" y="4" width="12" height="9" rx="1.5"/>
+            <path d="M2 7l6 4 6-4"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="top-row">
+            <span class="type reply">メール返信</span>
+            <span class="partner-sep">·</span>
+            <span class="partner-name">相手A</span>
+            <span class="time">15:10</span>
+          </div>
+          <p class="msg">3パターンが生成されました</p>
+          <div class="bottom-row">
+            <span class="result-badge unselected">生成済み・未選択</span>
+            <button class="resume-btn">結果に戻る →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="item" data-type="first" data-fb="answered">
+        <div class="icon first">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+            <path d="M2 8C2 4.7 4.7 2 8 2s6 2.7 6 6-2.7 6-6 6H2.5L2 14V8z"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="top-row">
+            <span class="type first">初回アプローチ</span>
+            <span class="partner-sep">·</span>
+            <span class="partner-name">相手A</span>
+            <span class="time">14:32</span>
+          </div>
+          <p class="msg">「プロフィール見てたらカフェ好きって書いてましたね！」</p>
+          <div class="bottom-row">
+            <span class="result-badge yes">返信きた</span>
+            <div class="fb-status">
+              <div class="fb-dot answered"></div>
+              <span class="fb-label answered">回答済み</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="item" data-type="reply" data-fb="unanswered">
+        <div class="icon reply">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round">
+            <rect x="2" y="4" width="12" height="9" rx="1.5"/>
+            <path d="M2 7l6 4 6-4"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="top-row">
+            <span class="type reply">メール返信</span>
+            <span class="partner-sep">·</span>
+            <span class="partner-name">相手B</span>
+            <span class="time">11:05</span>
+          </div>
+          <p class="msg">「週末は大体友達とサッカーしてるよ！○○さんは？」</p>
+          <div class="bottom-row">
+            <div class="fb-status">
+              <div class="fb-dot unanswered"></div>
+              <span class="fb-label unanswered">未回答</span>
+            </div>
+            <button class="fb-btn">結果を入力する</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="date-label" data-group="yesterday">昨日</div>
+
+      <div class="item" data-type="first" data-fb="answered">
+        <div class="icon first">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+            <path d="M2 8C2 4.7 4.7 2 8 2s6 2.7 6 6-2.7 6-6 6H2.5L2 14V8z"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="top-row">
+            <span class="type first">初回アプローチ</span>
+            <span class="partner-sep">·</span>
+            <span class="partner-name">相手C</span>
+            <span class="time">20:14</span>
+          </div>
+          <p class="msg">「はじめまして！映画好きって書いてましたが…」</p>
+          <div class="bottom-row">
+            <span class="result-badge no">既読スルー</span>
+            <div class="fb-status">
+              <div class="fb-dot answered"></div>
+              <span class="fb-label answered">回答済み</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="item" data-type="reply" data-fb="answered">
+        <div class="icon reply">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round">
+            <rect x="2" y="4" width="12" height="9" rx="1.5"/>
+            <path d="M2 7l6 4 6-4"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="top-row">
+            <span class="type reply">メール返信</span>
+            <span class="partner-sep">·</span>
+            <span class="partner-name">相手A</span>
+            <span class="time">18:50</span>
+          </div>
+          <p class="msg">「サッカーと映画が多いかな！カフェ好きなの気になってたんだけど…」</p>
+          <div class="bottom-row">
+            <span class="result-badge pending">まだ待ち中</span>
+            <div class="fb-status">
+              <div class="fb-dot answered"></div>
+              <span class="fb-label answered">回答済み</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="date-label" data-group="3days">3日前</div>
+
+      <div class="item" data-type="first" data-fb="unanswered">
+        <div class="icon first">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+            <path d="M2 8C2 4.7 4.7 2 8 2s6 2.7 6 6-2.7 6-6 6H2.5L2 14V8z"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="top-row">
+            <span class="type first">初回アプローチ</span>
+            <span class="partner-sep">·</span>
+            <span class="partner-name">相手D</span>
+            <span class="time">09:22</span>
+          </div>
+          <p class="msg">「はじめまして！プロフィール読んでいて、なんか話してみたいなって…」</p>
+          <div class="bottom-row">
+            <div class="fb-status">
+              <div class="fb-dot unanswered"></div>
+              <span class="fb-label unanswered">未回答</span>
+            </div>
+            <button class="fb-btn">結果を入力する</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="item" data-type="reply" data-fb="answered">
+        <div class="icon reply">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round">
+            <rect x="2" y="4" width="12" height="9" rx="1.5"/>
+            <path d="M2 7l6 4 6-4"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="top-row">
+            <span class="type reply">メール返信</span>
+            <span class="partner-sep">·</span>
+            <span class="partner-name">相手B</span>
+            <span class="time">08:01</span>
+          </div>
+          <p class="msg">「週末はのんびり映画とか見てることが多いかな〜」</p>
+          <div class="bottom-row">
+            <span class="result-badge yes">返信きた</span>
+            <div class="fb-status">
+              <div class="fb-dot answered"></div>
+              <span class="fb-label answered">回答済み</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bnav">
+      <div class="bnav-item">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round">
+          <path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+        </svg>
+        <span class="bnav-lbl">ホーム</span>
+        <div class="bnav-dot"></div>
+      </div>
+      <div class="bnav-item">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round">
+          <path d="M4 6h12M4 10h8M4 14h5"/>
+        </svg>
+        <span class="bnav-lbl active">履歴</span>
+        <div class="bnav-dot active"></div>
+      </div>
+      <div class="bnav-item">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="10" cy="7" r="3"/>
+          <path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+        </svg>
+        <span class="bnav-lbl">マイページ</span>
+        <div class="bnav-dot"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function filter(type, el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+
+  const items = document.querySelectorAll('.item');
+  items.forEach(item => {
+    if (type === 'all') {
+      item.classList.remove('hidden');
+    } else if (type === 'first') {
+      item.classList.toggle('hidden', item.dataset.type !== 'first');
+    } else if (type === 'reply') {
+      item.classList.toggle('hidden', item.dataset.type !== 'reply');
+    } else if (type === 'unanswered') {
+      item.classList.toggle('hidden', item.dataset.fb !== 'unanswered');
+    } else if (type === 'unselected') {
+      item.classList.toggle('hidden', item.dataset.fb !== 'unselected');
+    }
+  });
+
+  // 日付ラベルの表示制御（配下にvisibleなitemがなければ非表示）
+  document.querySelectorAll('.date-label').forEach(label => {
+    let next = label.nextElementSibling;
+    let hasVisible = false;
+    while (next && !next.classList.contains('date-label')) {
+      if (!next.classList.contains('hidden') && next.classList.contains('item')) {
+        hasVisible = true;
+        break;
+      }
+      next = next.nextElementSibling;
+    }
+    label.style.display = hasVisible ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

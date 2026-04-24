@@ -57,13 +57,15 @@ export default function ReplyResultPage() {
   const targetHobbies = location.state?.targetHobbies ?? ''
   const targetId: string | null = location.state?.targetId ?? null
 
+  const initMessageId: string | null = location.state?.messageId ?? null
+
   const [patterns, setPatterns] = useState<Pattern[]>(initPatterns)
   const [selected, setSelected] = useState(1)
   const [copied, setCopied] = useState<number | null>(null)
   const [used, setUsed] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [feedback, setFeedback] = useState<'yes' | 'no' | 'pending' | null>(null)
-  const [savedMessageId, setSavedMessageId] = useState<string | null>(null)
+  const [savedMessageId, setSavedMessageId] = useState<string | null>(initMessageId)
   const [showRegen, setShowRegen] = useState(false)
   const [regenPurpose, setRegenPurpose] = useState(purpose)
   const [regenCount, setRegenCount] = useState(count)
@@ -129,34 +131,51 @@ export default function ReplyResultPage() {
       data: { user },
     } = await supabase.auth.getUser()
     if (user) {
-      const { data: inserted } = await supabase
-        .from('messages')
-        .insert({
-          user_id: user.id,
-          target_id: targetId,
-          type: 'reply',
-          used_pattern: usedPattern,
-          used_message: usedMessage,
-          pattern_a: patterns[0]?.message ?? null,
-          pattern_b: patterns[1]?.message ?? null,
-          pattern_c: patterns[2]?.message ?? null,
-          tone_a: patterns[0]?.tone ?? null,
-          tone_b: patterns[1]?.tone ?? null,
-          tone_c: patterns[2]?.tone ?? null,
-        })
-        .select('id')
-        .single()
+      if (savedMessageId) {
+        await supabase
+          .from('messages')
+          .update({ used_pattern: usedPattern, used_message: usedMessage })
+          .eq('id', savedMessageId)
 
-      if (inserted) {
-        setSavedMessageId(inserted.id)
         if (targetId) {
           await supabase.from('conversation_turns').insert({
             user_id: user.id,
             target_id: targetId,
-            message_id: inserted.id,
+            message_id: savedMessageId,
             sender: 'me',
             raw_text: usedMessage,
           })
+        }
+      } else {
+        const { data: inserted } = await supabase
+          .from('messages')
+          .insert({
+            user_id: user.id,
+            target_id: targetId,
+            type: 'reply',
+            used_pattern: usedPattern,
+            used_message: usedMessage,
+            pattern_a: patterns[0]?.message ?? null,
+            pattern_b: patterns[1]?.message ?? null,
+            pattern_c: patterns[2]?.message ?? null,
+            tone_a: patterns[0]?.tone ?? null,
+            tone_b: patterns[1]?.tone ?? null,
+            tone_c: patterns[2]?.tone ?? null,
+          })
+          .select('id')
+          .single()
+
+        if (inserted) {
+          setSavedMessageId(inserted.id)
+          if (targetId) {
+            await supabase.from('conversation_turns').insert({
+              user_id: user.id,
+              target_id: targetId,
+              message_id: inserted.id,
+              sender: 'me',
+              raw_text: usedMessage,
+            })
+          }
         }
       }
     }
