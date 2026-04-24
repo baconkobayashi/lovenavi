@@ -74,7 +74,6 @@ export default function HistoryPage() {
   const navigate = useNavigate()
   const [messages, setMessages] = useState<MessageRow[]>([])
   const [filter, setFilter] = useState<FilterType>('all')
-  const [editingId, setEditingId] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -99,12 +98,6 @@ export default function HistoryPage() {
     }
     load()
   }, [])
-
-  async function handleFeedback(id: string, type: FeedbackType) {
-    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, feedback: type } : m)))
-    await supabase.from('messages').update({ feedback: type }).eq('id', id)
-    setEditingId(null)
-  }
 
   const filtered = messages.filter((m) => {
     if (filter === 'first') return m.type === 'first_approach' && m.used_message !== null
@@ -336,15 +329,9 @@ export default function HistoryPage() {
                                   </span>
                                 </div>
                                 {!answered && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setEditingId(msg.id)
-                                    }}
-                                    className="ml-auto cursor-pointer rounded-full border border-[#AFA9EC] bg-transparent px-2 py-[2px] text-[10px] text-[#534AB7] transition-colors hover:bg-[#EEEDFE]"
-                                  >
+                                  <span className="ml-auto rounded-full border border-[#AFA9EC] px-2 py-[2px] text-[10px] text-[#534AB7]">
                                     結果を入力する
-                                  </button>
+                                  </span>
                                 )}
                               </>
                             )}
@@ -360,54 +347,6 @@ export default function HistoryPage() {
         </div>
       </div>
       <BottomNav active="history" />
-
-      {/* フィードバックモーダル */}
-      {editingId && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-          <div className="w-full max-w-[400px] rounded-[16px_16px_0_0] bg-white px-4 pb-8 pt-5">
-            <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-black/20" />
-            <p className="mb-1 text-center text-[15px] font-medium">送って、どうでしたか？</p>
-            <p className="mb-4 text-center text-xs text-ink-secondary">
-              結果を教えてもらえるとAIが賢くなります
-            </p>
-            <div className="mb-[10px] flex gap-2">
-              {(
-                [
-                  {
-                    key: 'yes',
-                    label: '返信きた',
-                    cls: 'bg-success-bg border-success-border text-success-text',
-                  },
-                  {
-                    key: 'pending',
-                    label: 'まだ待ち中',
-                    cls: 'bg-warn-bg border-warn-border text-warn-text',
-                  },
-                  {
-                    key: 'no',
-                    label: '既読スルー',
-                    cls: 'bg-danger-bg border-danger-border text-danger-text',
-                  },
-                ] as const
-              ).map(({ key, label, cls }) => (
-                <button
-                  key={key}
-                  onClick={() => handleFeedback(editingId, key)}
-                  className={`flex-1 cursor-pointer rounded-md border border-black/20 bg-transparent px-1.5 py-3 text-center text-[13px] font-medium text-ink transition-all hover:${cls}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setEditingId(null)}
-              className="w-full cursor-pointer rounded-md border-none bg-transparent py-[10px] text-xs text-ink-tertiary hover:text-ink-secondary"
-            >
-              キャンセル
-            </button>
-          </div>
-        </div>
-      )}
     </>
   )
 }

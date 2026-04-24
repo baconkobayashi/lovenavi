@@ -36,11 +36,15 @@ interface Target {
   updated_at: string
 }
 
+type FeedbackType = 'yes' | 'no' | 'pending' | null
+
 interface ConversationItem {
   id?: string
   sender: 'me' | 'them'
   text: string
   createdAt: string
+  messageId?: string | null
+  feedback?: FeedbackType
 }
 
 function getRelationLabel(key: string | null): string {
@@ -113,6 +117,10 @@ export default function ReplyInputPage() {
 
   const [showSheet, setShowSheet] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [feedbackModal, setFeedbackModal] = useState<{
+    messageId: string
+    current: FeedbackType
+  } | null>(null)
 
   // モーダル内フォーム
   const [modalNickname, setModalNickname] = useState('')
@@ -176,17 +184,28 @@ export default function ReplyInputPage() {
     async function loadConversation() {
       const { data } = await supabase
         .from('conversation_turns')
-        .select('id, sender, raw_text, created_at')
+        .select('id, sender, raw_text, created_at, message_id, messages(feedback)')
         .eq('target_id', selectedTarget!.id)
         .order('created_at', { ascending: true })
       if (data) {
         setConversation(
-          data.map((t) => ({
-            id: t.id,
-            sender: t.sender === 'target' ? 'them' : 'me',
-            text: t.raw_text ?? '',
-            createdAt: t.created_at,
-          })),
+          data.map((t) => {
+            const msgs = t.messages as
+              | { feedback: FeedbackType }
+              | { feedback: FeedbackType }[]
+              | null
+            const feedback = Array.isArray(msgs)
+              ? (msgs[0]?.feedback ?? null)
+              : (msgs?.feedback ?? null)
+            return {
+              id: t.id,
+              sender: t.sender === 'target' ? 'them' : 'me',
+              text: t.raw_text ?? '',
+              createdAt: t.created_at,
+              messageId: t.message_id as string | null,
+              feedback,
+            }
+          }),
         )
       }
     }
@@ -270,6 +289,17 @@ export default function ReplyInputPage() {
   async function deleteTurn(id: string) {
     await supabase.from('conversation_turns').delete().eq('id', id)
     setConversation((prev) => prev.filter((item) => item.id !== id))
+  }
+
+  async function updateFeedback(type: FeedbackType) {
+    if (!feedbackModal) return
+    await supabase.from('messages').update({ feedback: type }).eq('id', feedbackModal.messageId)
+    setConversation((prev) =>
+      prev.map((item) =>
+        item.messageId === feedbackModal.messageId ? { ...item, feedback: type } : item,
+      ),
+    )
+    setFeedbackModal(null)
   }
 
   async function saveTurnEdit(id: string) {
@@ -557,8 +587,37 @@ export default function ReplyInputPage() {
                     {conversation.map((item, i) =>
                       item.sender === 'me' ? (
                         <div key={i} className="flex items-end gap-2">
-                          <div className="max-w-[75%] rounded-[4px_12px_12px_12px] bg-surface px-3 py-2 text-xs leading-[1.6] text-ink">
-                            {item.text}
+                          <div className="flex flex-col items-start gap-1.5">
+                            <div className="max-w-[240px] rounded-[4px_12px_12px_12px] bg-surface px-3 py-2 text-xs leading-[1.6] text-ink">
+                              {item.text}
+                            </div>
+                            {item.messageId && (
+                              <button
+                                onClick={() =>
+                                  setFeedbackModal({
+                                    messageId: item.messageId!,
+                                    current: item.feedback ?? null,
+                                  })
+                                }
+                                className={`cursor-pointer rounded-full border px-2 py-[2px] text-[10px] font-medium transition-colors ${
+                                  item.feedback === 'yes'
+                                    ? 'border-[#B6D98A] bg-[#EAF3DE] text-[#3B6D11]'
+                                    : item.feedback === 'no'
+                                      ? 'border-[#F0A0A0] bg-[#FCEBEB] text-[#A32D2D]'
+                                      : item.feedback === 'pending'
+                                        ? 'border-[#F0C87A] bg-[#FAEEDA] text-[#633806]'
+                                        : 'border-black/20 bg-surface text-ink-tertiary hover:bg-[#e8e6df]'
+                                }`}
+                              >
+                                {item.feedback === 'yes'
+                                  ? '返信きた'
+                                  : item.feedback === 'no'
+                                    ? '既読スルー'
+                                    : item.feedback === 'pending'
+                                      ? 'まだ待ち中'
+                                      : '状態を記録する'}
+                              </button>
+                            )}
                           </div>
                           <span className="whitespace-nowrap text-[10px] text-ink-tertiary">
                             {formatDate(item.createdAt)}
@@ -969,6 +1028,63 @@ export default function ReplyInputPage() {
         )}
       </div>
       <BottomNav active="home" />
+
+      {/* フィードバックモーダル */}
+      {feedbackModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setFeedbackModal(null)
+          }}
+        >
+          <div className="w-full max-w-[400px] rounded-[16px_16px_0_0] bg-white px-4 pb-8 pt-5">
+            <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-black/20" />
+            <p className="mb-1 text-center text-[15px] font-medium">送って、どうでしたか？</p>
+            <p className="mb-4 text-center text-xs text-ink-secondary">
+              結果を教えてもらえるとAIが賢くなります
+            </p>
+            <div className="mb-[10px] flex gap-2">
+              {(
+                [
+                  {
+                    key: 'yes',
+                    label: '返信きた',
+                    active: 'bg-success-bg border-success-border text-success-text',
+                  },
+                  {
+                    key: 'pending',
+                    label: 'まだ待ち中',
+                    active: 'bg-warn-bg border-warn-border text-warn-text',
+                  },
+                  {
+                    key: 'no',
+                    label: '既読スルー',
+                    active: 'bg-danger-bg border-danger-border text-danger-text',
+                  },
+                ] as const
+              ).map(({ key, label, active }) => (
+                <button
+                  key={key}
+                  onClick={() => updateFeedback(key)}
+                  className={`flex-1 cursor-pointer rounded-md border px-1.5 py-3 text-center text-[13px] font-medium transition-all ${
+                    feedbackModal.current === key
+                      ? active
+                      : 'border-black/20 bg-transparent text-ink hover:bg-surface'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setFeedbackModal(null)}
+              className="w-full cursor-pointer rounded-md border-none bg-transparent py-[10px] text-xs text-ink-tertiary hover:text-ink-secondary"
+            >
+              キャンセル
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }
