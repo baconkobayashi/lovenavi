@@ -2,7 +2,16 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import BottomNav from '../components/BottomNav'
-import { AREAS, RELATIONS, TARGET_TONES, type TargetTone } from '../lib/constants'
+import {
+  AREAS,
+  RELATIONS,
+  TARGET_TONES,
+  type TargetTone,
+  DEFAULT_TARGET_AGE,
+  TARGET_AGE_MIN,
+  TARGET_AGE_MAX,
+  DEFAULT_AREA,
+} from '../lib/constants'
 
 type Count = '初回' | '2〜5回' | '6〜10回' | '11回以上'
 type Purpose = '会話を続ける' | 'デートに誘う' | 'LINE交換' | '関係を温める'
@@ -125,8 +134,8 @@ export default function ReplyInputPage() {
   // モーダル内フォーム
   const [modalNickname, setModalNickname] = useState('')
   const [modalRelation, setModalRelation] = useState<RelationLabel>('マッチング直後')
-  const [modalAge, setModalAge] = useState(25)
-  const [modalArea, setModalArea] = useState('東京')
+  const [modalAge, setModalAge] = useState(DEFAULT_TARGET_AGE)
+  const [modalArea, setModalArea] = useState<string>(DEFAULT_AREA)
   const [modalHobbies, setModalHobbies] = useState('')
   const [modalProfileText, setModalProfileText] = useState('')
 
@@ -220,8 +229,8 @@ export default function ReplyInputPage() {
   function openEditModal(target: Target) {
     setModalNickname(target.nickname)
     setModalRelation((getRelationLabel(target.relation) as RelationLabel) || 'マッチング直後')
-    setModalAge(target.age ?? 25)
-    setModalArea(target.area ?? '東京')
+    setModalAge(target.age ?? DEFAULT_TARGET_AGE)
+    setModalArea(target.area ?? DEFAULT_AREA)
     setModalHobbies(target.hobbies ?? '')
     setModalProfileText(target.profile_text ?? '')
     setShowModal(true)
@@ -968,8 +977,8 @@ export default function ReplyInputPage() {
                   <div className="flex items-center gap-[10px]">
                     <input
                       type="range"
-                      min={18}
-                      max={45}
+                      min={TARGET_AGE_MIN}
+                      max={TARGET_AGE_MAX}
                       value={modalAge}
                       step={1}
                       onChange={(e) => setModalAge(Number(e.target.value))}

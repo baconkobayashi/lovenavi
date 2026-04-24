@@ -11,6 +11,13 @@ import {
   JOBS,
   AREAS,
   RELATIONS,
+  DEFAULT_TARGET_AGE,
+  TARGET_AGE_MIN,
+  TARGET_AGE_MAX,
+  DEFAULT_MY_AGE,
+  MY_AGE_MIN,
+  MY_AGE_MAX,
+  DEFAULT_RELATION,
 } from '../lib/constants'
 
 function InfoIcon() {
@@ -82,14 +89,14 @@ export default function FirstApproachPage() {
 
   // 相手の情報
   const [nickname, setNickname] = useState('')
-  const [relation, setRelation] = useState<Relation>('matching')
-  const [age, setAge] = useState(25)
+  const [relation, setRelation] = useState<Relation>(DEFAULT_RELATION)
+  const [age, setAge] = useState(DEFAULT_TARGET_AGE)
   const [area, setArea] = useState<Area | null>(null)
   const [hobbies, setHobbies] = useState('')
   const [profileText, setProfileText] = useState('')
 
   // 自分の情報
-  const [myAge, setMyAge] = useState(28)
+  const [myAge, setMyAge] = useState(DEFAULT_MY_AGE)
   const [myJob, setMyJob] = useState<Job | null>(null)
   const [myHobbies, setMyHobbies] = useState('')
   const [tone, setTone] = useState<Tone | null>(null)
@@ -100,12 +107,12 @@ export default function FirstApproachPage() {
       const d = JSON.parse(saved)
       setStep(d.step ?? 1)
       setNickname(d.nickname ?? '')
-      setRelation(d.relation ?? 'matching')
-      setAge(d.age ?? 25)
+      setRelation(d.relation ?? DEFAULT_RELATION)
+      setAge(d.age ?? DEFAULT_TARGET_AGE)
       setArea(d.area ?? null)
       setHobbies(d.hobbies ?? '')
       setProfileText(d.profileText ?? '')
-      setMyAge(d.myAge ?? 28)
+      setMyAge(d.myAge ?? DEFAULT_MY_AGE)
       setMyJob(d.myJob ?? null)
       setMyHobbies(d.myHobbies ?? '')
       setTone(d.tone ?? null)
@@ -331,8 +338,8 @@ export default function FirstApproachPage() {
                   <div className="flex items-center gap-[10px]">
                     <input
                       type="range"
-                      min={18}
-                      max={45}
+                      min={TARGET_AGE_MIN}
+                      max={TARGET_AGE_MAX}
                       value={age}
                       step={1}
                       onChange={(e) => setAge(Number(e.target.value))}
@@ -452,8 +459,8 @@ export default function FirstApproachPage() {
                   <div className="flex items-center gap-[10px]">
                     <input
                       type="range"
-                      min={18}
-                      max={50}
+                      min={MY_AGE_MIN}
+                      max={MY_AGE_MAX}
                       value={myAge}
                       step={1}
                       onChange={(e) => setMyAge(Number(e.target.value))}

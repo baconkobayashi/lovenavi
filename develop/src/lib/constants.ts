@@ -23,3 +23,14 @@ export const RELATIONS: { key: Relation; label: string; sub: string }[] = [
 
 export const TARGET_TONES = ['テンション高め', '普通', '素っ気ない', 'わからない'] as const
 export type TargetTone = (typeof TARGET_TONES)[number]
+
+export const DEFAULT_TARGET_AGE = 25
+export const TARGET_AGE_MIN = 18
+export const TARGET_AGE_MAX = 45
+
+export const DEFAULT_MY_AGE = 28
+export const MY_AGE_MIN = 18
+export const MY_AGE_MAX = 50
+
+export const DEFAULT_RELATION: Relation = 'matching'
+export const DEFAULT_AREA: Area = '東京'

@@ -2,7 +2,15 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { supabase } from '../lib/supabase'
-import { type Tone, type Job, MY_TONES, JOBS } from '../lib/constants'
+import {
+  type Tone,
+  type Job,
+  MY_TONES,
+  JOBS,
+  DEFAULT_MY_AGE,
+  MY_AGE_MIN,
+  MY_AGE_MAX,
+} from '../lib/constants'
 
 type ResultTag = 'yes' | 'no' | 'pending'
 
@@ -81,7 +89,7 @@ export default function MyPage() {
   const [history, setHistory] = useState<HistoryItem[]>([])
 
   const [showProfileSheet, setShowProfileSheet] = useState(false)
-  const [editAge, setEditAge] = useState(28)
+  const [editAge, setEditAge] = useState(DEFAULT_MY_AGE)
   const [editJob, setEditJob] = useState<Job>('会社員')
   const [editHobbies, setEditHobbies] = useState('')
   const [editTone, setEditTone] = useState<Tone>('sincere')
@@ -131,7 +139,7 @@ export default function MyPage() {
   }, [])
 
   function openProfileSheet() {
-    setEditAge(profile.my_age ?? 28)
+    setEditAge(profile.my_age ?? DEFAULT_MY_AGE)
     setEditJob((profile.my_job as Job) ?? '会社員')
     setEditHobbies(profile.my_hobbies ?? '')
     setEditTone((profile.tone as Tone) ?? 'sincere')
@@ -353,8 +361,8 @@ export default function MyPage() {
                 <div className="flex items-center gap-[10px]">
                   <input
                     type="range"
-                    min={18}
-                    max={50}
+                    min={MY_AGE_MIN}
+                    max={MY_AGE_MAX}
                     value={editAge}
                     step={1}
                     onChange={(e) => setEditAge(Number(e.target.value))}
