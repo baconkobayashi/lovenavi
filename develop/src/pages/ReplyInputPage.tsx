@@ -943,14 +943,18 @@ export default function ReplyInputPage() {
               </div>
               <div className="flex flex-col gap-4 p-4">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-ink">
-                    ニックネーム <span className="text-[10px] text-danger-text">必須</span>
+                  <label className="mb-1.5 flex items-center justify-between text-xs font-medium text-ink">
+                    <span>
+                      ニックネーム <span className="text-[10px] text-danger-text">必須</span>
+                    </span>
+                    <span className="text-[10px] text-ink-tertiary">{modalNickname.length}/20</span>
                   </label>
                   <input
                     type="text"
                     value={modalNickname}
                     onChange={(e) => setModalNickname(e.target.value)}
                     placeholder="例：カフェさん"
+                    maxLength={20}
                     className="w-full"
                   />
                 </div>

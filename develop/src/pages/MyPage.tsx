@@ -296,6 +296,8 @@ export default function MyPage() {
               <p className="mb-3 text-xs font-medium text-ink-secondary">アカウント設定</p>
               <Link
                 to="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex cursor-pointer items-center justify-between border-b border-black/10 py-[13px]"
               >
                 <span className="text-sm text-ink">利用規約</span>
@@ -303,6 +305,8 @@ export default function MyPage() {
               </Link>
               <Link
                 to="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex cursor-pointer items-center justify-between border-b border-black/10 py-[13px]"
               >
                 <span className="text-sm text-ink">プライバシーポリシー</span>

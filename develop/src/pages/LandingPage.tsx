@@ -202,11 +202,18 @@ export default function LandingPage() {
           <div className="flex items-center justify-between px-5 py-4">
             <span className="text-xs text-ink-tertiary">© 2025 lovenavigation</span>
             <div className="flex gap-3">
-              <Link to="/terms" className="text-[11px] text-ink-tertiary hover:text-ink-secondary">
+              <Link
+                to="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] text-ink-tertiary hover:text-ink-secondary"
+              >
                 利用規約
               </Link>
               <Link
                 to="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-[11px] text-ink-tertiary hover:text-ink-secondary"
               >
                 プライバシーポリシー

@@ -61,7 +61,6 @@ export default function ReplyResultPage() {
   const targetNickname: string = location.state?.targetNickname ?? ''
 
   const [patterns, setPatterns] = useState<Pattern[]>(initPatterns)
-  const [selected, setSelected] = useState(1)
   const [copied, setCopied] = useState<number | null>(null)
   const [used, setUsed] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
@@ -106,7 +105,6 @@ export default function ReplyResultPage() {
         message: p.message,
       }))
       setPatterns(newPatterns)
-      setSelected(1)
       setUsed(null)
 
       if (savedMessageId) {
@@ -156,7 +154,6 @@ export default function ReplyResultPage() {
   async function handleUsed(id: number) {
     if (used === id) return
     setUsed(id)
-    setSelected(id)
 
     const usedPattern = ['a', 'b', 'c'][id - 1]
     const usedMessage = patterns.find((p) => p.id === id)?.message ?? null
@@ -323,17 +320,10 @@ export default function ReplyResultPage() {
                   {patterns.map(({ id, label, tone, message }) => (
                     <div
                       key={id}
-                      onClick={() => setSelected(id)}
-                      className={`mb-[10px] cursor-pointer rounded-lg border p-[14px] transition-all ${
-                        selected === id
-                          ? 'border-2 border-brand-border bg-brand-light'
-                          : 'border border-black/10 bg-white'
-                      }`}
+                      className="mb-[10px] rounded-lg border border-black/10 bg-white p-[14px]"
                     >
                       <div className="mb-2 flex items-center justify-between">
-                        <span
-                          className={`rounded-full px-[10px] py-[3px] text-[11px] font-medium ${selected === id ? 'bg-brand-border text-brand-darker' : 'bg-surface text-ink-secondary'}`}
-                        >
+                        <span className="rounded-full bg-surface px-[10px] py-[3px] text-[11px] font-medium text-ink-secondary">
                           {label}
                         </span>
                         {tone && (
@@ -342,11 +332,7 @@ export default function ReplyResultPage() {
                           </span>
                         )}
                       </div>
-                      <p
-                        className={`mb-3 text-[13px] leading-[1.7] ${selected === id ? 'text-brand-darker' : 'text-ink'}`}
-                      >
-                        {message}
-                      </p>
+                      <p className="mb-3 text-[13px] leading-[1.7] text-ink">{message}</p>
                       <div className="flex gap-2">
                         <button
                           onClick={(e) => {

@@ -308,14 +308,18 @@ export default function FirstApproachPage() {
 
                 {/* ニックネーム */}
                 <div className="mb-4">
-                  <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink">
-                    ニックネーム <Badge label="必須" required />
+                  <p className="mb-1.5 flex items-center justify-between text-xs font-medium text-ink">
+                    <span className="flex items-center gap-1.5">
+                      ニックネーム <Badge label="必須" required />
+                    </span>
+                    <span className="text-[10px] text-ink-tertiary">{nickname.length}/20</span>
                   </p>
                   <input
                     type="text"
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     placeholder="例：カフェさん、みかちゃん"
+                    maxLength={20}
                     className="w-full"
                   />
                   <p className="mt-1 text-[11px] text-ink-tertiary">
