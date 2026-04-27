@@ -212,22 +212,38 @@ export default function ResultPage() {
       setSelected(1)
       setUsed(null)
 
-      const { data: inserted } = await supabase
-        .from('messages')
-        .insert({
-          user_id: session.user.id,
-          target_id: targetId,
-          type: 'first_approach',
-          pattern_a: newPatterns[0]?.message ?? null,
-          pattern_b: newPatterns[1]?.message ?? null,
-          pattern_c: newPatterns[2]?.message ?? null,
-          tone_a: newPatterns[0]?.tone ?? null,
-          tone_b: newPatterns[1]?.tone ?? null,
-          tone_c: newPatterns[2]?.tone ?? null,
-        })
-        .select('id')
-        .single()
-      if (inserted) setMessageId(inserted.id)
+      if (messageId) {
+        await supabase
+          .from('messages')
+          .update({
+            pattern_a: newPatterns[0]?.message ?? null,
+            pattern_b: newPatterns[1]?.message ?? null,
+            pattern_c: newPatterns[2]?.message ?? null,
+            tone_a: newPatterns[0]?.tone ?? null,
+            tone_b: newPatterns[1]?.tone ?? null,
+            tone_c: newPatterns[2]?.tone ?? null,
+            used_pattern: null,
+            used_message: null,
+          })
+          .eq('id', messageId)
+      } else {
+        const { data: inserted } = await supabase
+          .from('messages')
+          .insert({
+            user_id: session.user.id,
+            target_id: targetId,
+            type: 'first_approach',
+            pattern_a: newPatterns[0]?.message ?? null,
+            pattern_b: newPatterns[1]?.message ?? null,
+            pattern_c: newPatterns[2]?.message ?? null,
+            tone_a: newPatterns[0]?.tone ?? null,
+            tone_b: newPatterns[1]?.tone ?? null,
+            tone_c: newPatterns[2]?.tone ?? null,
+          })
+          .select('id')
+          .single()
+        if (inserted) setMessageId(inserted.id)
+      }
     }
     setRegenerating(false)
     setShowRegen(false)
@@ -361,7 +377,9 @@ export default function ResultPage() {
                                 onClick={() => setRegenTone(key)}
                                 className={`cursor-pointer rounded-md border p-[10px_12px] text-center transition-all ${regenTone === key ? 'border-brand-border bg-brand-light' : 'border-black/10 hover:bg-surface'}`}
                               >
-                                <p className={`mb-0.5 text-xs font-medium ${regenTone === key ? 'text-brand-dark' : 'text-ink'}`}>
+                                <p
+                                  className={`mb-0.5 text-xs font-medium ${regenTone === key ? 'text-brand-dark' : 'text-ink'}`}
+                                >
                                   {label}
                                 </p>
                                 <span className="text-[11px] text-ink-secondary">{sub}</span>

@@ -108,22 +108,38 @@ export default function ReplyResultPage() {
       setSelected(1)
       setUsed(null)
 
-      const { data: inserted } = await supabase
-        .from('messages')
-        .insert({
-          user_id: session.user.id,
-          target_id: targetId,
-          type: 'reply',
-          pattern_a: newPatterns[0]?.message ?? null,
-          pattern_b: newPatterns[1]?.message ?? null,
-          pattern_c: newPatterns[2]?.message ?? null,
-          tone_a: newPatterns[0]?.tone ?? null,
-          tone_b: newPatterns[1]?.tone ?? null,
-          tone_c: newPatterns[2]?.tone ?? null,
-        })
-        .select('id')
-        .single()
-      if (inserted) setSavedMessageId(inserted.id)
+      if (savedMessageId) {
+        await supabase
+          .from('messages')
+          .update({
+            pattern_a: newPatterns[0]?.message ?? null,
+            pattern_b: newPatterns[1]?.message ?? null,
+            pattern_c: newPatterns[2]?.message ?? null,
+            tone_a: newPatterns[0]?.tone ?? null,
+            tone_b: newPatterns[1]?.tone ?? null,
+            tone_c: newPatterns[2]?.tone ?? null,
+            used_pattern: null,
+            used_message: null,
+          })
+          .eq('id', savedMessageId)
+      } else {
+        const { data: inserted } = await supabase
+          .from('messages')
+          .insert({
+            user_id: session.user.id,
+            target_id: targetId,
+            type: 'reply',
+            pattern_a: newPatterns[0]?.message ?? null,
+            pattern_b: newPatterns[1]?.message ?? null,
+            pattern_c: newPatterns[2]?.message ?? null,
+            tone_a: newPatterns[0]?.tone ?? null,
+            tone_b: newPatterns[1]?.tone ?? null,
+            tone_c: newPatterns[2]?.tone ?? null,
+          })
+          .select('id')
+          .single()
+        if (inserted) setSavedMessageId(inserted.id)
+      }
     }
     setRegenerating(false)
     setShowRegen(false)
