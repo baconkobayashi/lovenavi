@@ -1,0 +1,7 @@
+<svg width="220" height="44" viewBox="0 0 220 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="22" cy="22" r="18" fill="#EEEDFE"/>
+  <path d="M22 30 C22 30 13 24 13 18 C13 14.7 15.7 12 19 12 C20.7 12 22 13.2 22 13.2 C22 13.2 23.3 12 25 12 C28.3 12 31 14.7 31 18 C31 24 22 30 22 30Z" fill="#534AB7"/>
+  <path d="M15 22 L29 22 M22 15 L22 29" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+  <text x="50" y="26" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="500" fill="#534AB7" letter-spacing="-0.3">love</text>
+  <text x="88" y="26" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="400" fill="#1a1a18" letter-spacing="-0.3">navi</text>
+</svg>

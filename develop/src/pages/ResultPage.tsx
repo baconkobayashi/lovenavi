@@ -64,6 +64,7 @@ export default function ResultPage() {
   const location = useLocation()
   const targetId: string | null = location.state?.targetId ?? null
   const initMessageId: string | null = location.state?.messageId ?? null
+  const targetNickname: string = location.state?.targetNickname ?? ''
   const targetRelation = location.state?.targetRelation ?? null
   const targetAge = location.state?.targetAge ?? null
   const targetArea = location.state?.targetArea ?? null
@@ -299,6 +300,29 @@ export default function ResultPage() {
 
               {!loading && (
                 <>
+                  {/* コンテキスト */}
+                  <div className="mb-4 rounded-md bg-surface p-[10px_12px]">
+                    {targetNickname && (
+                      <p className="mb-2 text-[13px] font-medium text-ink">{targetNickname}</p>
+                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        targetAge ? `${targetAge}歳` : null,
+                        targetArea || null,
+                        targetHobbies || null,
+                      ]
+                        .filter(Boolean)
+                        .map((t) => (
+                          <span
+                            key={t}
+                            className="rounded-full border border-black/10 bg-white px-2 py-[3px] text-[11px] text-ink-secondary"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                    </div>
+                  </div>
+
                   <p className="mb-[10px] text-xs font-medium text-ink-secondary">
                     3つの候補から選んでください
                   </p>

@@ -14,7 +14,12 @@ interface MessageRow {
   feedback: FeedbackType
   created_at: string
   target_id: string | null
-  targets: { nickname: string } | null
+  targets: {
+    nickname: string
+    age: number | null
+    area: string | null
+    hobbies: string | null
+  } | null
   pattern_a: string | null
   pattern_b: string | null
   pattern_c: string | null
@@ -84,7 +89,7 @@ export default function HistoryPage() {
       const { data } = await supabase
         .from('messages')
         .select(
-          'id, type, used_message, used_pattern, feedback, created_at, target_id, targets(nickname), pattern_a, pattern_b, pattern_c, tone_a, tone_b, tone_c',
+          'id, type, used_message, used_pattern, feedback, created_at, target_id, targets(nickname, age, area, hobbies), pattern_a, pattern_b, pattern_c, tone_a, tone_b, tone_c',
         )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -231,6 +236,10 @@ export default function HistoryPage() {
                                   patterns,
                                   messageId: msg.id,
                                   targetId: msg.target_id,
+                                  targetNickname: msg.targets?.nickname ?? '',
+                                  targetAge: msg.targets?.age ?? null,
+                                  targetArea: msg.targets?.area ?? '',
+                                  targetHobbies: msg.targets?.hobbies ?? '',
                                 },
                               })
                             } else {
@@ -239,15 +248,16 @@ export default function HistoryPage() {
                                   patterns,
                                   messageId: msg.id,
                                   targetId: msg.target_id,
+                                  targetNickname: msg.targets?.nickname ?? '',
+                                  targetAge: msg.targets?.age ?? null,
+                                  targetArea: msg.targets?.area ?? '',
+                                  targetHobbies: msg.targets?.hobbies ?? '',
                                   latestMessage: '',
                                   count: '',
                                   purpose: '',
                                   tone: '',
                                   conversationHistory: [],
                                   targetRelation: '',
-                                  targetAge: null,
-                                  targetArea: '',
-                                  targetHobbies: '',
                                 },
                               })
                             }

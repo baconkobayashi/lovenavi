@@ -10,8 +10,8 @@ export default function HomePage() {
         <div className="w-full max-w-[400px]">
           <div className="frame">
             {/* ナビバー */}
-            <div className="flex items-center border-b border-black/10 px-4 py-[14px]">
-              <span className="text-sm font-medium">lovenavigation</span>
+            <div className="flex items-center border-b border-black/10 px-4 py-[13px]">
+              <img src="/images/lovenavi_logo_light.svg" alt="lovenavigation" className="h-7" />
             </div>
 
             {/* グリーティング */}

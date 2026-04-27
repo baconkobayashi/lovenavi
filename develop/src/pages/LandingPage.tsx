@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const IconChat = () => (
@@ -46,7 +47,7 @@ export default function LandingPage() {
         {/* ナビゲーションバー */}
         <div className="frame mb-3">
           <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
-            <span className="text-[15px] font-medium">lovenavigation</span>
+            <img src="/images/lovenavi_logo_light.svg" alt="lovenavigation" className="h-7" />
             <div className="flex gap-2">
               <button
                 onClick={signInWithGoogle}
@@ -201,11 +202,15 @@ export default function LandingPage() {
           <div className="flex items-center justify-between px-5 py-4">
             <span className="text-xs text-ink-tertiary">© 2025 lovenavigation</span>
             <div className="flex gap-3">
-              {['利用規約', 'プライバシーポリシー', 'お問い合わせ'].map((l) => (
-                <span key={l} className="cursor-pointer text-[11px] text-ink-tertiary">
-                  {l}
-                </span>
-              ))}
+              <Link to="/terms" className="text-[11px] text-ink-tertiary hover:text-ink-secondary">
+                利用規約
+              </Link>
+              <Link
+                to="/privacy"
+                className="text-[11px] text-ink-tertiary hover:text-ink-secondary"
+              >
+                プライバシーポリシー
+              </Link>
             </div>
           </div>
         </div>

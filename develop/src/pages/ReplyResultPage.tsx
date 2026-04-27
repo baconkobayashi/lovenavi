@@ -58,6 +58,7 @@ export default function ReplyResultPage() {
   const targetId: string | null = location.state?.targetId ?? null
 
   const initMessageId: string | null = location.state?.messageId ?? null
+  const targetNickname: string = location.state?.targetNickname ?? ''
 
   const [patterns, setPatterns] = useState<Pattern[]>(initPatterns)
   const [selected, setSelected] = useState(1)
@@ -270,10 +271,21 @@ export default function ReplyResultPage() {
 
             <div className="p-4">
               {/* コンテキスト */}
-              {(count || purpose || latestMessage) && (
-                <div className="mb-4 rounded-md bg-surface p-[10px_12px]">
-                  <div className="flex flex-wrap gap-1.5">
-                    {[count, purpose, tone].filter(Boolean).map((t) => (
+              <div className="mb-4 rounded-md bg-surface p-[10px_12px]">
+                {targetNickname && (
+                  <p className="mb-2 text-[13px] font-medium text-ink">{targetNickname}</p>
+                )}
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    targetAge ? `${targetAge}歳` : null,
+                    targetArea || null,
+                    targetHobbies || null,
+                    count || null,
+                    purpose || null,
+                    tone || null,
+                  ]
+                    .filter(Boolean)
+                    .map((t) => (
                       <span
                         key={t}
                         className="rounded-full border border-black/10 bg-white px-2 py-[3px] text-[11px] text-ink-secondary"
@@ -281,17 +293,16 @@ export default function ReplyResultPage() {
                         {t}
                       </span>
                     ))}
-                  </div>
-                  {latestMessage && (
-                    <div className="mt-2 border-t border-black/10 pt-2">
-                      <p className="mb-1 text-[10px] text-ink-tertiary">相手の最新メッセージ</p>
-                      <p className="rounded-md border border-black/10 bg-white px-[10px] py-1.5 text-xs leading-[1.5] text-ink-secondary">
-                        {latestMessage}
-                      </p>
-                    </div>
-                  )}
                 </div>
-              )}
+                {latestMessage && (
+                  <div className="mt-2 border-t border-black/10 pt-2">
+                    <p className="mb-1 text-[10px] text-ink-tertiary">相手の最新メッセージ</p>
+                    <p className="rounded-md border border-black/10 bg-white px-[10px] py-1.5 text-xs leading-[1.5] text-ink-secondary">
+                      {latestMessage}
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {patterns.length === 0 ? (
                 <div className="py-12 text-center">
@@ -383,7 +394,7 @@ export default function ReplyResultPage() {
                   {showRegen && (
                     <div className="mt-3 overflow-hidden rounded-lg border border-black/10">
                       <div className="border-b border-black/10 bg-surface px-[14px] py-3 text-xs font-medium text-ink-secondary">
-                        条件を編集して再生成
+                        再生成する条件を変更
                       </div>
                       <div className="flex flex-col gap-3 p-[14px]">
                         <div>

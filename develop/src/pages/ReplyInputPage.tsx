@@ -404,6 +404,7 @@ export default function ReplyInputPage() {
           text: c.text,
           feedback: c.feedback ?? null,
         })),
+        targetNickname: selectedTarget.nickname,
         targetRelation: selectedTarget.relation,
         targetAge: selectedTarget.age,
         targetArea: selectedTarget.area,

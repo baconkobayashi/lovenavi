@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>プライバシーポリシー — lovenavi</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    background: #f5f4f0;
+    color: #1a1a18;
+    line-height: 1.8;
+    padding: 32px 16px 64px;
+  }
+
+  :root {
+    --purple: #534AB7;
+    --purple-light: #EEEDFE;
+    --purple-dark: #3C3489;
+    --purple-mid: #AFA9EC;
+    --text: #1a1a18;
+    --text2: #5f5e5a;
+    --text3: #888780;
+    --border: rgba(0,0,0,0.12);
+    --bg: #ffffff;
+    --bg2: #f1efe8;
+  }
+
+  .container { max-width: 680px; margin: 0 auto; }
+
+  /* Header */
+  .page-header {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+  }
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .page-title { font-size: 22px; font-weight: 500; color: var(--text); margin: 0 0 6px; }
+  .page-meta { font-size: 13px; color: var(--text3); }
+
+  /* Disclaimer */
+  .disclaimer {
+    background: #FBEAF0;
+    border: 0.5px solid #F4C0D1;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #72243E;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  /* Intro */
+  .intro {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 32px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.8;
+  }
+
+  /* Article */
+  .article {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .section {
+    padding: 24px 32px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--purple-light);
+    color: var(--purple);
+    font-size: 12px;
+    font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  p { font-size: 14px; color: var(--text2); margin: 0 0 10px; }
+  p:last-child { margin-bottom: 0; }
+
+  ul, ol { padding-left: 20px; margin: 8px 0 10px; }
+  li { font-size: 14px; color: var(--text2); margin-bottom: 6px; line-height: 1.7; }
+  li:last-child { margin-bottom: 0; }
+
+  /* テーブル */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  .data-table th {
+    background: var(--purple-light);
+    color: var(--purple-dark);
+    font-weight: 500;
+    padding: 8px 12px;
+    text-align: left;
+    border: 0.5px solid var(--purple-mid);
+  }
+  .data-table td {
+    padding: 8px 12px;
+    border: 0.5px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+  .data-table tr:nth-child(even) td { background: var(--bg2); }
+
+  .highlight {
+    background: var(--purple-light);
+    border-left: 3px solid var(--purple);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+    font-size: 13px;
+    color: var(--purple-dark);
+    line-height: 1.7;
+  }
+  .important {
+    background: #FAEEDA;
+    border-left: 3px solid #EF9F27;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+    font-size: 13px;
+    color: #633806;
+    line-height: 1.7;
+  }
+
+  /* Footer */
+  .page-footer {
+    text-align: center;
+    padding: 32px 0 0;
+    font-size: 12px;
+    color: var(--text3);
+  }
+  .page-footer a { color: var(--purple); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="page-header">
+    <div class="logo-area">
+      <svg width="120" height="28" viewBox="0 0 120 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="14" cy="14" r="12" fill="#EEEDFE"/>
+        <path d="M14 20 C14 20 7.5 16 7.5 11.5 C7.5 9.1 9.4 7.2 11.8 7.2 C12.9 7.2 14 8.1 14 8.1 C14 8.1 15.1 7.2 16.2 7.2 C18.6 7.2 20.5 9.1 20.5 11.5 C20.5 16 14 20 14 20Z" fill="#534AB7"/>
+        <path d="M8.5 14 L19.5 14 M14 8.5 L14 19.5" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.55"/>
+        <text x="32" y="19" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="500" fill="#534AB7" letter-spacing="-0.2">love</text>
+        <text x="60" y="19" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="400" fill="#1a1a18" letter-spacing="-0.2">navi</text>
+      </svg>
+    </div>
+    <h1 class="page-title">プライバシーポリシー</h1>
+    <p class="page-meta">制定日：2025年●月●日　最終更新：2025年●月●日</p>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ この文書は叩き台です。実際の運用前に必ず弁護士・法律の専門家にご確認ください。
+  </div>
+
+  <div class="intro">
+    ●●●●株式会社（以下「当社」といいます）は、「lovenavi」（以下「本サービス」といいます）において、ユーザーの個人情報の取り扱いを以下のとおり定めます。本サービスの利用にあたり、本ポリシーをご確認のうえご同意ください。
+  </div>
+
+  <div class="article">
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">1</span>取得する情報</h2>
+      <p>当社は、本サービスの提供にあたり以下の情報を取得します。</p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:30%;">情報の種類</th>
+            <th style="width:40%;">具体的な内容</th>
+            <th style="width:30%;">取得方法</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>アカウント情報</td>
+            <td>氏名・メールアドレス・プロフィール画像（Googleアカウントより取得）</td>
+            <td>Google OAuth認証</td>
+          </tr>
+          <tr>
+            <td>入力情報</td>
+            <td>相手のニックネーム・年齢・居住エリア・趣味・プロフィール文・メッセージ内容</td>
+            <td>ユーザーによる入力</td>
+          </tr>
+          <tr>
+            <td>自己情報</td>
+            <td>ユーザー自身の年齢・職業・趣味・キャラ設定</td>
+            <td>ユーザーによる入力</td>
+          </tr>
+          <tr>
+            <td>行動ログ</td>
+            <td>生成したメッセージ・選択したパターン・フィードバック（返信きた等）・操作履歴</td>
+            <td>サービス利用時に自動記録</td>
+          </tr>
+          <tr>
+            <td>端末・通信情報</td>
+            <td>IPアドレス・ブラウザ種別・OS・アクセス日時</td>
+            <td>サービス利用時に自動記録</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="important">
+        相手方の氏名・住所・電話番号・SNSアカウントなどの特定個人を識別できる情報の入力はお控えください。入力された情報はサービス向上のため利用される場合があります。
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">2</span>情報の利用目的</h2>
+      <p>取得した情報は以下の目的で利用します。</p>
+      <ol>
+        <li><strong>サービスの提供</strong>：メッセージ生成・履歴管理・マイページ機能の提供</li>
+        <li><strong>サービスの改善・AI学習</strong>：生成精度の向上、AIモデルのFine-tuning（SFT・DPO）への利用</li>
+        <li><strong>統計・分析</strong>：利用動向の分析（個人を特定できない形に加工して使用）</li>
+        <li><strong>サポート対応</strong>：お問い合わせへの回答・不正利用の調査</li>
+        <li><strong>通知・連絡</strong>：サービス変更・メンテナンス・重要なお知らせの通知</li>
+      </ol>
+      <div class="highlight">
+        行動ログ（選択したメッセージパターン・フィードバック結果など）は、AIの学習データとして利用されます。これによりサービスの精度向上が図られます。学習への利用を希望されない場合はお問い合わせください。
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">3</span>第三者への提供</h2>
+      <p>当社は、以下の場合を除き、ユーザーの個人情報を第三者に提供しません。</p>
+      <ul>
+        <li>ユーザー本人の同意がある場合</li>
+        <li>法令に基づき開示が必要な場合（捜査機関からの要請等）</li>
+        <li>人の生命・身体・財産の保護のために必要であり、本人の同意を得ることが困難な場合</li>
+        <li>国または地方公共団体への協力が必要な場合</li>
+      </ul>
+      <p>なお、サービスの運営に必要な範囲で、業務委託先（クラウドサービス事業者等）に情報を提供する場合があります。その場合、適切な秘密保持契約を締結します。</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">4</span>外部サービスの利用</h2>
+      <p>本サービスは以下の外部サービスを利用しています。各サービスのプライバシーポリシーも併せてご確認ください。</p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:30%;">サービス名</th>
+            <th style="width:40%;">利用目的</th>
+            <th style="width:30%;">参照先</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Google OAuth</td>
+            <td>ログイン認証・アカウント情報の取得</td>
+            <td>Google プライバシーポリシー</td>
+          </tr>
+          <tr>
+            <td>Supabase</td>
+            <td>データベース・認証基盤</td>
+            <td>Supabase プライバシーポリシー</td>
+          </tr>
+          <tr>
+            <td>OpenAI / Anthropic等のLLM API</td>
+            <td>メッセージ生成のためのAI処理</td>
+            <td>各社プライバシーポリシー</td>
+          </tr>
+          <tr>
+            <td>Vercel</td>
+            <td>サービスのホスティング</td>
+            <td>Vercel プライバシーポリシー</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">5</span>Cookieおよびアクセス解析</h2>
+      <p>本サービスでは、サービスの利便性向上および利用状況の分析のためCookieを使用しています。ブラウザの設定によりCookieを無効にすることができますが、その場合一部の機能が利用できなくなる場合があります。</p>
+      <p>また、サービス改善のためアクセス解析ツール（●●●●）を利用する場合があります。収集される情報は匿名化され、個人を特定するものではありません。</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">6</span>情報の保存期間</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:40%;">情報の種類</th>
+            <th style="width:60%;">保存期間</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>アカウント情報</td>
+            <td>退会から●年間（法令上の保存義務がある場合はその期間）</td>
+          </tr>
+          <tr>
+            <td>生成履歴・行動ログ</td>
+            <td>最終利用日から●年間</td>
+          </tr>
+          <tr>
+            <td>AI学習に使用したデータ</td>
+            <td>学習完了後も統計的なモデルに含まれる場合があります</td>
+          </tr>
+          <tr>
+            <td>お問い合わせ記録</td>
+            <td>対応完了から●年間</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">7</span>ユーザーの権利</h2>
+      <p>ユーザーは以下の権利を有します。お問い合わせ窓口よりご連絡ください。</p>
+      <ul>
+        <li><strong>開示請求</strong>：保有する個人情報の開示を求めることができます</li>
+        <li><strong>訂正・追加・削除</strong>：情報に誤りがある場合、訂正・削除を求めることができます</li>
+        <li><strong>利用停止・消去</strong>：個人情報の利用停止または消去を求めることができます</li>
+        <li><strong>AI学習への利用停止</strong>：行動ログのAI学習への利用停止を求めることができます</li>
+        <li><strong>アカウント削除</strong>：マイページまたはお問い合わせよりアカウントの削除を請求できます</li>
+      </ul>
+      <div class="highlight">
+        ご請求にあたっては、本人確認をさせていただく場合があります。対応期間は受付から原則●営業日以内とします。
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">8</span>未成年者の利用</h2>
+      <p>本サービスは18歳以上を対象としています。18歳未満の方のご利用はお断りしております。当社が18歳未満のユーザーの個人情報を取得したことが判明した場合、速やかに当該情報を削除します。</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">9</span>安全管理措置</h2>
+      <p>当社は個人情報への不正アクセス・紛失・破壊・改ざん・漏えい等を防止するため、以下の措置を講じます。</p>
+      <ul>
+        <li>通信の暗号化（HTTPS/TLS）</li>
+        <li>データベースへのアクセス制御</li>
+        <li>従業者への個人情報保護教育</li>
+        <li>定期的なセキュリティ見直し</li>
+      </ul>
+      <p>情報漏えい等が発生した場合は、速やかにユーザーへ通知するとともに、監督官庁への報告等、必要な措置を講じます。</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">10</span>本ポリシーの変更</h2>
+      <p>当社は必要に応じて本ポリシーを変更することがあります。重要な変更がある場合は、サービス上での通知またはメールにてお知らせします。変更後も本サービスを継続してご利用いただいた場合、変更後のポリシーに同意したものとみなします。</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title"><span class="section-num">附</span>お問い合わせ窓口</h2>
+      <p>個人情報の取り扱いに関するご質問・ご要望は以下までご連絡ください。</p>
+      <p>
+        ●●●●株式会社　個人情報取扱窓口<br>
+        メールアドレス：●●●@●●●.com<br>
+        受付時間：平日 10:00〜18:00
+      </p>
+    </div>
+
+  </div>
+
+  <div class="page-footer">
+    <p>© 2025 lovenavi &nbsp;|&nbsp; <a href="#">利用規約</a> &nbsp;|&nbsp; <a href="#">お問い合わせ</a></p>
+  </div>
+
+</div>
+
+</body>
+</html>

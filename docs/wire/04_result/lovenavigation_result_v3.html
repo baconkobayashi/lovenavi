@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生成結果画面 — lovenavigation</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif; background: #f5f4f0; display: flex; justify-content: center; padding: 32px 16px; min-height: 100vh; color: #1a1a18; }
+
+  /* CSS Variables */
+  :root {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f1efe8;
+    --color-text-primary: #1a1a18;
+    --color-text-secondary: #5f5e5a;
+    --color-text-tertiary: #888780;
+    --color-border-tertiary: rgba(0,0,0,0.12);
+    --color-border-secondary: rgba(0,0,0,0.22);
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+  }
+
+  input, select, textarea, button { font-family: inherit; font-size: 14px; }
+  input[type="text"], select, textarea {
+    width: 100%; padding: 8px 10px; border: 0.5px solid rgba(0,0,0,0.22);
+    border-radius: 8px; background: #fff; color: #1a1a18; outline: none;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(83,74,183,0.15); border-color: #AFA9EC; }
+
+  .r-wrap { max-width: 400px; width: 100%; font-size: 14px; }
+  .r-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: #888780; text-transform: uppercase; margin-bottom: 6px; }
+  .r-frame { border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; background: #fff; overflow: hidden; margin-bottom: 16px; }
+
+  .r-nav { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 0.5px solid rgba(0,0,0,0.12); }
+  .r-back { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; cursor: pointer; background: transparent; flex-shrink: 0; }
+  .r-nav-title { font-size: 15px; font-weight: 500; flex: 1; }
+  .r-home-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #888780; cursor: pointer; padding: 4px 8px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.12); background: transparent; flex-shrink: 0; }
+
+  .r-body { padding: 16px; }
+
+  .r-context { background: #f1efe8; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; }
+  .r-context-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .r-context-nickname { font-size: 13px; font-weight: 500; color: #1a1a18; }
+  .r-context-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .r-context-tag { font-size: 11px; color: #5f5e5a; background: #fff; border: 0.5px solid rgba(0,0,0,0.12); padding: 3px 8px; border-radius: 99px; }
+
+  .r-nickname-label { font-size: 14px; font-weight: 500; color: #1a1a18; margin: 0 0 4px; }
+  .r-section-label { font-size: 12px; font-weight: 500; color: #5f5e5a; margin: 0 0 10px; }
+
+  .r-card { border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; background: #fff; transition: border-color 0.15s; }
+  .r-card:hover { border-color: rgba(0,0,0,0.25); }
+  .r-card.selected { border: 2px solid #AFA9EC; background: #EEEDFE; }
+  .r-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .r-pattern-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 99px; background: #f1efe8; color: #5f5e5a; }
+  .r-card.selected .r-pattern-badge { background: #AFA9EC; color: #26215C; }
+  .r-tone-badge { font-size: 10px; padding: 2px 8px; border-radius: 99px; border: 0.5px solid rgba(0,0,0,0.12); color: #888780; }
+  .r-message { font-size: 13px; line-height: 1.7; color: #1a1a18; margin: 0 0 12px; }
+  .r-card.selected .r-message { color: #26215C; }
+
+  .r-card-actions { display: flex; gap: 8px; }
+  .r-copy-btn { flex: 1; padding: 8px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.22); background: transparent; font-size: 12px; cursor: pointer; color: #1a1a18; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.15s; }
+  .r-copy-btn:hover { background: #f1efe8; }
+  .r-copy-btn.copied { background: #EAF3DE; border-color: #97C459; color: #3B6D11; }
+  .r-used-btn { flex: 1; padding: 8px; border-radius: 8px; border: none; background: #534AB7; font-size: 12px; cursor: pointer; color: #EEEDFE; font-weight: 500; transition: background 0.15s; }
+  .r-used-btn:hover { background: #3C3489; }
+  .r-used-btn.done { background: #EAF3DE; color: #3B6D11; cursor: default; border: 0.5px solid #97C459; }
+
+  .r-regen-btn { width: 100%; padding: 11px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.22); background: transparent; font-size: 13px; cursor: pointer; color: #5f5e5a; margin-top: 4px; transition: background 0.15s; }
+  .r-regen-btn:hover { background: #f1efe8; }
+
+  .r-regen-panel { display: none; margin-top: 12px; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; overflow: hidden; }
+  .r-regen-panel.open { display: block; }
+  .r-regen-panel-head { padding: 12px 14px; background: #f1efe8; border-bottom: 0.5px solid rgba(0,0,0,0.12); font-size: 12px; font-weight: 500; color: #5f5e5a; }
+  .r-regen-panel-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .r-regen-field label { font-size: 12px; font-weight: 500; display: block; margin-bottom: 6px; color: #1a1a18; }
+  .r-regen-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .r-regen-chip { font-size: 12px; padding: 5px 12px; border-radius: 99px; border: 0.5px solid rgba(0,0,0,0.22); background: transparent; cursor: pointer; color: #1a1a18; transition: all 0.15s; }
+  .r-regen-chip:hover { background: #f1efe8; }
+  .r-regen-chip.selected { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; font-weight: 500; }
+  .r-regen-submit { width: 100%; padding: 11px; border-radius: 8px; background: #534AB7; color: #EEEDFE; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: background 0.15s; }
+  .r-regen-submit:hover { background: #3C3489; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); align-items: flex-end; justify-content: center; z-index: 100; }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet { background: #fff; border-radius: 16px 16px 0 0; padding: 20px 16px 32px; width: 100%; max-width: 400px; }
+  .modal-handle { width: 36px; height: 4px; background: rgba(0,0,0,0.22); border-radius: 2px; margin: 0 auto 16px; }
+  .modal-title { font-size: 15px; font-weight: 500; margin: 0 0 4px; text-align: center; }
+  .modal-sub { font-size: 12px; color: #5f5e5a; text-align: center; margin: 0 0 16px; }
+  .modal-fb-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .modal-fb-btn { flex: 1; padding: 12px 6px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.22); background: transparent; font-size: 13px; cursor: pointer; color: #1a1a18; font-weight: 500; text-align: center; transition: all 0.15s; }
+  .modal-fb-btn:hover { background: #f1efe8; }
+  .modal-fb-btn.active-yes { background: #EAF3DE; border-color: #97C459; color: #3B6D11; }
+  .modal-fb-btn.active-no { background: #FCEBEB; border-color: #F09595; color: #A32D2D; }
+  .modal-fb-btn.active-pending { background: #FAEEDA; border-color: #EF9F27; color: #633806; }
+  .modal-skip { width: 100%; padding: 10px; border-radius: 8px; border: none; background: transparent; font-size: 12px; color: #888780; cursor: pointer; }
+  .modal-skip:hover { color: #5f5e5a; }
+</style>
+</head>
+<body>
+
+<div class="r-wrap">
+  <div style="margin-bottom:8px;"><div class="r-label">生成結果画面 v2</div></div>
+
+  <div class="r-frame">
+    <div class="r-nav">
+      <button class="r-back">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#1a1a18" stroke-width="1.5" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
+      </button>
+      <span class="r-nav-title">生成結果</span>
+      <button class="r-home-btn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5.5L6 1l5 4.5V11a.5.5 0 01-.5.5h-3V8H4.5v3.5h-3A.5.5 0 011 11V5.5z"/></svg>
+        ホーム
+      </button>
+    </div>
+
+    <div class="r-body">
+      <div class="r-context">
+        <div class="r-context-header">
+          <span class="r-context-nickname" id="nickname-tag">カフェさん</span>
+          <span style="font-size:11px;color:#534AB7;cursor:pointer;">条件を編集</span>
+        </div>
+        <div class="r-context-tags">
+          <span class="r-context-tag">25歳</span>
+          <span class="r-context-tag">東京</span>
+          <span class="r-context-tag">カフェ・映画</span>
+          <span class="r-context-tag">積極的</span>
+        </div>
+      </div>
+
+      <p class="r-nickname-label" id="nickname-label" style="display:none;"></p>
+      <p class="r-section-label">3つの候補から選んでください</p>
+
+      <div class="r-card selected" id="card1" onclick="selectCard(1)">
+        <div class="r-card-header">
+          <span class="r-pattern-badge">パターン A</span>
+          <span class="r-tone-badge">共通点を活かす</span>
+        </div>
+        <p class="r-message">「プロフィール見てたらカフェ好きって書いてましたね！自分もよく新しいカフェ開拓してて、○○さんのおすすめ聞いてみたいです。よかったらいろいろ教えてください！」</p>
+        <div class="r-card-actions">
+          <button class="r-copy-btn" id="copy1" onclick="doCopy(event,1)">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M1 9V2a1 1 0 011-1h7"/></svg>
+            コピー
+          </button>
+          <button class="r-used-btn" id="used1" onclick="doUsed(event,1)">これを使う</button>
+        </div>
+      </div>
+
+      <div class="r-card" id="card2" onclick="selectCard(2)">
+        <div class="r-card-header">
+          <span class="r-pattern-badge">パターン B</span>
+          <span class="r-tone-badge">質問で引き込む</span>
+        </div>
+        <p class="r-message">「はじめまして！映画好きって書いてましたが、最近観た中でおすすめってありますか？自分もよく観るんですが、最近ちょうどいい作品探してて。」</p>
+        <div class="r-card-actions">
+          <button class="r-copy-btn" id="copy2" onclick="doCopy(event,2)">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M1 9V2a1 1 0 011-1h7"/></svg>
+            コピー
+          </button>
+          <button class="r-used-btn" id="used2" onclick="doUsed(event,2)">これを使う</button>
+        </div>
+      </div>
+
+      <div class="r-card" id="card3" onclick="selectCard(3)">
+        <div class="r-card-header">
+          <span class="r-pattern-badge">パターン C</span>
+          <span class="r-tone-badge">シンプル・自然</span>
+        </div>
+        <p class="r-message">「はじめまして！プロフィール読んでいて、なんか話してみたいなって思いました。カフェとか映画とかよく行くんですか？」</p>
+        <div class="r-card-actions">
+          <button class="r-copy-btn" id="copy3" onclick="doCopy(event,3)">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M1 9V2a1 1 0 011-1h7"/></svg>
+            コピー
+          </button>
+          <button class="r-used-btn" id="used3" onclick="doUsed(event,3)">これを使う</button>
+        </div>
+      </div>
+
+      <button class="r-regen-btn" onclick="toggleRegen()">条件を変えてもう一度生成する ↓</button>
+
+      <div class="r-regen-panel" id="regen-panel">
+        <div class="r-regen-panel-head">条件を編集して再生成</div>
+        <div class="r-regen-panel-body">
+          <div class="r-regen-field">
+            <label>居住エリア</label>
+            <div class="r-regen-chips" id="rc-area">
+              <span class="r-regen-chip selected" onclick="selectRegenChip(this,'rc-area')">東京</span>
+              <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-area')">神奈川</span>
+              <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-area')">大阪</span>
+              <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-area')">その他</span>
+            </div>
+          </div>
+          <div class="r-regen-field">
+            <label>キャラ設定</label>
+            <div class="r-regen-chips" id="rc-char">
+              <span class="r-regen-chip selected" onclick="selectRegenChip(this,'rc-char')">積極的</span>
+              <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-char')">控えめ</span>
+              <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-char')">ユーモア系</span>
+              <span class="r-regen-chip" onclick="selectRegenChip(this,'rc-char')">誠実系</span>
+            </div>
+          </div>
+          <div class="r-regen-field">
+            <label>趣味・好きなこと</label>
+            <input type="text" placeholder="例：カフェ巡り、映画" value="カフェ・映画">
+          </div>
+          <button class="r-regen-submit">この条件で再生成する</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="fb-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <p class="modal-title">送って、どうでしたか？</p>
+    <p class="modal-sub">結果を教えてもらえるとAIが賢くなります</p>
+    <div class="modal-fb-row">
+      <button class="modal-fb-btn" id="mfb-yes" onclick="selectModalFb('yes')">返信きた</button>
+      <button class="modal-fb-btn" id="mfb-pending" onclick="selectModalFb('pending')">まだ待ち中</button>
+      <button class="modal-fb-btn" id="mfb-no" onclick="selectModalFb('no')">既読スルー</button>
+    </div>
+    <button class="modal-skip" onclick="closeModal()">あとで回答する</button>
+  </div>
+</div>
+
+<script>
+// sessionStorageからニックネームを取得して表示
+(function() {
+  try {
+    var draft = JSON.parse(sessionStorage.getItem('first-approach-draft') || '{}');
+    var nickname = draft.nickname || '';
+    var labelEl = document.getElementById('nickname-label');
+    var tagEl = document.getElementById('nickname-tag');
+    if (nickname) {
+      if (labelEl) { labelEl.textContent = nickname + 'へのメッセージ'; labelEl.style.display = 'block'; }
+      if (tagEl) { tagEl.textContent = nickname; }
+    }
+  } catch(e) {}
+})();
+
+function selectCard(n) {
+  [1,2,3].forEach(i => document.getElementById('card'+i).classList.remove('selected'));
+  document.getElementById('card'+n).classList.add('selected');
+}
+function doCopy(e, n) {
+  e.stopPropagation();
+  var btn = document.getElementById('copy'+n);
+  btn.classList.add('copied');
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 7l3 3 6-6"/></svg> コピー済み';
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M1 9V2a1 1 0 011-1h7"/></svg> コピー';
+  }, 2000);
+}
+function doUsed(e, n) {
+  e.stopPropagation();
+  var btn = document.getElementById('used'+n);
+  if (btn.classList.contains('done')) return;
+  btn.classList.add('done');
+  btn.textContent = '使った';
+  selectCard(n);
+  setTimeout(() => {
+    document.getElementById('fb-modal').classList.add('open');
+  }, 400);
+}
+function closeModal() {
+  document.getElementById('fb-modal').classList.remove('open');
+}
+function selectModalFb(type) {
+  ['yes','pending','no'].forEach(t => {
+    document.getElementById('mfb-'+t).classList.remove('active-yes','active-no','active-pending');
+  });
+  document.getElementById('mfb-'+type).classList.add('active-'+type);
+  setTimeout(() => closeModal(), 800);
+}
+function toggleRegen() {
+  document.getElementById('regen-panel').classList.toggle('open');
+}
+function selectRegenChip(el, groupId) {
+  document.getElementById(groupId).querySelectorAll('.r-regen-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

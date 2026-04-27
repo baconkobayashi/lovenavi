@@ -252,6 +252,7 @@ export default function FirstApproachPage() {
         patterns,
         targetId: target.id,
         messageId,
+        targetNickname: nickname,
         targetRelation: relation,
         targetAge: age,
         targetArea: area,

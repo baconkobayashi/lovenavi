@@ -8,6 +8,8 @@ import ReplyInputPage from './pages/ReplyInputPage'
 import ReplyResultPage from './pages/ReplyResultPage'
 import MyPage from './pages/MyPage'
 import HistoryPage from './pages/HistoryPage'
+import TermsPage from './pages/TermsPage'
+import PrivacyPage from './pages/PrivacyPage'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -20,6 +22,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
       <Route
         path="/home"
         element={
