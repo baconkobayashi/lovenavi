@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { supabase } from '../lib/supabase'
 import {
@@ -294,10 +294,21 @@ export default function MyPage() {
             {/* アカウント設定 */}
             <div className="border-b border-black/10 p-4">
               <p className="mb-3 text-xs font-medium text-ink-secondary">アカウント設定</p>
+              <Link
+                to="/terms"
+                className="flex cursor-pointer items-center justify-between border-b border-black/10 py-[13px]"
+              >
+                <span className="text-sm text-ink">利用規約</span>
+                <span className="text-base text-ink-tertiary">›</span>
+              </Link>
+              <Link
+                to="/privacy"
+                className="flex cursor-pointer items-center justify-between border-b border-black/10 py-[13px]"
+              >
+                <span className="text-sm text-ink">プライバシーポリシー</span>
+                <span className="text-base text-ink-tertiary">›</span>
+              </Link>
               {[
-                { label: '利用規約', danger: false, onClick: undefined },
-                { label: 'プライバシーポリシー', danger: false, onClick: undefined },
-                { label: 'お問い合わせ', danger: false, onClick: undefined },
                 {
                   label: 'ログアウト',
                   danger: false,
