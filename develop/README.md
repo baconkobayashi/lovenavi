@@ -9,12 +9,12 @@
 | スタイリング | Tailwind CSS |
 | ルーティング | React Router v6 |
 | バックエンド / DB | Supabase (PostgreSQL + Edge Functions) |
-| ホスティング | Vercel |
+| ホスティング | Cloudflare Pages |
 | LLM | Google Gemini 2.5 Flash Lite |
 
-## ホスティング（テスト）
+## ホスティング
 
-https://becon-lovenavigation.vercel.app/
+https://becon-lovenavigation.pages.dev/
 
 ## チェックシート
 
