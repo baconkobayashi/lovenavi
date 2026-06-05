@@ -66,9 +66,9 @@ export default function LandingPage() {
               実際の女性の声をAIに学習
             </span>
             <h1 className="mb-3 text-[22px] font-medium leading-[1.4] text-ink">
-              マッチングアプリで
+              もう返信に悩まない。
               <br />
-              もう返信に悩まない
+              AIが恋愛メッセージをサポート
             </h1>
             <p className="mb-6 text-[13px] leading-[1.7] text-ink-secondary">
               相手の情報を入れるだけで、好印象を与える
