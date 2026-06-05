@@ -71,7 +71,7 @@ export default function LegalLayout({ title, meta, children, footerLink }: Legal
 
         {/* フッター */}
         <div className="text-center text-[12px] text-ink-tertiary">
-          <span>© 2025 lovenavigation</span>
+          <span>© 2026 lovenavi</span>
           <span className="mx-2">|</span>
           <Link to={footerLink.to} className="text-brand hover:underline">
             {footerLink.label}

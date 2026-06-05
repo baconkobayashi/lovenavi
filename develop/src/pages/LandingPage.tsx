@@ -200,7 +200,7 @@ export default function LandingPage() {
         {/* フッター */}
         <div className="frame">
           <div className="flex items-center justify-between px-5 py-4">
-            <span className="text-xs text-ink-tertiary">© 2025 lovenavigation</span>
+            <span className="text-xs text-ink-tertiary">© 2026 lovenavi</span>
             <div className="flex gap-3">
               <Link
                 to="/terms"
