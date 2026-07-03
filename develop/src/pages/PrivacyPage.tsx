@@ -187,9 +187,9 @@ export default function PrivacyPage() {
       <Section num="附" title="お問い合わせ窓口">
         <p>個人情報の取り扱いに関するご質問・ご要望は以下までご連絡ください。</p>
         <p>
-          ●●●●株式会社　個人情報取扱窓口
+          株式会社BACON
           <br />
-          メールアドレス：●●●@●●●.com
+          メールアドレス：info@crispy-bacon.com
           <br />
           受付時間：平日 10:00〜18:00
         </p>
