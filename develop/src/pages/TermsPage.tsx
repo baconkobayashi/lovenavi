@@ -4,7 +4,7 @@ export default function TermsPage() {
   return (
     <LegalLayout
       title="利用規約"
-      meta="制定日：2025年7月1日　最終更新：2025年●月●日"
+      meta="制定日：2025年7月1日"
       footerLink={{ label: 'プライバシーポリシー', to: '/privacy' }}
     >
       <Section num="前" title="はじめに">

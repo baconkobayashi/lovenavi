@@ -39,7 +39,7 @@ export default function PrivacyPage() {
   return (
     <LegalLayout
       title="プライバシーポリシー"
-      meta="制定日：2025年●月●日　最終更新：2025年●月●日"
+      meta="制定日：2025年7月1日"
       footerLink={{ label: '利用規約', to: '/terms' }}
     >
       <div className="border-b border-black/10 px-6 py-5 text-[14px] leading-[1.8] text-ink-secondary sm:px-8">
